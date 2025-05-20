@@ -5,6 +5,7 @@
 package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
@@ -56,11 +57,14 @@ import frc.robot.subsystems.intake.*;
 import frc.robot.subsystems.limelight.LimelightIOReal;
 import frc.robot.subsystems.limelight.LimelightIOReplay;
 import frc.robot.subsystems.limelight.LimelightSubsystem;
+import frc.robot.subsystems.questnav.OculusIOReal;
+import frc.robot.subsystems.questnav.OculusSubsystem;
 import frc.robot.subsystems.swerve.Swerve;
 import lombok.Getter;
 import org.frcteam6941.looper.UpdateManager;
 import org.littletonrobotics.AllianceFlipUtil;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+import frc.robot.subsystems.questnav.OculusIO;
 
 import java.util.HashMap;
 
@@ -103,6 +107,7 @@ public class RobotContainer {
     private IndicatorSubsystem indicatorSubsystem;
     private LimelightSubsystem limelightSubsystem;
     private EndEffectorArmSubsystem endEffectorArmSubsystem;
+    private OculusSubsystem oculusSubsystem;
     private double lastResetTime = 0.0;
 
 
@@ -128,6 +133,7 @@ public class RobotContainer {
                     put(LIMELIGHT_LEFT, new LimelightIOReal(LIMELIGHT_LEFT));
                     put(LIMELIGHT_RIGHT, new LimelightIOReal(LIMELIGHT_RIGHT));
                 }});
+                oculusSubsystem = new OculusSubsystem(new OculusIOReal());
             } else {
                 // Simulation initialization
                 indicatorSubsystem = new IndicatorSubsystem(new IndicatorIOSim());
@@ -146,6 +152,7 @@ public class RobotContainer {
                         new BeambreakIOSim(RobotConstants.BeamBreakConstants.ENDEFFECTORARM_CORAL_BEAMBREAK_ID),
                         new BeambreakIOSim(RobotConstants.BeamBreakConstants.ENDEFFECTORARM_ALGAE_BEAMBREAK_ID)
                 );
+                oculusSubsystem = new OculusSubsystem(new OculusIOReal());
             }
         }
 
@@ -190,6 +197,10 @@ public class RobotContainer {
             elevatorSubsystem = new ElevatorSubsystem(new ElevatorIO() {
             });
         }
+        if (oculusSubsystem == null) {
+            oculusSubsystem = new OculusSubsystem(new OculusIO.Default());
+        }
+
 
         // Initialize the update manager
         updateManager = new UpdateManager(swerve,
@@ -305,7 +316,7 @@ public class RobotContainer {
     }
 
     public void configureTesterBindings() {
-        testerController.a().onTrue(Commands.runOnce(() -> destinationSupplier.updateElevatorSetpoint(DestinationSupplier.elevatorSetpoint.L1)));
+        testerController.a().onTrue(Commands.runOnce(() -> oculusSubsystem.resetPose(new Pose2d(0, 0, new Rotation2d(0)),true)).ignoringDisable(true));
         testerController.b().onTrue(Commands.runOnce(() -> destinationSupplier.updateElevatorSetpoint(DestinationSupplier.elevatorSetpoint.L2)));
         testerController.x().onTrue(Commands.runOnce(() -> destinationSupplier.updateElevatorSetpoint(DestinationSupplier.elevatorSetpoint.L3)));
         testerController.y().onTrue(Commands.runOnce(() -> destinationSupplier.updateElevatorSetpoint(DestinationSupplier.elevatorSetpoint.L4)));
