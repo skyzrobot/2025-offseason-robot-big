@@ -18,6 +18,7 @@ import static frc.robot.subsystems.questnav.OculusStatus.*;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -27,6 +28,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.questnav.OculusConstants.PoseResetStrategy;
+import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.questnav.OculusIO;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -216,6 +218,7 @@ public class OculusSubsystem extends SubsystemBase {
     if (inputs.connected && inputs.isTracking) {
       Pose2d pose = getPose();
       double timestamp = getTimestamp();
+      Swerve.getInstance().getLocalizer().addMeasurement(timestamp, pose, OCULUS_STD_DEVS);
     }
   }
 
