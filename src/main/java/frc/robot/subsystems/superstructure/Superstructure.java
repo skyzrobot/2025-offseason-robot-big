@@ -1,5 +1,6 @@
 package frc.robot.subsystems.superstructure;
 
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -37,6 +38,10 @@ public class Superstructure extends SubsystemBase {
 
         // Declear all edges here
         addEdge(SuperstructureState.START, SuperstructureState.STOW);
+        addEdge(SuperstructureState.CORAL_GROUND_INTAKE, SuperstructureState.STOW, true, false);
+        addEdge(SuperstructureState.CORAL_GROUND_INTAKE, SuperstructureState.L3, true, false);
+        addEdge(SuperstructureState.STOW, SuperstructureState.L3, true, false);
+        addEdge(SuperstructureState.L3, SuperstructureState.L3_EJECT, true,false);
     }
 
     @Override
@@ -207,17 +212,38 @@ public class Superstructure extends SubsystemBase {
       }
     }
 
+    /**
+     * Adds a non-reversible edge between two states.
+     * @param from The source state
+     * @param to The target state
+     * @param restricted If true, this edge can only be used when transitioning directly to its target state
+     */
     private void addEdge(SuperstructureState from, SuperstructureState to, boolean restricted) {
         addEdge(from, to, false, restricted);
     }
 
+    /**
+     * Adds a non-reversible, non-restricted edge between two states.
+     * @param from The source state
+     * @param to The target state
+     */
     private void addEdge(SuperstructureState from, SuperstructureState to) {
         addEdge(from, to, false);
     }
 
     //declare all edge commands here
     private Command getEdgeCommand(SuperstructureState from, SuperstructureState to) {
-        return Commands.none();
+        if (from == SuperstructureState.CORAL_GROUND_INTAKE && to == SuperstructureState.L3) {
+            return Commands.sequence(
+                Commands.waitSeconds(1),
+                Commands.runOnce(() -> {
+                    System.out.println("Coral Ground Intake to L3");
+                })
+            );
+        }
+        return Commands.runOnce(() -> {
+            System.out.println(from + " to " + to);
+        });
     }
 
     /** All edge commands should finish and exit properly. */

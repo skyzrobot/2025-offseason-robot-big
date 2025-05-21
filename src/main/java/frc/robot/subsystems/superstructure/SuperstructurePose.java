@@ -23,10 +23,10 @@ public record SuperstructurePose(DoubleSupplier elevatorHeight, Supplier<Rotatio
     @Getter
     @RequiredArgsConstructor
     enum Preset {
-        STOW("stow",0.0, 0, 0),
+        STOW("stow",0.5, 45, 0),
         START("start", 0.0, 0, 0),
         L3("L3",0.7,45,45),
-        CORAL_GROUND_INTAKE("Coral Ground Intake", 0.0, 0, 0);
+        CORAL_GROUND_INTAKE("Coral Ground Intake", 0.0, 0, 90);
         
         private final SuperstructurePose pose;
 

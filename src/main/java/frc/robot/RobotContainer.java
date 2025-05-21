@@ -57,6 +57,7 @@ import frc.robot.subsystems.limelight.LimelightIOReal;
 import frc.robot.subsystems.limelight.LimelightIOReplay;
 import frc.robot.subsystems.limelight.LimelightSubsystem;
 import frc.robot.subsystems.superstructure.Superstructure;
+import frc.robot.subsystems.superstructure.SuperstructureState;
 import frc.robot.subsystems.swerve.Swerve;
 import lombok.Getter;
 import org.frcteam6941.looper.UpdateManager;
@@ -195,7 +196,7 @@ public class RobotContainer {
             });
         }
 
-        superstructure = new Superstructure(elevatorSubsystem, endEffectorArmSubsystem, intakeSubsystem);
+        superstructure = new Superstructure();
 
         // Initialize the update manager
         updateManager = new UpdateManager(swerve,
@@ -311,10 +312,10 @@ public class RobotContainer {
     }
 
     public void configureTesterBindings() {
-        testerController.a().onTrue(Commands.runOnce(() -> destinationSupplier.updateElevatorSetpoint(DestinationSupplier.elevatorSetpoint.L1)));
-        testerController.b().onTrue(Commands.runOnce(() -> destinationSupplier.updateElevatorSetpoint(DestinationSupplier.elevatorSetpoint.L2)));
-        testerController.x().onTrue(Commands.runOnce(() -> destinationSupplier.updateElevatorSetpoint(DestinationSupplier.elevatorSetpoint.L3)));
-        testerController.y().onTrue(Commands.runOnce(() -> destinationSupplier.updateElevatorSetpoint(DestinationSupplier.elevatorSetpoint.L4)));
+        testerController.a().onTrue(superstructure.runGoal(SuperstructureState.STOW));
+        testerController.b().onTrue(superstructure.runGoal(SuperstructureState.L3));
+        testerController.x().onTrue(superstructure.runGoal(SuperstructureState.L3_EJECT));
+        testerController.y().onTrue(superstructure.runGoal(SuperstructureState.CORAL_GROUND_INTAKE));
         testerController.leftBumper().onTrue(Commands.runOnce(() -> destinationSupplier.updateElevatorSetpoint(DestinationSupplier.elevatorSetpoint.P1)));
         testerController.rightBumper().onTrue(Commands.runOnce(() -> destinationSupplier.updateElevatorSetpoint(DestinationSupplier.elevatorSetpoint.P2)));
         testerController.povUp().whileTrue(new PutAlgaeProcessorCommand(testerController, endEffectorArmSubsystem, elevatorSubsystem, intakeSubsystem, indicatorSubsystem));
