@@ -390,6 +390,8 @@ public final class RobotConstants {
         public static final double ELEVATOR_GEAR_RATIO = 3.0;
         public static final double ELEVATOR_DANGER_ZONE = 0.4180619200456253;
         public static final double ELEVATOR_DEFAULT_POSITION_WHEN_DISABLED = 0.0;//TODO: fixme
+        public static final int ELEVATOR_ZEROING_FILTER_SIZE = 5;
+        public static final TunableNumber ELEVATOR_GOAL_TOLERANCE = new TunableNumber("Elevator/GoalTolerance", 0.02);
 
         public static final TunableNumber motionAcceleration = new TunableNumber("Elevator/MotionAcceleration",
                 300);

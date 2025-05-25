@@ -54,6 +54,7 @@ public class Superstructure extends SubsystemBase {
 
 
 
+        addEdge(SuperstructureState.START, SuperstructureState.IDLE, false, false);
         // Add edges between shoot and preshoot states
         final Set<Pair<SuperstructureState, SuperstructureState>> shootStates =
         Set.of(
@@ -69,13 +70,15 @@ public class Superstructure extends SubsystemBase {
         final Set<SuperstructureState> freeStatesBelowFlip =
         Set.of(
             SuperstructureState.CORAL_GROUND_INTAKE,
+            SuperstructureState.L1_INTAKE_SIDE,
             SuperstructureState.IDLE
             );
         final Set<SuperstructureState> freeStatesAboveFlip =
         Set.of(
             SuperstructureState.CORAL_STOW,
             SuperstructureState.ALGAE_STOW,
-            SuperstructureState.L1_INTAKE_SIDE,
+            SuperstructureState.L1_SHOOT_SIDE,
+            SuperstructureState.L2,
             SuperstructureState.L3,
             SuperstructureState.L4,
             SuperstructureState.P1,
@@ -97,10 +100,10 @@ public class Superstructure extends SubsystemBase {
             }
         }
         for (var from :freeStatesAboveFlip){
-            addEdge(from, SuperstructureState.AVOID, false);
+            addEdge(from, SuperstructureState.AVOID, true, false);
         }
         for (var from : freeStatesBelowFlip) {
-            addEdge(from, SuperstructureState.AVOID, false);
+            addEdge(from, SuperstructureState.AVOID, true, false);
         }
 
         setDefaultCommand(Commands.none());

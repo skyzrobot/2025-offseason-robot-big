@@ -18,15 +18,6 @@ public interface ElevatorIO {
     default double getElevatorVelocity() {
         return 0.0;
     }
-
-    default boolean isNearExtension(double expected) {
-        return false;
-    }
-
-    default boolean isNearZeroExtension() {
-        return false;
-    }
-
     @AutoLog
     class ElevatorIOInputs {
         public double positionMeters = 0.0;

@@ -163,18 +163,6 @@ public class ElevatorIOReal implements ElevatorIO {
         return talonPosToHeight(leader.getVelocity().getValueAsDouble());
     }
 
-
-    @Override
-    public boolean isNearZeroExtension() {
-        return talonPosToHeight(leader.getPosition().getValueAsDouble()) <= 0.08;
-        //return MathUtil.isNear(0.07, talonPosToHeight(leader.getPosition().getValueAsDouble()), 0.01);
-    }
-
-    @Override
-    public boolean isNearExtension(double expected) {
-        return MathUtil.isNear(expected, talonPosToHeight(leader.getPosition().getValueAsDouble()), 0.02);
-    }
-
     private double heightToTalonPos(double heightMeters) {
         return (heightMeters / (Math.PI * ELEVATOR_SPOOL_DIAMETER)) * ELEVATOR_GEAR_RATIO;
     }

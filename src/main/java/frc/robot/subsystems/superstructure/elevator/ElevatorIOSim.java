@@ -114,21 +114,11 @@ public class ElevatorIOSim implements ElevatorIO {
     }
 
     @Override
-    public boolean isNearExtension(double expected) {
-        return MathUtil.isNear(expected, radToHeight(simState.get(0)), 0.02);
-    }
-
-    @Override
     public void setElevatorTarget(double meters) {
         targetPositionMeters = meters;
         controller.setGoal(heightToRad(meters));
     }
 
-
-    @Override
-    public boolean isNearZeroExtension() {
-        return MathUtil.isNear(0.05, radToHeight(simState.get(0)), 0.3);
-    }
 
     @Override
     public double getElevatorVelocity() {
