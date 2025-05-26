@@ -76,47 +76,68 @@ public class Superstructure extends SubsystemBase {
         for (var pair : shootStates) {
             addEdge(pair.getFirst(), pair.getSecond(), true, false);
         }
-        final Set<SuperstructureState> freeStatesBelowFlip =
-        Set.of(
-            SuperstructureState.CORAL_GROUND_INTAKE,
-            SuperstructureState.L1_INTAKE_SIDE,
-            SuperstructureState.IDLE
-            );
-        final Set<SuperstructureState> freeStatesAboveFlip =
-        Set.of(
-            SuperstructureState.CORAL_STOW,
-            SuperstructureState.ALGAE_STOW,
-            SuperstructureState.L1_SHOOT_SIDE,
-            SuperstructureState.L2,
-            SuperstructureState.L3,
-            SuperstructureState.L4,
-            SuperstructureState.P1,
-            SuperstructureState.P2,
-            SuperstructureState.NET_SCORE
-            );
-        for (var from : freeStatesBelowFlip) {
-            for (var to : freeStatesBelowFlip) {
+        for (var from : statesBelowNoFlip) {
+            for (var to : statesBelowNoFlip) {
                 if (from != to) {
                     addEdge(from, to, false);
                 }
             }
         }
-        for (var from : freeStatesAboveFlip) {
-            for (var to : freeStatesAboveFlip) {
+        for (var from : statesAboveFlip) {
+            for (var to : statesAboveFlip) {
                 if (from != to) {
                     addEdge(from, to, false);
                 }
             }
         }
-        for (var from :freeStatesAboveFlip){
+        for (var from : statesBelowFlip){
+            for (var to : statesBelowFlip){
+                if (from != to) {
+                    addEdge(from, to, false);
+                }
+            }
+        }
+        for (var from : statesBelowFlip){
+            for (var to : statesAboveFlip){
+                if (from != to) {
+                    addEdge(from, to, true, false);
+                }
+            }
+        }
+        for (var from : statesAboveFlip){
             addEdge(from, SuperstructureState.AVOID, true, false);
         }
-        for (var from : freeStatesBelowFlip) {
+        for (var from : statesBelowFlip) {
+            addEdge(from, SuperstructureState.AVOID, true, false);
+        }
+        for (var from : statesBelowNoFlip){
             addEdge(from, SuperstructureState.AVOID, true, false);
         }
 
         setDefaultCommand(runGoal(() -> SuperstructureState.IDLE));
     }
+    final Set<SuperstructureState> statesBelowNoFlip =
+        Set.of(
+            SuperstructureState.CORAL_GROUND_INTAKE,
+            SuperstructureState.L1_INTAKE_SIDE,
+            SuperstructureState.IDLE
+            );
+    final Set<SuperstructureState> statesAboveFlip =
+        Set.of(
+            SuperstructureState.CORAL_STOW,
+            SuperstructureState.ALGAE_STOW,
+            SuperstructureState.L3,
+            SuperstructureState.L4,
+            SuperstructureState.P2,
+            SuperstructureState.NET_SCORE
+            );
+    final Set<SuperstructureState> statesBelowFlip =
+        Set.of(
+            SuperstructureState.L1_SHOOT_SIDE,
+            SuperstructureState.L2,
+            SuperstructureState.P1
+            );
+
 
     @Override
     public void periodic() {
@@ -365,6 +386,23 @@ public class Superstructure extends SubsystemBase {
 
     //declare all edge commands here
     private Command getEdgeCommand(SuperstructureState from, SuperstructureState to) {
+        if (to == SuperstructureState.AVOID) {
+            if (statesBelowFlip.contains(from)) {
+                return runElevator(to.getValue().getPose().elevatorHeight())
+                    .andThen(
+                        Commands.waitUntil(elevator::isAtGoal),
+                        runEndEffectorArm(to.getValue().getPose().endEffectorAngle()),
+                        runIntake(to.getValue().getPose().intakeAngle()),
+                        Commands.waitUntil(this::poseAtGoal)
+                    );
+            } else if (statesAboveFlip.contains(from)) {
+                return runSuperstructurePose(to.getValue().getPose())
+                    .andThen(Commands.waitUntil(endEffectorArm::isAtGoal));
+            } else {
+                return runSuperstructurePose(to.getValue().getPose())
+                    .andThen(Commands.waitUntil(elevator::isAtGoal));
+            }
+        }
         return runSuperstructurePose(to.getValue().getPose())
             .alongWith(runSuperstructureRollers(to))
             .andThen(Commands.waitUntil(this::poseAtGoal));

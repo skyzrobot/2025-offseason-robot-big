@@ -328,7 +328,7 @@ public class RobotContainer {
     public void configureTesterBindings() {
         testerController.a().onTrue(superstructure.runGoal(() -> SuperstructureState.CORAL_STOW));
         testerController.b().onTrue(superstructure.runGoal(() -> SuperstructureState.L3));
-        testerController.x().toggleOnTrue(superstructure.runGoal(() -> SuperstructureState.L3_EJECT));
+        testerController.x().toggleOnTrue(superstructure.runGoal(() -> SuperstructureState.L1_SHOOT_SIDE_EJECT));
         testerController.y().onTrue(superstructure.runGoal(() -> SuperstructureState.CORAL_GROUND_INTAKE));
         testerController.leftBumper().onTrue(Commands.runOnce(() -> destinationSupplier.updateElevatorSetpoint(DestinationSupplier.elevatorSetpoint.P1)));
         testerController.rightBumper().onTrue(Commands.runOnce(() -> destinationSupplier.updateElevatorSetpoint(DestinationSupplier.elevatorSetpoint.P2)));
