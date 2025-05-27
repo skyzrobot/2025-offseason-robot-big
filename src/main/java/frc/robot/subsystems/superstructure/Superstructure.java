@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.superstructure.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.superstructure.endeffectorarm.EndEffectorArmSubsystem;
 import frc.robot.subsystems.superstructure.intake.IntakeSubsystem;
+import frc.robot.utils.LoggedTracer;
 import lombok.Builder;
 import lombok.Getter;
 import org.jgrapht.Graph;
@@ -32,7 +33,7 @@ public class Superstructure extends SubsystemBase {
     private final IntakeSubsystem intake;
     private final EndEffectorArmSubsystem endEffectorArm;
     private final ElevatorSubsystem elevator;
-    private final SuperstructureVisualizer currentPoseVisualizer;
+    private final SuperstructureVisualizer measuredPoseVisualizer;
     private final SuperstructureVisualizer setpointPoseVisualizer;
     private final SuperstructureVisualizer goalPoseVisualizer;
 
@@ -53,7 +54,7 @@ public class Superstructure extends SubsystemBase {
         this.intake = intake;
         this.endEffectorArm = endEffectorArm;
         this.elevator = elevator;
-        this.currentPoseVisualizer = new SuperstructureVisualizer("Current");
+        this.measuredPoseVisualizer = new SuperstructureVisualizer("Measured");
         this.setpointPoseVisualizer = new SuperstructureVisualizer("Setpoint");
         this.goalPoseVisualizer = new SuperstructureVisualizer("Goal");
 
@@ -146,7 +147,7 @@ public class Superstructure extends SubsystemBase {
         endEffectorArm.periodic();
         elevator.periodic();
 
-        currentPoseVisualizer.update(
+        measuredPoseVisualizer.update(
             elevator.getElevatorPosition(),
             intake.getCurrentAngle(), 
             endEffectorArm.getCurrentAngle()
@@ -190,6 +191,9 @@ public class Superstructure extends SubsystemBase {
         } else {
             Logger.recordOutput("Superstructure/EdgeCommand", "");
         }
+
+        // Record cycle time
+        LoggedTracer.record("Superstructure");
     }
 
     @AutoLogOutput(key = "Superstructure/AtGoal")
@@ -206,6 +210,9 @@ public class Superstructure extends SubsystemBase {
         return run(() -> setGoal(goal.get()));
     }
 
+    public Command runZero(){
+        return elevator.zeroElevator();
+    }
 
     public void setGoal(SuperstructureState goal) {
         // Don't do anything if goal is the same
