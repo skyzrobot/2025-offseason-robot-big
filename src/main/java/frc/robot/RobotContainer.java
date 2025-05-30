@@ -318,10 +318,46 @@ public class RobotContainer {
     }
 
     public void configureTesterBindings() {
-        testerController.a().onTrue(superstructure.runGoal(() -> SuperstructureState.CORAL_STOW));
-        testerController.b().onTrue(superstructure.runGoal(() -> SuperstructureState.L3));
-        testerController.x().toggleOnTrue(superstructure.runGoal(() -> SuperstructureState.L1_SHOOT_SIDE_EJECT));
-        testerController.y().onTrue(superstructure.runGoal(() -> SuperstructureState.CORAL_GROUND_INTAKE));
+        testerController
+            .a()
+            .whileTrue(
+                superstructure
+                    .runGoal(() -> SuperstructureState.CORAL_GROUND_INTAKE)
+                    .until(superstructure::hasCoral)
+            );
+
+        testerController
+            .b()
+            .whileTrue(
+                superstructure
+                    .runGoal(() -> SuperstructureState.L4)
+                    .until(testerController.x())
+                    .andThen(
+                        superstructure
+                            .runGoal(() -> SuperstructureState.L4_EJECT)
+                            .until(() -> !superstructure.hasCoral())
+                    )
+            );
+
+        testerController
+            .button(4)
+            .whileTrue(
+                superstructure
+                    .runGoal(() -> SuperstructureState.P1)
+                    .until(superstructure::hasAlgae)
+            );
+        testerController
+            .button(5)
+            .whileTrue(
+                superstructure
+                    .runGoal(() -> SuperstructureState.NET_SCORE)
+                    .until(testerController.button(6))
+                    .andThen(
+                        superstructure
+                            .runGoal(() -> SuperstructureState.NET_SCORE_EJECT)
+                            .until(() -> !superstructure.hasAlgae())
+                    )
+            );
         testerController.leftBumper().onTrue(Commands.runOnce(() -> destinationSupplier.updateElevatorSetpoint(DestinationSupplier.elevatorSetpoint.P1)));
         testerController.rightBumper().onTrue(Commands.runOnce(() -> destinationSupplier.updateElevatorSetpoint(DestinationSupplier.elevatorSetpoint.P2)));
     }

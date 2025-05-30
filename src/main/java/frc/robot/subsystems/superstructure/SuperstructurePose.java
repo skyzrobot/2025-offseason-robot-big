@@ -24,7 +24,7 @@ public record SuperstructurePose(DoubleSupplier elevatorHeight, DoubleSupplier e
     @RequiredArgsConstructor
     enum Preset {
         CORAL_STOW("Coral Stow",        0.6,   135,   40),
-        ALGAE_STOW("Algae Stow",        0.6,    45,   40),
+        ALGAE_STOW("Algae Stow",        0.6,    0,   40),
         START("Start",                  0.5,     0,    0),
         L1_INTAKE_SIDE("L1 Intake Side", 0.16,   0,   40),
         L1_SHOOT_SIDE("L1 Shoot Side",  0.3,   200,   40),

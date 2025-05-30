@@ -119,7 +119,17 @@ public class Superstructure extends SubsystemBase {
             addEdge(from, SuperstructureState.AVOID, true, false);
         }
 
-        setDefaultCommand(runGoal(() -> SuperstructureState.IDLE));
+        setDefaultCommand(
+            runGoal(() -> {
+                if (endEffectorArm.isHasCoral()) {
+                    return SuperstructureState.CORAL_STOW;
+                } else if (endEffectorArm.isHasAlgae()) {
+                    return SuperstructureState.ALGAE_STOW;
+                } else {
+                    return SuperstructureState.IDLE;
+                }
+            })
+        );
     }
     final Set<SuperstructureState> statesBelowNoFlip =
         Set.of(
@@ -398,6 +408,14 @@ public class Superstructure extends SubsystemBase {
     public static class EdgeCommand extends DefaultEdge {
       private final Command command;
       @Builder.Default private final boolean restricted = false;
+    }
+
+    public boolean hasCoral(){
+        return endEffectorArm.isHasCoral();
+    }
+
+    public boolean hasAlgae(){
+        return endEffectorArm.isHasAlgae();
     }
 
     private Command runIntake(DoubleSupplier pivotAngle) {
