@@ -67,7 +67,6 @@ public class ElevatorSubsystem extends SubsystemBase {
         return Math.abs(inputs.positionMeters - wantedPosition) < offset;
     }
 
-    //TODO: UNTESTED AND UNFINISHED
     public Command zeroElevator() {
         return Commands.startRun(
             () -> {

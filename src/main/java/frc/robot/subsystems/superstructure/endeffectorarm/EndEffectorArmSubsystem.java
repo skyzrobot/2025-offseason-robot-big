@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotConstants;
 import frc.robot.RobotContainer;
+import frc.robot.RobotConstants.EndEffectorArmConstants;
 import frc.robot.subsystems.beambreak.BeambreakIO;
 import frc.robot.subsystems.beambreak.BeambreakIOInputsAutoLogged;
 import frc.robot.subsystems.superstructure.endeffectorarm.EndEffectorArmPivotIOInputsAutoLogged;
@@ -116,7 +117,7 @@ public class EndEffectorArmSubsystem extends SubsystemBase {
         Logger.processInputs(NAME + "/Roller", armRollerIOInputs);
 
         // Update goal status and set pivot angle
-        atGoal = isNearAngle(wantedAngle);
+        atGoal = isNearAngle(wantedAngle,EndEffectorArmConstants.END_EFFECTOR_ARM_PIVIOT_TOLERANCE.get());
         armPivotIO.setPivotAngle(wantedAngle);
 
         // Update tunable numbers if tuning is enabled
@@ -134,15 +135,6 @@ public class EndEffectorArmSubsystem extends SubsystemBase {
         LoggedTracer.record("EndEffectorArm");
     }
 
-    /**
-     * Checks if the arm is near a target angle
-     *
-     * @param targetAngleDeg The target angle in degrees
-     * @return True if the arm is within 1 degree of the target
-     */
-    public boolean isNearAngle(double targetAngleDeg) {
-        return MathUtil.isNear(targetAngleDeg, armPivotIOInputs.currentAngleDeg, 5);
-    }
 
     public boolean isNearAngle(double targetAngleDeg, double tolerance) {
         return MathUtil.isNear(targetAngleDeg, armPivotIOInputs.currentAngleDeg, tolerance);

@@ -323,6 +323,7 @@ public final class RobotConstants {
         public static final TunableNumber INTAKE_PIVOT_CRUISE_VELOCITY = new TunableNumber("INTAKE_PIVOT/cruiseVelocity", 250);
         public static final TunableNumber INTAKE_PIVOT_ACCELERATION = new TunableNumber("INTAKE_PIVOT/acceleration", 250);
         public static final TunableNumber INTAKE_PIVOT_JERK = new TunableNumber("INTAKE_PIVOT/jerk", 0);
+        public static final TunableNumber INTAKE_PIVOT_TOLERANCE = new TunableNumber("INTAKE_PIVIOT/tolerance",1.5);
         public static final double INTAKE_PIVOT_ENCODER_OFFSET = -0.018473310625;
         //Motion constants for intake roller
         public static final TunableNumber INTAKE_VOLTAGE = new TunableNumber("INTAKE_ROLLER/intakeVoltage", 15.0);
@@ -464,6 +465,7 @@ public final class RobotConstants {
             public static final TunableNumber END_EFFECTOR_ARM_PIVOT_KS = new TunableNumber("END_EFFECTOR_ARM_PIVOT_PID/ks", 0.015);
             public static final TunableNumber END_EFFECTOR_ARM_PIVOT_KG = new TunableNumber("END_EFFECTOR_ARM_PIVOT_PID/kg", -0.0513);
         }
+        public static final TunableNumber END_EFFECTOR_ARM_PIVIOT_TOLERANCE = new TunableNumber("END_EFFECTOR_ARM_PIVIOT_TOLERANCE",3.5);
 
         /**
          * Constants for the EndEffectorArm roller motor gains.

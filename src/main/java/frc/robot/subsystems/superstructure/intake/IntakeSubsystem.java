@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.RobotConstants;
+import frc.robot.RobotConstants.IntakeConstants;
 import frc.robot.subsystems.beambreak.BeambreakIO;
 import frc.robot.subsystems.beambreak.BeambreakIOInputsAutoLogged;
 import frc.robot.subsystems.superstructure.intake.IntakePivotIOInputsAutoLogged;
@@ -64,7 +65,7 @@ public class IntakeSubsystem extends RollerSubsystem {
         Logger.processInputs("Intake/Pivot", intakePivotIOInputs);
         Logger.processInputs("Intake/Roller", intakeRollerIOInputs);
         Logger.processInputs("Intake/Roller/Beambreak", BBInputs);
-        atGoal = isNearAngle(wantedAngle);
+        atGoal = isNearAngle(wantedAngle, IntakeConstants.INTAKE_PIVOT_TOLERANCE.get());
         intakePivotIO.setPivotAngle(wantedAngle);
 
         //TODO: add Debouncer or filter to prevent false positives
@@ -81,8 +82,8 @@ public class IntakeSubsystem extends RollerSubsystem {
      * @param targetAngleDeg The target angle in degrees
      * @return True if the arm is within tolerance of the target
      */
-    public boolean isNearAngle(double targetAngleDeg) {
-        return MathUtil.isNear(targetAngleDeg, intakePivotIOInputs.currentAngleDeg, 1.0);
+    public boolean isNearAngle(double targetAngleDeg, double tolerance) {
+        return MathUtil.isNear(targetAngleDeg, intakePivotIOInputs.currentAngleDeg, tolerance);
     }
 
     /**

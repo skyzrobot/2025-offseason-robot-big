@@ -224,20 +224,9 @@ public class RobotContainer {
 
 
     
-/**
- * Superstructure Default Command Behavior
- * 
- * The superstructure subsystem uses a default command that continuously monitors and updates its state.
- * This command runs automatically in the background under these conditions:
- * - When the robot transitions from disabled to enabled state
- * - When no other command is actively running on the subsystem
- * - After a previously running command completes
- * 
- * Note: When a goal command is executed (e.g., via button bindings), it remains active even after
- * reaching the target state. This prevents the default command from taking over, which is intentional
- * to maintain the desired state until a new command is issued.
- */
+
     private void configureDriverBindings() {
+        //TODO: consider enabling the auto scoring button whilst the superstructure is intaking
         swerve.setDefaultCommand(Commands.runOnce(() -> swerve.drive(
                 new Translation2d(
                         Math.abs(driverController.getLeftY()) < RobotConstants.SwerveConstants.deadband ?
@@ -270,51 +259,11 @@ public class RobotContainer {
         // driverController.povUp().whileTrue(new PreClimbCommand(climberSubsystem, elevatorSubsystem, intakeSubsystem, endEffectorArmSubsystem));
         // driverController.povLeft().whileTrue(new IdleClimbCommand(climberSubsystem, elevatorSubsystem, intakeSubsystem, endEffectorArmSubsystem));
         // driverController.y().whileTrue(new ClimbCommand(climberSubsystem, elevatorSubsystem, intakeSubsystem, endEffectorArmSubsystem));
-        // // Intake and outtake
-        // driverController.leftTrigger().toggleOnTrue(switchIntakeModeCommand());
-        // driverController.b().toggleOnTrue(new GroundOuttakeCommand(intakeSubsystem));
-        // driverController.leftBumper().whileTrue(
-        //         Commands.sequence(
-        //                 Commands.runOnce(() -> elevatorSubsystem.setElevatorPosition(destinationSupplier.getElevatorSetpoint(false))),
-        //                 Commands.waitUntil(() -> elevatorSubsystem.elevatorReady(0.03)),
-        //                 Commands.runOnce(() -> endEffectorArmSubsystem.setWantedState(EndEffectorArmSubsystem.WantedState.ALGAE_INTAKE)),
-        //                 Commands.waitSeconds(100)
-        //         ).finallyDo(() -> {
-        //             if (!GamepieceTracker.getInstance().isEndeffectorHasCoral() && !GamepieceTracker.getInstance().isEndeffectorHasAlgae()) {
-        //                 elevatorSubsystem.setElevatorPosition(RobotConstants.ElevatorConstants.HOME_EXTENSION_METERS.get());
-        //             } else {
-        //                 elevatorSubsystem.setElevatorPosition(RobotConstants.ElevatorConstants.HOLD_EXTENSION_METERS.get());
-        //             }
-        //             endEffectorArmSubsystem.setWantedState(EndEffectorArmSubsystem.WantedState.HOLD);
-        //         }));
-        // // Scoring
-        // driverController.povRight().whileTrue(switchAimingModeCommand());
-        // driverController.rightBumper().whileTrue(switchPreMoveModeCommand());
-        // driverController.leftStick().whileTrue(switchAimingModeCommand().beforeStarting(Commands.runOnce(() -> destinationSupplier.updateBranch(false))).ignoringDisable(true));
-        // driverController.rightStick().whileTrue(switchAimingModeCommand().beforeStarting(Commands.runOnce(() -> destinationSupplier.updateBranch(true))).ignoringDisable(true));
-        // driverController.povDown().onTrue(new ZeroElevatorCommand(elevatorSubsystem, intakeSubsystem, endEffectorArmSubsystem));
-
-        // //Intake Stuck Fix
-        // driverController.back().whileTrue(new FixIntakeCommand(elevatorSubsystem, intakeSubsystem, endEffectorArmSubsystem));
+        
     }
 
     private void configureStreamDeckBindings() {
-        // // Operator's controller
-        // streamDeckController.button(1).onTrue(Commands.runOnce(() -> destinationSupplier.setCurrentControlMode(DestinationSupplier.controlMode.MANUAL)).ignoringDisable(true));
-        // streamDeckController.button(3).onTrue(Commands.runOnce(() -> destinationSupplier.setCurrentControlMode(DestinationSupplier.controlMode.AUTO)).ignoringDisable(true));
-        // streamDeckController.button(5).onTrue(Commands.runOnce(destinationSupplier::switchUseSuperCycle).ignoringDisable(true));
-        // streamDeckController.button(6).onTrue(Commands.runOnce(() -> destinationSupplier.setCurrentGamePiece(DestinationSupplier.GamePiece.CORAL_SCORING)).ignoringDisable(true));
-        // streamDeckController.button(7).onTrue(Commands.runOnce(() -> destinationSupplier.setCurrentGamePiece(DestinationSupplier.GamePiece.ALGAE_INTAKING)).ignoringDisable(true));
-        // streamDeckController.button(11).onTrue(Commands.runOnce(() -> destinationSupplier.setAlgaeScoringMode(DestinationSupplier.AlgaeScoringMode.NET)).ignoringDisable(true));
-        // streamDeckController.button(12).onTrue(Commands.runOnce(() -> destinationSupplier.setAlgaeScoringMode(DestinationSupplier.AlgaeScoringMode.PROCESSOR)).ignoringDisable(true));
-        // streamDeckController.button(14).onTrue(Commands.runOnce(() -> destinationSupplier.updateElevatorSetpoint(DestinationSupplier.elevatorSetpoint.L2)).ignoringDisable(true));
-        // streamDeckController.button(15).onTrue(Commands.runOnce(() -> destinationSupplier.updateElevatorSetpoint(DestinationSupplier.elevatorSetpoint.L3)).ignoringDisable(true));
-        // streamDeckController.button(16).onTrue(Commands.runOnce(() -> destinationSupplier.updateElevatorSetpoint(DestinationSupplier.elevatorSetpoint.L4)).ignoringDisable(true));
-        // streamDeckController.button(18).onTrue(Commands.runOnce(() -> destinationSupplier.updateElevatorSetpoint(DestinationSupplier.elevatorSetpoint.P1)).ignoringDisable(true));
-        // streamDeckController.button(19).onTrue(Commands.runOnce(() -> destinationSupplier.updateElevatorSetpoint(DestinationSupplier.elevatorSetpoint.P2)).ignoringDisable(true));
-        // streamDeckController.button(8).whileTrue(Commands.run(() -> destinationSupplier.setCurrentL1Mode(DestinationSupplier.L1Mode.INTAKE))
-        //         .finallyDo(() -> destinationSupplier.setCurrentL1Mode(DestinationSupplier.L1Mode.ELEVATOR)).ignoringDisable(true));
-        // streamDeckController.button(10).whileTrue(Commands.run(() -> intakeSubsystem.setLowerAngle(true))).onFalse(Commands.runOnce(() -> intakeSubsystem.setLowerAngle(false)));
+
     }
 
     public void configureTesterBindings() {
@@ -360,52 +309,14 @@ public class RobotContainer {
         
     }
 
-    // public Command getAutonomousCommand() {
-    //     return autoFile.runAuto(autoChooser.get());
-    // }
+    public Command getAutonomousCommand() {
+        // return autoFile.runAuto(autoChooser.get());
+        return Commands.none();
+    }
 
     public FieldConstants.AprilTagLayoutType getAprilTagLayoutType() {
         return FieldConstants.defaultAprilTagType;
     }
-
-    // public Command switchAimingModeCommand() {
-    //     return new ConditionalCommand(
-    //             // AUTO
-    //             new AutoAimShootCommand(
-    //                     indicatorSubsystem, endEffectorArmSubsystem, elevatorSubsystem, intakeSubsystem,
-    //                     () -> false, driverController),
-    //             // MANUAL
-    //             Commands.sequence(
-    //                     Commands.runOnce(() -> DestinationSupplier.getInstance().setCurrentGamePiece(DestinationSupplier.GamePiece.CORAL_SCORING)),
-    //                     new ReefAimCommand(() -> false, elevatorSubsystem, driverController, indicatorSubsystem)),
-    //             () -> destinationSupplier.getCurrentControlMode() == DestinationSupplier.controlMode.AUTO);
-    // }
-
-    // public Command switchIntakeModeCommand() {
-    //     return new ConditionalCommand(
-    //             new GroundIntakeCommand(indicatorSubsystem, intakeSubsystem, endEffectorArmSubsystem, elevatorSubsystem),
-    //             new HoldIntakeCommand(indicatorSubsystem, intakeSubsystem, elevatorSubsystem),
-    //             () -> destinationSupplier.getL1Mode() == DestinationSupplier.L1Mode.ELEVATOR || endEffectorArmSubsystem.hasAlgae());
-    // }
-
-    // public Command switchPreMoveModeCommand() {
-    //     return new ConditionalCommand(
-    //             // Intake L1
-    //             new ShootHoldCommand(intakeSubsystem, () -> driverController.rightTrigger().getAsBoolean()),
-    //             new ConditionalCommand(
-    //                     new ConditionalCommand(
-    //                             // Elevator Algae Net
-    //                             new PutAlgaeNetCommand(driverController, endEffectorArmSubsystem, elevatorSubsystem, intakeSubsystem, indicatorSubsystem),
-    //                             // Elevator Algae Processor
-    //                             new PutAlgaeProcessorCommand(driverController, endEffectorArmSubsystem, elevatorSubsystem, intakeSubsystem, indicatorSubsystem),
-    //                             () -> destinationSupplier.getAlgaeScoringMode() == DestinationSupplier.AlgaeScoringMode.NET
-    //                     ),
-    //                     // Elevator Coral
-    //                     new PutCoralCommand(driverController, endEffectorArmSubsystem, elevatorSubsystem, intakeSubsystem, indicatorSubsystem),
-    //                     () -> !endEffectorArmSubsystem.hasCoral()
-    //             ),
-    //             () -> destinationSupplier.getL1Mode() == DestinationSupplier.L1Mode.INTAKE);
-    // }
 
     public void setMegaTag2(boolean setMegaTag2) {
         limelightSubsystem.setMegaTag2(setMegaTag2);

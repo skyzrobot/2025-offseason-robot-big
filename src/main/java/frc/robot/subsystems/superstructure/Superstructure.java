@@ -24,6 +24,7 @@ import java.util.*;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
+
 public class Superstructure extends SubsystemBase {
 
 
@@ -45,13 +46,27 @@ public class Superstructure extends SubsystemBase {
      * Constructor for the Superstructure subsystem.
      * 
      * Important Implementation Requirements:
-     * 1. All state transitions (edges) must be declared in the constructor using addEdge()
-     * 2. All edge commands must be implemented in getEdgeCommand()
-     * 3. All commands must properly exit and finish - they should not run indefinitely
+     * 1. All state transitions (edges) must be declared in the constructor using {@link #addEdge(SuperstructureState, SuperstructureState)}
+     * 2. All edge commands must be implemented in {@link #getEdgeCommand(SuperstructureState, SuperstructureState)}
+     * 3. All commands must properly exit and finish
      *    This is crucial for the state machine to progress to the next state
      * 
-     * @see #addEdge(SuperstructureState, SuperstructureState, boolean, boolean)
+     * Superstructure Default Command Behavior
+     * 
+     * The superstructure subsystem uses a default command that continuously monitors and updates its state.
+     * This command runs automatically in the background under these conditions:
+     * - When the robot transitions from disabled to enabled state
+     * - When no other command is actively running on the subsystem
+     * - After a previously running command completes
+     * 
+     * Note: When {@link #runGoal(SuperstructureState)} is executed (e.g., via button bindings), it remains active even after
+     * reaching the target state. This prevents the default command from taking over, which is intentional
+     * to maintain the desired state until a new command is issued. I.E if the superstructure were to return
+     * to the default state, {@link #runGoal(SuperstructureState)} would have to finish
+     * 
+     * @see #addEdge(SuperstructureState, SuperstructureState)
      * @see #getEdgeCommand(SuperstructureState, SuperstructureState)
+     * @see #setDefaultCommand(Command)
      * @see EdgeCommand
      */
     public Superstructure(IntakeSubsystem intake, EndEffectorArmSubsystem endEffectorArm, ElevatorSubsystem elevator) {
@@ -118,6 +133,7 @@ public class Superstructure extends SubsystemBase {
         for (var from : statesBelowNoFlip){
             addEdge(from, SuperstructureState.AVOID, true, false);
         }
+
 
         setDefaultCommand(
             runGoal(() -> {
