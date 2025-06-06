@@ -94,7 +94,7 @@ public class EndEffectorArmPivotIOReal implements EndEffectorArmPivotIO {
         inputs.motorVolts = motorVolts.getValueAsDouble();
         inputs.supplyCurrentAmps = supplyCurrentAmps.getValueAsDouble();
         inputs.statorCurrentAmps = statorCurrentAmps.getValueAsDouble();
-        inputs.currentAngleDeg = talonPosToAngle(currentPositionRot.getValueAsDouble()) - 63;
+        inputs.currentAngleDeg = talonPosToAngle(currentPositionRot.getValueAsDouble()) + 23;
         inputs.targetAngleDeg = targetAngleDeg;
 
         if (RobotConstants.TUNING) {
@@ -127,7 +127,7 @@ public class EndEffectorArmPivotIOReal implements EndEffectorArmPivotIO {
     @Override
     public void setPivotAngle(double targetAngleDeg) {
         this.targetAngleDeg = targetAngleDeg;
-        motor.setControl(new PositionDutyCycle(angleToTalonPos(targetAngleDeg + 63)).withEnableFOC(true));
+        motor.setControl(new PositionDutyCycle(angleToTalonPos(targetAngleDeg - 23)).withEnableFOC(true));
     }
 
     private double angleToTalonPos(double angleDeg) {

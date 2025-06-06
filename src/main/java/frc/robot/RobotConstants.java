@@ -439,7 +439,7 @@ public final class RobotConstants {
 
         // Pivot motor configuration
         public static final double ROTOR_SENSOR_RATIO = 1.0 / 8 * 64 / 18 * 60;
-        public static final double END_EFFECTOR_ARM_ENCODER_OFFSET = 0.0661628126 + 0.008;
+        public static final double END_EFFECTOR_ARM_ENCODER_OFFSET = 0.406494140625;
         // Roller voltages for different operations
         public static final TunableNumber CORAL_INTAKE_VOLTAGE = new TunableNumber("END_EFFECTOR_ARM_ROLLER/coralIntakeVoltage", 12.0);
         public static final TunableNumber CORAL_OUTTAKE_VOLTAGE = new TunableNumber("END_EFFECTOR_ARM_ROLLER/coralOuttakeVoltage", -6.0);
