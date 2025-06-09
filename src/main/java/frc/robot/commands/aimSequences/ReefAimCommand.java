@@ -40,7 +40,6 @@ public class ReefAimCommand extends Command {
                     ReefAimConstants.MAX_AIMING_SPEED.magnitude(),
                     ReefAimConstants.MAX_AIMING_ACCELERATION.magnitude()));
     private final BooleanSupplier stop;
-    private final Superstructure superstructure;
     private final CommandXboxController driverController;
     private final IndicatorSubsystem indicatorSubsystem;
     private boolean rightReef; // true if shooting right reef
@@ -51,11 +50,10 @@ public class ReefAimCommand extends Command {
     private Translation2d translationalVelocity, controllerVelocity;
 
 
-    public ReefAimCommand(BooleanSupplier stop, Superstructure superstructure,
+    public ReefAimCommand(BooleanSupplier stop,
                           CommandXboxController driverController, IndicatorSubsystem indicatorSubsystem) {
         addRequirements(swerve);
         this.stop = stop;
-        this.superstructure = superstructure;
         this.driverController = driverController;
         this.indicatorSubsystem = indicatorSubsystem;
     }
@@ -75,12 +73,8 @@ public class ReefAimCommand extends Command {
         if (DestinationSupplier.getInstance().getCurrentGamePiece() == DestinationSupplier.GamePiece.ALGAE_INTAKING) {
             finalDestinationPose = DestinationSupplier.getFinalAlgaeTarget(tagPose);
         } else {
-            if (DestinationSupplier.getInstance().getCurrentElevSetpointCoral() == SuperstructureState.L1_SHOOT_SIDE) {
-                finalDestinationPose = DestinationSupplier.getFinalAlgaeTarget(tagPose);
-            } else {
-                rightReef = DestinationSupplier.getInstance().getCurrentBranch();
-                finalDestinationPose = DestinationSupplier.getFinalCoralTarget(tagPose, rightReef);
-            }
+            rightReef = DestinationSupplier.getInstance().getCurrentBranch();
+            finalDestinationPose = DestinationSupplier.getFinalCoralTarget(tagPose, rightReef);
         }
         indicatorSubsystem.setPattern(IndicatorIO.Patterns.AIMING);
     }
@@ -89,12 +83,12 @@ public class ReefAimCommand extends Command {
     public void execute() {
         xPID.setConstraints(
                 new TrapezoidProfile.Constraints(
-                        ReefAimConstants.MAX_AIMING_SPEED.magnitude() * 0.6 / superstructure.getElevatorPosition(),
-                        ReefAimConstants.MAX_AIMING_ACCELERATION.magnitude() * 0.6 / superstructure.getElevatorPosition()));
+                        ReefAimConstants.MAX_AIMING_SPEED.magnitude() ,
+                        ReefAimConstants.MAX_AIMING_ACCELERATION.magnitude() ));
         yPID.setConstraints(
                 new TrapezoidProfile.Constraints(
-                        ReefAimConstants.MAX_AIMING_SPEED.magnitude() * 0.6 / superstructure.getElevatorPosition(),
-                        ReefAimConstants.MAX_AIMING_ACCELERATION.magnitude() * 0.6 / superstructure.getElevatorPosition()));
+                        ReefAimConstants.MAX_AIMING_SPEED.magnitude(),
+                        ReefAimConstants.MAX_AIMING_ACCELERATION.magnitude()));
         if (RobotConstants.TUNING) {
             xPID.setPID(RobotConstants.SwerveConstants.AimGainsClass.AIM_KP.get(),
                     RobotConstants.SwerveConstants.AimGainsClass.AIM_KI.get(),
