@@ -28,14 +28,16 @@ public class DestinationSupplier {
     @Setter
     private int targetTagID = 0;
     private boolean coralRight = false;
+    private boolean useProcessor = false;
     @Getter
-    private AlgaeScoringMode algaeScoringMode = AlgaeScoringMode.NET;
+    @AutoLogOutput(key = "DestinationSupplier/coralScoreState")
+    private SuperstructureState coralScoreState = L2;
     @Getter
-    @AutoLogOutput(key = "DestinationSupplier/currentStateSetpointCoral")
-    private SuperstructureState currentStateSetpointCoral = L2;
+    @AutoLogOutput(key = "DestinationSupplier/algaeIntakeState")
+    private SuperstructureState algaeIntakeState = P1;
     @Getter
-    @AutoLogOutput(key = "DestinationSupplier/currentStateSetpointAlgae")
-    private SuperstructureState currentStateSetpointAlgae = P1;
+    @AutoLogOutput(key = "DestinationSupplier/algaeScoringState")
+    private SuperstructureState algaeScoringState = NET_SCORE;
     @Getter
     @AutoLogOutput(key = "DestinationSupplier/CurrentPiece")
     private GamePiece currentGamePiece = GamePiece.CORAL_SCORING;
@@ -67,20 +69,28 @@ public class DestinationSupplier {
     public void setStateSetPoint(SuperstructureState stateSetPoint) {
         switch (stateSetPoint) {
             case L1_INTAKE_SIDE, L2, L3, L4:
-                currentStateSetpointCoral = stateSetPoint;
+                coralScoreState = stateSetPoint;
                 break;
             case P1, P2:
-                currentStateSetpointAlgae = stateSetPoint;
+                algaeIntakeState = stateSetPoint;
+                break;
+            case NET_SCORE, PROCESSOR_SCORE:
+                algaeScoringState = stateSetPoint;
                 break;
             default:
-                throw new IllegalStateException("Unexpected value: " + currentStateSetpointCoral);
+                throw new IllegalStateException("Unexpected value: " + coralScoreState);
         }
     }
 
     public SuperstructureState getPreState() {
-        return currentGamePiece == GamePiece.ALGAE_INTAKING ? 
-            currentStateSetpointAlgae : 
-            currentStateSetpointCoral;
+        if (currentGamePiece == GamePiece.ALGAE_INTAKING) {
+            updatePokeSetpointByTag(AimGoalSupplier.getNearestTagID(swerve.getLocalizer().getCoarseFieldPose(Timer.getFPGATimestamp())));
+        }
+        return switch (currentGamePiece) {
+            case ALGAE_INTAKING -> algaeIntakeState;
+            case ALGAE_SCORING -> algaeScoringState;
+            case CORAL_SCORING -> coralScoreState;
+        };
     }
 
     public SuperstructureState getShootState() {
@@ -90,21 +100,21 @@ public class DestinationSupplier {
     }
 
     private SuperstructureState getShootCoralState() {
-        return switch (currentStateSetpointCoral) {
+        return switch (coralScoreState) {
             case L1_SHOOT_SIDE -> L1_SHOOT_SIDE_EJECT;
             case L1_INTAKE_SIDE -> L1_INTAKE_SIDE_EJECT;
             case L2 -> L2_EJECT;
             case L3 -> L3_EJECT;
             case L4 -> L4_EJECT;
-            case NET_SCORE -> NET_SCORE_EJECT;
-            default -> throw new IllegalStateException("Unexpected coral state: " + currentStateSetpointCoral);
+            default -> throw new IllegalStateException("Unexpected coral state: " + coralScoreState);
         };
     }
 
     private SuperstructureState getShootAlgaeState() {
-        return switch (algaeScoringMode) {
-            case NET -> NET_SCORE_EJECT;
-            case PROCESSOR -> throw new IllegalStateException("Processor mode not implemented for algae scoring");
+        return switch (algaeScoringState) {
+            case NET_SCORE -> NET_SCORE_EJECT;
+            case PROCESSOR_SCORE -> PROCESSOR_SCORE_EJECT;
+            default -> throw new IllegalStateException("Unexpected algae scoring state: " + algaeScoringState);
         };
     }
 
@@ -131,15 +141,8 @@ public class DestinationSupplier {
         }
     }
 
-    public Command setCurrentGamePiece(DestinationSupplier.GamePiece currentGamePiece) {
-        return Commands.runOnce(
-                () ->{
-                    this.currentGamePiece = currentGamePiece;
-                    if (currentGamePiece == GamePiece.ALGAE_INTAKING) {
-                        updatePokeSetpointByTag(AimGoalSupplier.getNearestTagID(swerve.getLocalizer().getCoarseFieldPose(Timer.getFPGATimestamp())));
-                    }
-                }
-        );
+    public void setCurrentGamePiece(DestinationSupplier.GamePiece currentGamePiece) {
+        this.currentGamePiece = currentGamePiece;
     }
 
     public void switchUseSuperCycle() {
@@ -154,11 +157,7 @@ public class DestinationSupplier {
 
     public enum GamePiece {
         CORAL_SCORING,
-        ALGAE_INTAKING
-    }
-
-    public enum AlgaeScoringMode {
-        NET,
-        PROCESSOR
+        ALGAE_INTAKING,
+        ALGAE_SCORING
     }
 }

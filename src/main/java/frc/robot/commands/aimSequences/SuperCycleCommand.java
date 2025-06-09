@@ -59,7 +59,7 @@ public class SuperCycleCommand extends SequentialCommandGroup {
 // whenever the right trigger is pressed, the preShootCoral Command will end and
 // continue to shoot
     private Command preShootCoral() {
-        return DestinationSupplier.getInstance().setCurrentGamePiece(DestinationSupplier.GamePiece.CORAL_SCORING)
+        return Commands.runOnce(() -> DestinationSupplier.getInstance().setCurrentGamePiece(DestinationSupplier.GamePiece.CORAL_SCORING))
                 .andThen(
                     Commands.parallel(
                         // move the robot to the correct position
@@ -81,8 +81,8 @@ public class SuperCycleCommand extends SequentialCommandGroup {
     }
 
     private Command takeAlgae() {
-        return DestinationSupplier.getInstance().setCurrentGamePiece(DestinationSupplier.GamePiece.ALGAE_INTAKING).
-                andThen(Commands.parallel(
+        return Commands.runOnce(() -> DestinationSupplier.getInstance().setCurrentGamePiece(DestinationSupplier.GamePiece.ALGAE_INTAKING))
+                .andThen(Commands.parallel(
                         // move to the correct position
                         new ReefAimCommand(stop, driverController, indicatorSubsystem),
                         // set up ee and elevator and take the algae

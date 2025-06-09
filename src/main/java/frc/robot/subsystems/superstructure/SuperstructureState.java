@@ -36,6 +36,10 @@ public enum SuperstructureState {
     NET_SCORE(createState(Preset.NET_SCORE, null, null)),
     NET_SCORE_EJECT(createState(NET_SCORE, null, () -> EndEffectorArmConstants.ALGAE_NET_SHOOT_VOLTAGE.get())),
 
+    // Processor scoring positions
+    PROCESSOR_SCORE(createState(Preset.PROCESSOR, null, null)),
+    PROCESSOR_SCORE_EJECT(createState(PROCESSOR_SCORE, null, () -> EndEffectorArmConstants.ALGAE_PROCESSOR_SHOOT_VOLTAGE.get())),
+
     // Pickup positions
     P1(createState(Preset.P1, null, () -> EndEffectorArmConstants.ALGAE_INTAKE_VOLTAGE.get())),
     P2(createState(Preset.P2, null, () -> EndEffectorArmConstants.ALGAE_INTAKE_VOLTAGE.get())),
