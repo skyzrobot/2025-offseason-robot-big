@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.RobotConstants;
 import frc.robot.RobotConstants.SwerveConstants;
+import frc.robot.commands.aimSequences.AimGoalSupplier;
 import frc.robot.subsystems.superstructure.DestinationSupplier;
 import lombok.Getter;
 import lombok.Setter;
@@ -533,7 +534,7 @@ public class Swerve implements Updatable, Subsystem {
         Logger.recordOutput("swerve/localizer/MeasuredVelocity", swerveLocalizer.getMeasuredVelocity());
         Logger.recordOutput("swerve/localizer/MeasuredVelocityDirect", getSwerveVelocity());
         Logger.recordOutput("swerve/localizer/MeasuredAcceleration", swerveLocalizer.getMeasuredAcceleration());
-        DestinationSupplier.isEdgeCase(swerveLocalizer.getCoarseFieldPose(Timer.getFPGATimestamp()));
+        AimGoalSupplier.isEdgeCase(swerveLocalizer.getCoarseFieldPose(Timer.getFPGATimestamp()));
         trajectoryFollower.sendData();
         //Logger.recordOutput("ActivePath", PathPlannerPath.fromPathFile("T_1").getPathPoses());
     }

@@ -78,36 +78,15 @@ public class DestinationSupplier {
     }
 
     public SuperstructureState getPreState() {
-        return switch (currentGamePiece) {
-            case ALGAE_INTAKING ->  getPreAlgaeState();
-            case CORAL_SCORING -> getPreCoralState();
-        };
-    }
-
-    private SuperstructureState getPreCoralState() {
-        return switch (currentStateSetpointCoral) {
-            case L1_INTAKE_SIDE -> L1_INTAKE_SIDE;
-            case L1_SHOOT_SIDE -> L1_SHOOT_SIDE;
-            case L2 -> L2;
-            case L3 -> L3;
-            case L4 -> L4;
-            default -> throw new IllegalStateException("Unexpected value: " + currentStateSetpointCoral);
-        };
-    }
-
-    private SuperstructureState getPreAlgaeState() {
-        return switch (currentStateSetpointAlgae) {
-            case P1 -> P1;
-            case P2 -> P2;
-            default -> throw new IllegalStateException("Unexpected value: " + currentStateSetpointAlgae);
-        };
+        return currentGamePiece == GamePiece.ALGAE_INTAKING ? 
+            currentStateSetpointAlgae : 
+            currentStateSetpointCoral;
     }
 
     public SuperstructureState getShootState() {
-        return switch (currentGamePiece) {
-            case ALGAE_INTAKING -> getShootAlgaeState();
-            case CORAL_SCORING -> getShootCoralState();
-        };
+        return currentGamePiece == GamePiece.ALGAE_INTAKING ? 
+            getShootAlgaeState() : 
+            getShootCoralState();
     }
 
     private SuperstructureState getShootCoralState() {
@@ -118,14 +97,14 @@ public class DestinationSupplier {
             case L3 -> L3_EJECT;
             case L4 -> L4_EJECT;
             case NET_SCORE -> NET_SCORE_EJECT;
-            default -> throw new IllegalStateException("Unexpected value: " + currentStateSetpointAlgae);
+            default -> throw new IllegalStateException("Unexpected coral state: " + currentStateSetpointCoral);
         };
     }
 
     private SuperstructureState getShootAlgaeState() {
         return switch (algaeScoringMode) {
             case NET -> NET_SCORE_EJECT;
-            case PROCESSOR -> throw new IllegalStateException("Unexpected value: " + currentStateSetpointAlgae);
+            case PROCESSOR -> throw new IllegalStateException("Processor mode not implemented for algae scoring");
         };
     }
 
