@@ -114,14 +114,14 @@ public class RobotContainer {
                             RobotConstants.IntakeConstants.IS_INVERT,
                             RobotConstants.IntakeConstants.IS_BRAKE
                         ),
-                        new RollerIOReal(
-                            RobotConstants.IntakeConstants.INDEX_MOTOR_ID,
-                            RobotConstants.CANIVORE_CAN_BUS_NAME,
-                            RobotConstants.IntakeConstants.STATOR_CURRENT_LIMIT_AMPS,
-                            RobotConstants.IntakeConstants.SUPPLY_CURRENT_LIMIT_AMPS,
-                            RobotConstants.IntakeConstants.IS_INVERT,
-                            RobotConstants.IntakeConstants.IS_BRAKE
-                        ),
+                        // new RollerIOReal(
+                        //     RobotConstants.IntakeConstants.INDEX_MOTOR_ID,
+                        //     RobotConstants.CANIVORE_CAN_BUS_NAME,
+                        //     RobotConstants.IntakeConstants.STATOR_CURRENT_LIMIT_AMPS,
+                        //     RobotConstants.IntakeConstants.SUPPLY_CURRENT_LIMIT_AMPS,
+                        //     RobotConstants.IntakeConstants.IS_INVERT,
+                        //     RobotConstants.IntakeConstants.IS_BRAKE
+                        // ),
                         new BeambreakIOReal(RobotConstants.BeamBreakConstants.INTAKE_BEAMBREAK_ID)
                 );
                 climberSubsystem = new ClimberSubsystem(new ClimberIOReal());
@@ -153,9 +153,9 @@ public class RobotContainer {
                             new SimpleMotorFeedforward(0.0, 0.24),
                             new ProfiledPIDController(0.5, 0.0, 0.0,
                                 new TrapezoidProfile.Constraints(15, 1))),
-                        new RollerIOSim(1, 1.0, new SimpleMotorFeedforward(0.0, 0.24),
-                                new ProfiledPIDController(0.5, 0.0, 0.0,
-                                        new TrapezoidProfile.Constraints(15, 1))),
+                        // new RollerIOSim(1, 1.0, new SimpleMotorFeedforward(0.0, 0.24),
+                        //         new ProfiledPIDController(0.5, 0.0, 0.0,
+                        //                 new TrapezoidProfile.Constraints(15, 1))),
                         new BeambreakIOSim(RobotConstants.BeamBreakConstants.INTAKE_BEAMBREAK_ID)
                 );
                 climberSubsystem = new ClimberSubsystem(new ClimberIOSim());
@@ -208,8 +208,8 @@ public class RobotContainer {
                     },
                     new RollerIO() {
                     },
-                    new RollerIO() {
-                    },
+                    // new RollerIO() {
+                    // },
                     new BeambreakIO() {
                     }
             );

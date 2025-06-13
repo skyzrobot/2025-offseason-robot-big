@@ -26,10 +26,10 @@ import lombok.Setter;
 public class IntakeSubsystem {
     private final IntakePivotIO intakePivotIO;
     private final RollerIO intakeRollerIO;
-    private final RollerIO indexRollerIO;
+    //private final RollerIO indexRollerIO;
     private final IntakePivotIOInputsAutoLogged intakePivotIOInputs = new IntakePivotIOInputsAutoLogged();
     private final RollerIOInputsAutoLogged intakeRollerIOInputs = new RollerIOInputsAutoLogged();
-    private final RollerIOInputsAutoLogged indexRollerIOInputs = new RollerIOInputsAutoLogged();
+    //private final RollerIOInputsAutoLogged indexRollerIOInputs = new RollerIOInputsAutoLogged();
     private final BeambreakIO BBIO;
     private final BeambreakIOInputsAutoLogged BBInputs = new BeambreakIOInputsAutoLogged();
 
@@ -49,12 +49,12 @@ public class IntakeSubsystem {
     public IntakeSubsystem(
             IntakePivotIO intakePivotIO,
             RollerIO intakeRollerIO,
-            RollerIO indexRollerIO,
+            //RollerIO indexRollerIO,
             BeambreakIO BBIO
     ) {
         this.intakePivotIO = intakePivotIO;
         this.intakeRollerIO = intakeRollerIO;
-        this.indexRollerIO = indexRollerIO;
+        //this.indexRollerIO = indexRollerIO;
         this.BBIO = BBIO;
     }
 
@@ -64,11 +64,11 @@ public class IntakeSubsystem {
         BBIO.updateInputs(BBInputs);
         intakePivotIO.updateInputs(intakePivotIOInputs);
         intakeRollerIO.updateInputs(intakeRollerIOInputs);
-        indexRollerIO.updateInputs(indexRollerIOInputs);
+        //indexRollerIO.updateInputs(indexRollerIOInputs);
 
         Logger.processInputs("Intake/Pivot", intakePivotIOInputs);
         Logger.processInputs("Intake/Roller", intakeRollerIOInputs);
-        Logger.processInputs("Intake/IndexRoller", indexRollerIOInputs);
+        //Logger.processInputs("Intake/IndexRoller", indexRollerIOInputs);
         Logger.processInputs("Intake/Roller/Beambreak", BBInputs);
         atGoal = isNearAngle(wantedAngle, IntakeConstants.INTAKE_PIVOT_TOLERANCE.get());
         intakePivotIO.setPivotAngle(wantedAngle);
@@ -122,11 +122,11 @@ public class IntakeSubsystem {
     }
 
     public void setIndexRollerVoltage(DoubleSupplier voltage) {
-        indexRollerIO.setVoltage(voltage.getAsDouble());
+        //indexRollerIO.setVoltage(voltage.getAsDouble());
     }
 
     public void stopIndexRoller() {
-        indexRollerIO.stop();
+        //indexRollerIO.stop();
     }
 
 }
