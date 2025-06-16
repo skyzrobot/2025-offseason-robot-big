@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.aimSequences.AimGoalSupplier;
 import frc.robot.commands.aimSequences.SuperCycleCommand;
 import frc.robot.commands.climb.ClimbCommand;
 import frc.robot.commands.climb.IdleClimbCommand;
@@ -56,6 +57,7 @@ import frc.robot.subsystems.roller.RollerIOSim;
 import lombok.Getter;
 import org.frcteam6941.looper.UpdateManager;
 import org.littletonrobotics.AllianceFlipUtil;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import frc.robot.subsystems.questnav.OculusIO;
 
@@ -329,10 +331,17 @@ public class RobotContainer {
                                 superstructure
                                         .runGoal(() -> SuperstructureState.CORAL_INDEXED_INTAKE)
                                         .until(() -> superstructure.hasAlgae() && superstructure.indexedCoral()),
-                                superstructure
+                                Commands.either(
+                                    superstructure
                                         .runGoal(() -> SuperstructureState.CORAL_GROUND_INTAKE)
                                         .until(() -> superstructure.hasCoral()),
-                                superstructure::hasAlgae
+                                    superstructure
+                                        .runGoal(() -> SuperstructureState.CORAL_INDEXED_INTAKE)
+                                        .until(() -> superstructure.indexedCoral()),
+                                    () -> !AimGoalSupplier.isInHexagonalReefDangerZone(
+                                            swerve.getLocalizer().getCoarseFieldPose(Timer.getFPGATimestamp()))
+                                ),
+                                () -> superstructure.hasAlgae()
                         )
                 );
         driverController
@@ -372,13 +381,7 @@ public class RobotContainer {
     }
 
     public void configureTesterBindings() {
-        testerController
-                .a()
-                .whileTrue(
-                        superstructure
-                                .runGoal(() -> SuperstructureState.CORAL_GROUND_INTAKE)
-                                .until(superstructure::hasCoral)
-                );
+
 
         testerController
                 .b()

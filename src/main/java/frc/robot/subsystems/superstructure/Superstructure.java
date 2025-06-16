@@ -3,13 +3,17 @@ package frc.robot.subsystems.superstructure;
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotConstants;
+import frc.robot.RobotConstants.SwerveConstants.AimGainsClass;
+import frc.robot.commands.aimSequences.AimGoalSupplier;
 import frc.robot.subsystems.superstructure.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.superstructure.endeffectorarm.EndEffectorArmSubsystem;
 import frc.robot.subsystems.superstructure.intake.IntakeSubsystem;
+import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.utils.LoggedTracer;
 import lombok.Builder;
 import lombok.Getter;
@@ -140,13 +144,19 @@ public class Superstructure extends SubsystemBase {
                 runGoal(() -> {
                     if (endEffectorArm.isHasCoral()) {
                         return SuperstructureState.CORAL_STOW;
-                    } else if (endEffectorArm.isHasAlgae()) {
-                        return SuperstructureState.ALGAE_STOW;
-                    } else if (intake.isIndexRollerHasCoral()) {
-                        return SuperstructureState.CORAL_GROUND_INTAKE;
-                    } else {
-                        return SuperstructureState.IDLE;
                     }
+                    if (endEffectorArm.isHasAlgae()) {
+                        return SuperstructureState.ALGAE_STOW;
+                    }
+                    if (AimGoalSupplier.isInHexagonalReefDangerZone(
+                            Swerve.getInstance().getLocalizer().getCoarseFieldPose(Timer.getFPGATimestamp()))) {
+                        return SuperstructureState.AVOID;
+                    }
+                    if (intake.isIndexRollerHasCoral()) {
+                        return SuperstructureState.CORAL_GROUND_INTAKE;
+                    }
+                    
+                    return SuperstructureState.IDLE;
                 })
         );
     }
