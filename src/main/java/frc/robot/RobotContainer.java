@@ -327,22 +327,27 @@ public class RobotContainer {
         driverController
                 .b()
                 .whileTrue(
-                        Commands.either(
-                                superstructure
-                                        .runGoal(() -> SuperstructureState.CORAL_INDEXED_INTAKE)
-                                        .until(() -> superstructure.hasAlgae() && superstructure.indexedCoral()),
-                                Commands.either(
-                                    superstructure
-                                        .runGoal(() -> SuperstructureState.CORAL_GROUND_INTAKE)
-                                        .until(() -> superstructure.hasCoral()),
-                                    superstructure
-                                        .runGoal(() -> SuperstructureState.CORAL_INDEXED_INTAKE)
-                                        .until(() -> superstructure.indexedCoral()),
-                                    () -> !AimGoalSupplier.isInHexagonalReefDangerZone(
-                                            swerve.getLocalizer().getCoarseFieldPose(Timer.getFPGATimestamp()))
-                                ),
-                                () -> superstructure.hasAlgae()
-                        )
+                        superstructure
+                                .runGoal(() -> {
+                                    if (superstructure.hasAlgae()) {
+                                        return SuperstructureState.CORAL_INDEXED_INTAKE;
+                                    } else if (!AimGoalSupplier.isInHexagonalReefDangerZone(
+                                            swerve.getLocalizer().getCoarseFieldPose(Timer.getFPGATimestamp()))) {
+                                        return SuperstructureState.CORAL_GROUND_INTAKE;
+                                    } else {
+                                        return SuperstructureState.CORAL_INDEXED_INTAKE;
+                                    }
+                                })
+                                .until(() -> {
+                                    if (superstructure.hasAlgae()) {
+                                        return superstructure.hasAlgae() && superstructure.indexedCoral();
+                                    } else if (!AimGoalSupplier.isInHexagonalReefDangerZone(
+                                            swerve.getLocalizer().getCoarseFieldPose(Timer.getFPGATimestamp()))) {
+                                        return superstructure.hasCoral();
+                                    } else {
+                                        return superstructure.indexedCoral();
+                                    }
+                                })
                 );
         driverController
                 .x()
