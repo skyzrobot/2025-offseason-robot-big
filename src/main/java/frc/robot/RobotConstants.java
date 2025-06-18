@@ -35,19 +35,15 @@ public final class RobotConstants {
     public static final boolean TUNING = true;
     public static final boolean DriverCamera = true;
     public static final boolean useReplay = false;
-    // Judge whether the team is 10541
-    // During Huston, is10541 should always be TRUE
-    public static final String Serial10541 = "0327BA65";
-    public static final boolean is10541 = RobotController.getSerialNumber().matches(Serial10541) && Robot.isReal();
-    public static String CANIVORE_CAN_BUS_NAME = is10541 ? "10541Canivore0" : "6941Canivore0";
-    public static String CLIMBER_CAN_BUS = is10541 ? "rio" : "6941Canivore0";
+    public static String CANIVORE_CAN_BUS_NAME = "10541Canivore0";
+    public static String CLIMBER_CAN_BUS = "rio";
 
     /**
      * Constants related to the robot's indicators, such as LEDs.
      */
     public static class IndicatorConstants {
-        public static final int LED_PORT = is10541 ? 0 : 9;
-        public static final int LED_BUFFER_LENGTH = is10541 ? 30 : 92;
+        public static final int LED_PORT = 0;
+        public static final int LED_BUFFER_LENGTH = 30;
     }
 
     /**
@@ -173,7 +169,7 @@ public final class RobotConstants {
         private static final int FRONT_LEFT_DRIVE_MOTOR_ID = 4;
         private static final int FRONT_LEFT_STEER_MOTOR_ID = 3;
         private static final int FRONT_LEFT_ENCODER_ID = 10;
-        private static final double FRONT_LEFT_ENCODER_OFFSET = is10541 ? -0.1533204844 : -0.4532636;
+        private static final double FRONT_LEFT_ENCODER_OFFSET = -0.1491701719;
         private static final Measure<DistanceUnit> frontLeftXPos = Meters.of(0.29);
         private static final Measure<DistanceUnit> frontLeftYPos = Meters.of(0.29);
         public static final LegacySwerveModuleConstants FrontLeft = ConstantCreator.createModuleConstants(
@@ -183,7 +179,7 @@ public final class RobotConstants {
         private static final int FRONT_RIGHT_DRIVE_MOTOR_ID = 6;
         private static final int FRONT_RIGHT_STEER_MOTOR_ID = 5;
         private static final int FRONT_RIGHT_ENCODER_ID = 11;
-        private static final double FRONT_RIGHT_ENCODER_OFFSET = is10541 ? -0.3049317344 : -0.420898875;
+        private static final double FRONT_RIGHT_ENCODER_OFFSET = -0.3134766406;
         private static final Measure<DistanceUnit> frontRightXPos = Meters.of(0.29);
         private static final Measure<DistanceUnit> frontRightYPos = Meters.of(-0.29);
         public static final LegacySwerveModuleConstants FrontRight = ConstantCreator.createModuleConstants(
@@ -194,7 +190,7 @@ public final class RobotConstants {
         private static final int BACK_LEFT_DRIVE_MOTOR_ID = 2;
         private static final int BACK_LEFT_STEER_MOTOR_ID = 1;
         private static final int BACK_LEFT_ENCODER_ID = 0;
-        private static final double BACK_LEFT_ENCODER_OFFSET = is10541 ? 0.0383297031 : -0.354248046875;
+        private static final double BACK_LEFT_ENCODER_OFFSET = 0.0383297031;
         private static final Measure<DistanceUnit> backLeftXPos = Meters.of(-0.29);
         private static final Measure<DistanceUnit> backLeftYPos = Meters.of(0.29);
         public static final LegacySwerveModuleConstants BackLeft = ConstantCreator.createModuleConstants(
@@ -204,13 +200,13 @@ public final class RobotConstants {
         private static final int BACK_RIGHT_DRIVE_MOTOR_ID = 8;
         private static final int BACK_RIGHT_STEER_MOTOR_ID = 7;
         private static final int BACK_RIGHT_ENCODER_ID = 20;
-        private static final double BACK_RIGHT_ENCODER_OFFSET = is10541 ? 0.6206053438 : 0.4663082031;
+        private static final double BACK_RIGHT_ENCODER_OFFSET = 0.6206053438;
         private static final Measure<DistanceUnit> backRightXPos = Meters.of(-0.29);
         private static final Measure<DistanceUnit> backRightYPos = Meters.of(-0.29);
         public static final LegacySwerveModuleConstants BackRight = ConstantCreator.createModuleConstants(
                 BACK_RIGHT_STEER_MOTOR_ID, BACK_RIGHT_DRIVE_MOTOR_ID, BACK_RIGHT_ENCODER_ID,
                 BACK_RIGHT_ENCODER_OFFSET, backRightXPos.magnitude(), backRightYPos.magnitude(), true);
-        // swervemodule
+        // Swerve Module
         public static LegacySwerveModuleConstants[] modules = {FrontLeft, FrontRight, BackLeft, BackRight};
         public static final Translation2d[] modulePlacements = new Translation2d[]{
                 new Translation2d(SwerveConstants.FrontLeft.LocationX,
@@ -295,7 +291,7 @@ public final class RobotConstants {
 
     /**
      * Constants related to the beambreak subsystem.
-     */ 
+     */
     public static class BeamBreakConstants {
         public static final int ENDEFFECTORARM_CORAL_BEAMBREAK_ID = 0;
         public static final int ENDEFFECTORARM_ALGAE_BEAMBREAK_ID = 2;
@@ -327,7 +323,7 @@ public final class RobotConstants {
         public static final TunableNumber INTAKE_PIVOT_CRUISE_VELOCITY = new TunableNumber("INTAKE_PIVOT/cruiseVelocity", 250);
         public static final TunableNumber INTAKE_PIVOT_ACCELERATION = new TunableNumber("INTAKE_PIVOT/acceleration", 250);
         public static final TunableNumber INTAKE_PIVOT_JERK = new TunableNumber("INTAKE_PIVOT/jerk", 0);
-        public static final TunableNumber INTAKE_PIVOT_TOLERANCE = new TunableNumber("INTAKE_PIVIOT/tolerance",3.5);
+        public static final TunableNumber INTAKE_PIVOT_TOLERANCE = new TunableNumber("INTAKE_PIVIOT/tolerance", 3.5);
         //TODO: tune pid and decrease tolerance
         public static final double INTAKE_PIVOT_ENCODER_OFFSET = -0.018473310625;
         //Motion constants for intake roller
