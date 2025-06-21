@@ -264,7 +264,7 @@ public final class RobotConstants {
         public static class AimGainsClass {
             public static final TunableNumber AIM_KP = new TunableNumber("AIM/kp", 4.0);
             public static final TunableNumber AIM_KI = new TunableNumber("AIM/ki", 0);
-            public static final TunableNumber AIM_KD = new TunableNumber("AIM/kd", 0.1);
+            public static final TunableNumber AIM_KD = new TunableNumber("AIM/kd", 0.15);
         }
 
     }

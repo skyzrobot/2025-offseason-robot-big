@@ -315,17 +315,10 @@ public class RobotContainer {
         //         );
 
 
-        driverController
-                .a()
-                .whileTrue(
-                        new SuperCycleCommand(superstructure,
-                                indicatorSubsystem,
-                                driverController,
-                                () -> false)
-                );
+
 
         driverController
-                .b()
+                .a()
                 .whileTrue(
                         superstructure
                                 .runGoal(() -> {
@@ -361,6 +354,87 @@ public class RobotContainer {
                                                 .until(() -> !superstructure.hasAlgae())
                                 )
                 );
+
+        // Left trigger binding - only executes if there is coral
+        driverController
+                .leftBumper()
+                .whileTrue(
+                        Commands.sequence(
+                                Commands.runOnce(() -> destinationSupplier.updateBranch(false)),
+                               Commands.runOnce(() -> destinationSupplier.setStateSetPoint(SuperstructureState.L4)),
+                               new SuperCycleCommand(superstructure,
+                                indicatorSubsystem,
+                                driverController,
+                                () -> false)
+                        )
+                        .onlyIf(() -> superstructure.hasCoral())
+                );
+        driverController
+                .leftTrigger()
+                .whileTrue(
+                        Commands.sequence(
+                                Commands.runOnce(() -> destinationSupplier.updateBranch(false)),
+                               Commands.runOnce(() -> destinationSupplier.setStateSetPoint(SuperstructureState.L3)),
+                               new SuperCycleCommand(superstructure,
+                                indicatorSubsystem,
+                                driverController,
+                                () -> false)
+                        )
+                        .onlyIf(() -> superstructure.hasCoral())
+                );
+        driverController
+                .back()
+                .whileTrue(
+                        Commands.sequence(
+                                Commands.runOnce(() -> destinationSupplier.updateBranch(false)),
+                               Commands.runOnce(() -> destinationSupplier.setStateSetPoint(SuperstructureState.L2)),
+                               new SuperCycleCommand(superstructure,
+                                indicatorSubsystem,
+                                driverController,
+                                () -> false)
+                        )
+                        .onlyIf(() -> superstructure.hasCoral())
+                );
+        driverController
+                .rightBumper()
+                .whileTrue(
+                        Commands.sequence(
+                                Commands.runOnce(() -> destinationSupplier.updateBranch(true)),
+                               Commands.runOnce(() -> destinationSupplier.setStateSetPoint(SuperstructureState.L4)),
+                               new SuperCycleCommand(superstructure,
+                                indicatorSubsystem,
+                                driverController,
+                                () -> false)
+                        )
+                        .onlyIf(() -> superstructure.hasCoral())
+                );
+        driverController
+                .rightTrigger()
+                .whileTrue(
+                        Commands.sequence(
+                                Commands.runOnce(() -> destinationSupplier.updateBranch(true)),
+                               Commands.runOnce(() -> destinationSupplier.setStateSetPoint(SuperstructureState.L3)),
+                               new SuperCycleCommand(superstructure,
+                                indicatorSubsystem,
+                                driverController,
+                                () -> false)
+                        )
+                        .onlyIf(() -> superstructure.hasCoral())
+                );
+        driverController
+                .leftStick()
+                .whileTrue(
+                        Commands.sequence(
+                                Commands.runOnce(() -> destinationSupplier.updateBranch(true)),
+                               Commands.runOnce(() -> destinationSupplier.setStateSetPoint(SuperstructureState.L2)),
+                               new SuperCycleCommand(superstructure,
+                                indicatorSubsystem,
+                                driverController,
+                                () -> false)
+                        )
+                        .onlyIf(() -> superstructure.hasCoral())
+                );
+        
     }
 
     private void configureStreamDeckBindings() {

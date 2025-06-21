@@ -145,7 +145,7 @@ public class ReefAimCommand extends Command {
     public boolean isFinished() {
         xFinished = Math.abs(robotPose.getX() - finalDestinationPose.getX()) < ReefAimConstants.X_TOLERANCE_METERS.get();
         yFinished = Math.abs(robotPose.getY() - finalDestinationPose.getY()) < ReefAimConstants.Y_TOLERANCE_METERS.get();
-        omegaFinished = Swerve.getInstance().aimingReady(ReefAimConstants.OMEGA_TOLERANCE_DEGREES.get(), 5);
+        omegaFinished = Swerve.getInstance().aimingReady(ReefAimConstants.OMEGA_TOLERANCE_DEGREES.get(), 3);
         Logger.recordOutput("ReefAimCommand/xFinished", xFinished);
         Logger.recordOutput("ReefAimCommand/yFinished", yFinished);
         Logger.recordOutput("ReefAimCommand/omegaFinished", omegaFinished);
