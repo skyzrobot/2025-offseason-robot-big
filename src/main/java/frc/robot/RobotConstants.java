@@ -421,6 +421,7 @@ public final class RobotConstants {
         public static final String LIMELIGHT_LEFT = "limelight-leftf";
         public static final String LIMELIGHT_RIGHT = "limelight-rightf";
         public static final double AREA_THRESHOLD = 0.1;
+        public static final TunableNumber OCULUS_RESET_AMBIGUITY_THRESHOLD = new TunableNumber("LIMELIGHT/oculusResetAmbiguityThreshold", 0.15);
     }
 
     /**

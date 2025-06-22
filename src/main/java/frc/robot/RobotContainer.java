@@ -267,6 +267,23 @@ public class RobotContainer {
                 true,
                 false), swerve));
 
+        oculusSubsystem.setDefaultCommand(Commands.run(() -> {
+            // Check if limelight ambiguity is below threshold and reset oculus pose if so
+            double minAmbiguity = limelightSubsystem.getMinimumAmbiguity();
+            if (minAmbiguity < RobotConstants.LimelightConstants.OCULUS_RESET_AMBIGUITY_THRESHOLD.get() && 
+                minAmbiguity != Double.MAX_VALUE) {
+                
+                System.out.println("Limelight ambiguity (" + minAmbiguity + ") below threshold (" + 
+                    RobotConstants.LimelightConstants.OCULUS_RESET_AMBIGUITY_THRESHOLD.get() + 
+                    "), resetting Oculus pose");
+                
+                oculusSubsystem.resetPose(
+                    limelightSubsystem.getEstimatedPose().get()[0].pose(), 
+                    true
+                );
+            }
+        }, oculusSubsystem));
+
         driverController.start().onTrue(
                 Commands.runOnce(() -> {
                     /*

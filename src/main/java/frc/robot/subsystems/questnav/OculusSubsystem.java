@@ -216,7 +216,7 @@ public class OculusSubsystem extends SubsystemBase {
    * Processes the current pose data and forwards it to the consumer if connected and properly
    * tracking. This enables integration with pose estimation systems.
    */
-  private void processPose() {
+  public void processPose() {
     if (inputs.connected && inputs.isTracking) {
       Pose2d pose = getPose();
       double timestamp = getTimestamp();

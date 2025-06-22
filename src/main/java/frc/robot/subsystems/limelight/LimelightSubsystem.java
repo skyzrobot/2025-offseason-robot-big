@@ -10,18 +10,22 @@ import frc.robot.RobotConstants;
 import frc.robot.subsystems.limelight.LimelightIO.PoseEstimate;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.utils.LoggedTracer;
+import lombok.Getter;
 
 import org.frcteam6941.localization.Localizer;
 import org.littletonrobotics.AllianceFlipUtil;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.*;
+import java.util.function.BooleanSupplier;
 
 import static frc.robot.RobotConstants.LimelightConstants.*;
 
 public class LimelightSubsystem extends SubsystemBase {
     private final Map<String, LimelightIO> limelightIOs;
     private final Map<String, LimelightIOInputsAutoLogged> limelightInputs;
+    @Getter
+    public Optional<PoseEstimate[]> estimatedPose;
 
     private final Localizer swerveLocalizer = Swerve.getInstance().getLocalizer();
     private boolean useMegaTag2 = false;
@@ -65,6 +69,28 @@ public class LimelightSubsystem extends SubsystemBase {
             }
         });
         return poseEstimates.toArray(new PoseEstimate[0]);
+    }
+
+    /**
+     * Gets the minimum ambiguity value from all visible AprilTags across all limelights.
+     * Returns Double.MAX_VALUE if no tags are visible.
+     * 
+     * @return The minimum ambiguity value, or Double.MAX_VALUE if no tags visible
+     */
+    public double getMinimumAmbiguity() {
+        double minAmbiguity = Double.MAX_VALUE;
+        
+        for (LimelightIOInputsAutoLogged input : limelightInputs.values()) {
+            if (input != null && input.poseBlue != null && input.poseBlue.rawFiducials() != null) {
+                for (LimelightIO.RawFiducial fiducial : input.poseBlue.rawFiducials()) {
+                    if (fiducial != null) {
+                        minAmbiguity = Math.min(minAmbiguity, fiducial.ambiguity());
+                    }
+                }
+            }
+        }
+        
+        return minAmbiguity;
     }
 
     public void setMegaTag2(boolean value) {
@@ -115,7 +141,30 @@ public class LimelightSubsystem extends SubsystemBase {
         }
     }
 
-    private void addVisionMeasurement() {
+    private void addVisionMeasurement(Optional<PoseEstimate[]> estimatedPose) {
+        if (estimatedPose.isPresent()) {
+            if (estimatedPose.get()[0] != null) {
+                if (useMegaTag2) {
+                    swerveLocalizer.addMeasurement(estimatedPose.get()[0].timestampSeconds(), new Pose2d(estimatedPose.get()[0].pose().getTranslation(), estimatedPose.get()[0].pose().getRotation().minus(Rotation2d.fromDegrees(180))), VecBuilder.fill(.7, .7, 9999999));
+                } else {
+                    swerveLocalizer.addMeasurement(estimatedPose.get()[0].timestampSeconds(), new Pose2d(estimatedPose.get()[0].pose().getTranslation(), estimatedPose.get()[0].pose().getRotation().minus(Rotation2d.fromDegrees(180))), VecBuilder.fill(.5, .5, 9999999));
+                }
+                Logger.recordOutput(LIMELIGHT_LEFT + "/estimatedPose", estimatedPose.get()[0]);
+            }
+            if (estimatedPose.get()[1] != null) {
+                if (useMegaTag2) {
+                    swerveLocalizer.addMeasurement(estimatedPose.get()[1].timestampSeconds(), new Pose2d(estimatedPose.get()[1].pose().getTranslation(), estimatedPose.get()[1].pose().getRotation().minus(Rotation2d.fromDegrees(180))), VecBuilder.fill(.7, .7, 9999999));
+                } else {
+                    swerveLocalizer.addMeasurement(estimatedPose.get()[1].timestampSeconds(), new Pose2d(estimatedPose.get()[1].pose().getTranslation(), estimatedPose.get()[1].pose().getRotation().minus(Rotation2d.fromDegrees(180))), VecBuilder.fill(.5, .5, 9999999));
+                }
+                Logger.recordOutput(LIMELIGHT_RIGHT + "/estimatedPose",estimatedPose.get()[1]);
+            }
+        }
+    }
+
+
+    @Override
+    public void periodic() {
         limelightIOs.forEach((name, io) -> {
             // TODO: figure out why 180 - abs()
             io.setRobotOrientation(
@@ -135,32 +184,8 @@ public class LimelightSubsystem extends SubsystemBase {
                 Logger.processInputs(name, input);
             }
         });
-
-        Optional<PoseEstimate[]> estimatedPose = determinePoseEstimate(gyroRate);
-
-        if (estimatedPose.isPresent()) {
-            if (estimatedPose.get()[0] != null) {
-                if (useMegaTag2) {
-                    swerveLocalizer.addMeasurement(estimatedPose.get()[0].timestampSeconds(), new Pose2d(estimatedPose.get()[0].pose().getTranslation(), estimatedPose.get()[0].pose().getRotation().minus(Rotation2d.fromDegrees(180))), VecBuilder.fill(.7, .7, 9999999));
-                } else {
-                    swerveLocalizer.addMeasurement(estimatedPose.get()[0].timestampSeconds(), new Pose2d(estimatedPose.get()[0].pose().getTranslation(), estimatedPose.get()[0].pose().getRotation().minus(Rotation2d.fromDegrees(180))), VecBuilder.fill(.5, .5, 9999999));
-                }
-                Logger.recordOutput(LIMELIGHT_LEFT + "/estimatedPose", new Pose2d(estimatedPose.get()[0].pose().getTranslation(), estimatedPose.get()[0].pose().getRotation().minus(Rotation2d.fromDegrees(180))));
-            }
-            if (estimatedPose.get()[1] != null) {
-                if (useMegaTag2) {
-                    swerveLocalizer.addMeasurement(estimatedPose.get()[1].timestampSeconds(), new Pose2d(estimatedPose.get()[1].pose().getTranslation(), estimatedPose.get()[1].pose().getRotation().minus(Rotation2d.fromDegrees(180))), VecBuilder.fill(.7, .7, 9999999));
-                } else {
-                    swerveLocalizer.addMeasurement(estimatedPose.get()[1].timestampSeconds(), new Pose2d(estimatedPose.get()[1].pose().getTranslation(), estimatedPose.get()[1].pose().getRotation().minus(Rotation2d.fromDegrees(180))), VecBuilder.fill(.5, .5, 9999999));
-                }
-                Logger.recordOutput(LIMELIGHT_RIGHT + "/estimatedPose", new Pose2d(estimatedPose.get()[1].pose().getTranslation(), estimatedPose.get()[1].pose().getRotation().minus(Rotation2d.fromDegrees(180))));
-            }
-        }
-    }
-
-    @Override
-    public void periodic() {
-        addVisionMeasurement();
+        estimatedPose = determinePoseEstimate(gyroRate);
+        addVisionMeasurement(estimatedPose);
         LoggedTracer.record("Limelight");
     }
 }
