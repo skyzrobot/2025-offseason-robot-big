@@ -3,17 +3,10 @@ package frc.robot.subsystems.questnav;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import frc.robot.RobotConstants;
-import frc.robot.utils.TunableNumber;
 import gg.questnav.questnav.QuestNav;
 
 public class QuestNavIOReal implements QuestNavIO {
     private final QuestNav questNav;
-
-
-    // Transform from robot center to Quest headset
-    private final TunableNumber robotToQuestX = new TunableNumber("QuestNav/RobotToQuestX", 0.0);
-    private final TunableNumber robotToQuestY = new TunableNumber("QuestNav/RobotToQuestY", 0.0);
-    private final TunableNumber robotToQuestRotDeg = new TunableNumber("QuestNav/RobotToQuestRotDeg", 0.0);
 
     public QuestNavIOReal() {
         questNav = new QuestNav(); 
@@ -32,9 +25,9 @@ public class QuestNavIOReal implements QuestNavIO {
     public void setPose(Pose2d robotPose) {
         // Transform robot pose to Quest pose
         Transform2d robotToQuest = new Transform2d(
-            robotToQuestX.get(),
-            robotToQuestY.get(),
-            edu.wpi.first.math.geometry.Rotation2d.fromDegrees(robotToQuestRotDeg.get())
+            RobotConstants.QuestNavConstants.ROBOT_TO_QUEST_X.get(),
+            RobotConstants.QuestNavConstants.ROBOT_TO_QUEST_Y.get(),
+            edu.wpi.first.math.geometry.Rotation2d.fromDegrees(RobotConstants.QuestNavConstants.ROBOT_TO_QUEST_ROT_DEG.get())
         );
         
         Pose2d questPose = robotPose.transformBy(robotToQuest);

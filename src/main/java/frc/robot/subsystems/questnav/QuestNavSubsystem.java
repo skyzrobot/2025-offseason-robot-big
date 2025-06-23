@@ -7,30 +7,15 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotConstants;
 import frc.robot.subsystems.swerve.Swerve;
-import frc.robot.utils.TunableNumber;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class QuestNavSubsystem extends SubsystemBase {
     private final QuestNavIO io;
     private final QuestNavIOInputsAutoLogged inputs = new QuestNavIOInputsAutoLogged();
-    
-    // Standard deviations for pose estimation
-    private final TunableNumber stdDevX = new TunableNumber("QuestNav/StdDevX", 0.02);
-    private final TunableNumber stdDevY = new TunableNumber("QuestNav/StdDevY", 0.02);
-    private final TunableNumber stdDevRot = new TunableNumber("QuestNav/StdDevRotDeg", 2.0);
-    
-    // Transform from robot center to Quest headset
-    private final TunableNumber robotToQuestX = new TunableNumber("QuestNav/RobotToQuestX", 0.12);
-    private final TunableNumber robotToQuestY = new TunableNumber("QuestNav/RobotToQuestY", 0.337);
-    private final TunableNumber robotToQuestRotDeg = new TunableNumber("QuestNav/RobotToQuestRotDeg", 0.0);
-    
-    // Enable/disable vision updates
-    private final TunableNumber enableVisionUpdates = new TunableNumber("QuestNav/EnableVisionUpdates", 1.0);
     
     private final Swerve swerve;
 
@@ -130,7 +115,7 @@ public class QuestNavSubsystem extends SubsystemBase {
      */
     private void addVisionMeasurement() {
         // Only add vision measurement if enabled and Quest is connected and tracking
-        if (enableVisionUpdates.get() == 0.0 || !inputs.connected || !inputs.tracking) {
+        if (RobotConstants.QuestNavConstants.ENABLE_VISION_UPDATES.get() == 0.0 || !inputs.connected || !inputs.tracking) {
             return;
         }
 
@@ -139,9 +124,9 @@ public class QuestNavSubsystem extends SubsystemBase {
         
         // Create standard deviation matrix
         Matrix<N3, N1> stdDevs = VecBuilder.fill(
-            stdDevX.get(),
-            stdDevY.get(),
-            Math.toRadians(stdDevRot.get())
+            RobotConstants.QuestNavConstants.STD_DEV_X.get(),
+            RobotConstants.QuestNavConstants.STD_DEV_Y.get(),
+            Math.toRadians(RobotConstants.QuestNavConstants.STD_DEV_ROT_DEG.get())
         );
 
         // Add measurement to swerve drive pose estimator through localizer
@@ -157,9 +142,9 @@ public class QuestNavSubsystem extends SubsystemBase {
      */
     private Transform2d getRobotToQuestTransform() {
         return new Transform2d(
-            robotToQuestX.get(),
-            robotToQuestY.get(),
-            edu.wpi.first.math.geometry.Rotation2d.fromDegrees(robotToQuestRotDeg.get())
+            RobotConstants.QuestNavConstants.ROBOT_TO_QUEST_X.get(),
+            RobotConstants.QuestNavConstants.ROBOT_TO_QUEST_Y.get(),
+            edu.wpi.first.math.geometry.Rotation2d.fromDegrees(RobotConstants.QuestNavConstants.ROBOT_TO_QUEST_ROT_DEG.get())
         );
     }
 } 

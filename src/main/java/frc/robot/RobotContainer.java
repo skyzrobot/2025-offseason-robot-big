@@ -43,6 +43,7 @@ import frc.robot.subsystems.limelight.LimelightSubsystem;
 import frc.robot.subsystems.superstructure.DestinationSupplier;
 import frc.robot.subsystems.superstructure.Superstructure;
 import frc.robot.subsystems.superstructure.SuperstructureState;
+import frc.robot.subsystems.superstructure.DestinationSupplier.GamePiece;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIO;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOReal;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOSim;
@@ -282,7 +283,7 @@ public class RobotContainer {
                         swerve.resetPose(
                                 AllianceFlipUtil.apply(new Pose2d(
                                         new Translation2d(0, 0),
-                                        swerve.getLocalizer().getLatestPose().getRotation())));
+                                        swerve.getLocalizer().getLatestPose().getRotation().minus(new Rotation2d(Math.toRadians(90))))));
                     }
                     lastResetTime = Timer.getFPGATimestamp();
                     indicatorSubsystem.setPattern(IndicatorIO.Patterns.RESET_ODOM);
@@ -346,9 +347,14 @@ public class RobotContainer {
                                     }
                                 })
                 );
+
+        driverController.b().whileTrue(superstructure.runGoal(() -> SuperstructureState.CORAL_OUTTAKE));
+
+        // Left trigger binding - only executes if there is coral
         driverController
-                .x()
-                .whileTrue(
+                .leftBumper()
+                .whileTrue(Commands.either(
+                        createScoringCommand(false, SuperstructureState.L4),
                         superstructure
                                 .runGoal(() -> SuperstructureState.NET_SCORE)
                                 .until(driverController.y())
@@ -356,15 +362,8 @@ public class RobotContainer {
                                         superstructure
                                                 .runGoal(() -> SuperstructureState.NET_SCORE_EJECT)
                                                 .until(() -> !superstructure.hasAlgae())
-                                )
-                );
-        driverController.b().whileTrue(superstructure.runGoal(() -> SuperstructureState.CORAL_OUTTAKE));
-
-        // Left trigger binding - only executes if there is coral
-        driverController
-                .leftBumper()
-                .whileTrue(
-                        createScoringCommand(false, SuperstructureState.L4)
+                                ).onlyIf(superstructure::hasAlgae),
+                        superstructure::hasCoral)
                 );
         driverController
                 .leftTrigger()
@@ -392,17 +391,17 @@ public class RobotContainer {
                         createScoringCommand(true, SuperstructureState.L2)
                 );
 
-
-        //testing delete
-        driverController
-                .y()
-                .whileTrue(
-                        Commands.sequence(                                
-                                new ReefAimCommand(() -> false, driverController, indicatorSubsystem),
-                                superstructure
-                                        .runGoal(() -> SuperstructureState.L4)
-                        )
-                );
+                //testing delete
+        driverController.povUp().whileTrue(
+            Commands.runOnce(() -> {
+                destinationSupplier.setCurrentGamePiece(GamePiece.ALGAE_INTAKING);
+            })
+            .andThen(
+                new ReefAimCommand(() -> false, driverController, indicatorSubsystem)
+            ).alongWith(superstructure.runGoal(SuperstructureState.P2))
+        );
+        
+        
         
     }
 
@@ -410,13 +409,15 @@ public class RobotContainer {
      * Helper method to create a scoring command sequence for a given branch and state
      * @param isRightBranch true for right branch, false for left branch
      * @param state the superstructure state to target
+     * 
+     * 
      * @return the command sequence for scoring
      */
     private Command createScoringCommand(boolean isRightBranch, SuperstructureState state) {
         return Commands.sequence(
                 Commands.runOnce(() -> destinationSupplier.updateBranch(isRightBranch)),
                 Commands.runOnce(() -> destinationSupplier.setStateSetPoint(state)),
-                new SuperCycleCommand(superstructure, indicatorSubsystem, driverController, questNavSubsystem, () -> false)
+                new SuperCycleCommand(superstructure, indicatorSubsystem, driverController, () -> false)
         ).onlyIf(() -> superstructure.hasCoral());
     }
 

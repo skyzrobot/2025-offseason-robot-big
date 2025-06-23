@@ -496,9 +496,9 @@ public final class RobotConstants {
         
         // Transform from robot center to Quest headset (in meters and degrees)
         // TODO: Measure and update these values based on actual Quest mounting position
-        public static final TunableNumber ROBOT_TO_QUEST_X = new TunableNumber("QuestNav/RobotToQuestX", 0.0);
-        public static final TunableNumber ROBOT_TO_QUEST_Y = new TunableNumber("QuestNav/RobotToQuestY", 0.0);
-        public static final TunableNumber ROBOT_TO_QUEST_ROT_DEG = new TunableNumber("QuestNav/RobotToQuestRotDeg", 0.0);
+        public static final TunableNumber ROBOT_TO_QUEST_X = new TunableNumber("QuestNav/RobotToQuestX", 0.12);
+        public static final TunableNumber ROBOT_TO_QUEST_Y = new TunableNumber("QuestNav/RobotToQuestY", 0.337);
+        public static final TunableNumber ROBOT_TO_QUEST_ROT_DEG = new TunableNumber("QuestNav/RobotToQuestRotDeg", 10.0);
         
         // Enable/disable vision updates
         public static final TunableNumber ENABLE_VISION_UPDATES = new TunableNumber("QuestNav/EnableVisionUpdates", 1.0);

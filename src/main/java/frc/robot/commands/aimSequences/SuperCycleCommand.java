@@ -6,9 +6,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Robot;
-import frc.robot.RobotConstants;
 import frc.robot.subsystems.indicator.IndicatorSubsystem;
-import frc.robot.subsystems.questnav.QuestNavSubsystem;
 import frc.robot.subsystems.superstructure.DestinationSupplier;
 import frc.robot.subsystems.superstructure.Superstructure;
 import frc.robot.subsystems.superstructure.SuperstructureState;
@@ -25,7 +23,6 @@ public class SuperCycleCommand extends SequentialCommandGroup {
     public SuperCycleCommand(Superstructure superstructure,
                              IndicatorSubsystem indicatorSubsystem,
                              CommandXboxController driverController,
-                             QuestNavSubsystem questNav,
                              BooleanSupplier stop) {
         this.indicatorSubsystem = indicatorSubsystem;
         this.superstructure = superstructure;
@@ -40,7 +37,6 @@ public class SuperCycleCommand extends SequentialCommandGroup {
                         Commands.sequence(
                                 // preshoot coral(press right trigger to end)
                                 preShootCoral(),
-                                Commands.runOnce(() -> questNav.resetPose(Swerve.getInstance().getLocalizer().getCoarseFieldPose(Timer.getFPGATimestamp()))),
                                 // shoot
                                 superstructure
                                         .runGoal(
