@@ -303,8 +303,7 @@ public final class RobotConstants {
      */
     public static class IntakeConstants {
         public static final int INTAKE_MOTOR_ID = 15;
-        //todo:change
-        public static final int INDEX_MOTOR_ID = 20;
+        public static final int INDEX_MOTOR_ID = 19;
         public static final int INTAKE_PIVOT_MOTOR_ID = 16;
         public static final int INTAKE_PIVOT_ENCODER_ID = 17;
         public static final double INTAKE_PIVOT_ROTOR_ENCODER_RATIO = 45/11*56/20*56/8;
