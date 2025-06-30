@@ -483,7 +483,7 @@ public class Superstructure extends SubsystemBase {
     }
 
     public boolean poseAtGoal() {
-        return elevator.isAtGoal() && endEffectorArm.isAtGoal() && /*intake.isAtGoal()*/true;
+        return elevator.isAtGoal() && endEffectorArm.isAtGoal(); //&& intake.isAtGoal();
     }
 
     private Command runSuperstructureRollers(SuperstructureState state) {

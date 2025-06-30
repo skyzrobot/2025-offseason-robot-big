@@ -12,6 +12,10 @@ public interface ElevatorIO {
     default void setElevatorTarget(double meters) {
     }
 
+    default void setElevatorTarget(double meters, boolean isGoingUp) {
+        setElevatorTarget(meters); // Default fallback
+    }
+
     default void resetElevatorPosition() {
     }
 
@@ -28,6 +32,11 @@ public interface ElevatorIO {
         public double supplyCurrentAmps = 0.0;
         public double motorVoltage = 0.0;
         public double tempCelsius = 0.0;
+        // Dynamic Motion Magic logging
+        public boolean isGoingUp = false;
+        public double currentAcceleration = 0.0;
+        public double currentCruiseVelocity = 0.0;
+        public double currentJerk = 0.0;
     }
 
 }

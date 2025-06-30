@@ -3,8 +3,8 @@ package frc.robot.subsystems.superstructure.elevator;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.*;
+import com.ctre.phoenix6.controls.DynamicMotionMagicVoltage;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -30,7 +30,7 @@ public class ElevatorIOReal implements ElevatorIO {
     private final Slot0Configs slot0Configs;
     private final MotionMagicConfigs motionMagicConfigs;
 
-    private final MotionMagicVoltage motionRequest = new MotionMagicVoltage(0.0).withEnableFOC(true);
+    private final DynamicMotionMagicVoltage motionRequest = new DynamicMotionMagicVoltage(0.0, 100, 300, 0).withEnableFOC(true);
 
     private final StatusSignal<AngularVelocity> velocityLeft;
     private final StatusSignal<Angle> positionLeft;
@@ -39,6 +39,7 @@ public class ElevatorIOReal implements ElevatorIO {
     private final StatusSignal<Current> supplyLeft;
     private final StatusSignal<Temperature> tempLeft;
     private double setpointMeters = 0;
+    private boolean isGoingUp = false;
 
     public ElevatorIOReal() {
         this.leader = new TalonFX(LEFT_ELEVATOR_MOTOR_ID, CANIVORE_CAN_BUS_NAME);
@@ -63,15 +64,22 @@ public class ElevatorIOReal implements ElevatorIO {
         MotorOutputConfigs followerMotorConfigs = new MotorOutputConfigs();
         followerMotorConfigs.NeutralMode = NeutralModeValue.Brake;
 
+        // Initialize motion magic configs (not used for Dynamic Motion Magic, but kept for compatibility)
         motionMagicConfigs = new MotionMagicConfigs();
-        motionMagicConfigs.MotionMagicAcceleration = motionAcceleration.get();
-        motionMagicConfigs.MotionMagicCruiseVelocity = motionCruiseVelocity.get();
-        motionMagicConfigs.MotionMagicJerk = motionJerk.get();
+        motionMagicConfigs.MotionMagicAcceleration = motionAccelerationUp.get(); // Default fallback
+        motionMagicConfigs.MotionMagicCruiseVelocity = motionCruiseVelocityUp.get(); // Default fallback
+        motionMagicConfigs.MotionMagicJerk = motionJerkUp.get(); // Default fallback
+        
+        // Set default Dynamic Motion Magic parameters (will be overridden in setElevatorTarget)
+        motionRequest.Velocity = motionCruiseVelocityUp.get();
+        motionRequest.Acceleration = motionAccelerationUp.get();
+        motionRequest.Jerk = motionJerkUp.get();
 
         slot0Configs = new Slot0Configs();
         slot0Configs.kA = ElevatorGainsClass.ELEVATOR_KA.get();
         slot0Configs.kS = ElevatorGainsClass.ELEVATOR_KS.get();
         slot0Configs.kV = ElevatorGainsClass.ELEVATOR_KV.get();
+        slot0Configs.kG = ElevatorGainsClass.ELEVATOR_KG.get();
         slot0Configs.kP = ElevatorGainsClass.ELEVATOR_KP.get();
         slot0Configs.kI = ElevatorGainsClass.ELEVATOR_KI.get();
         slot0Configs.kD = ElevatorGainsClass.ELEVATOR_KD.get();
@@ -121,6 +129,11 @@ public class ElevatorIOReal implements ElevatorIO {
         inputs.supplyCurrentAmps = supplyLeft.getValueAsDouble();
         inputs.tempCelsius = tempLeft.getValueAsDouble();
         inputs.motorVoltage = leader.getMotorVoltage().getValueAsDouble();
+        // Dynamic Motion Magic logging
+        inputs.isGoingUp = isGoingUp;
+        inputs.currentAcceleration = isGoingUp ? motionAccelerationUp.get() : motionAccelerationDown.get();
+        inputs.currentCruiseVelocity = isGoingUp ? motionCruiseVelocityUp.get() : motionCruiseVelocityDown.get();
+        inputs.currentJerk = isGoingUp ? motionJerkUp.get() : motionJerkDown.get();
         if (RobotConstants.TUNING) {
             slot0Configs.kA = ElevatorGainsClass.ELEVATOR_KA.get();
             slot0Configs.kS = ElevatorGainsClass.ELEVATOR_KS.get();
@@ -130,14 +143,19 @@ public class ElevatorIOReal implements ElevatorIO {
             slot0Configs.kD = ElevatorGainsClass.ELEVATOR_KD.get();
             slot0Configs.kG = ElevatorGainsClass.ELEVATOR_KG.get();
 
-            motionMagicConfigs.MotionMagicAcceleration = motionAcceleration.get();
-            motionMagicConfigs.MotionMagicCruiseVelocity = motionCruiseVelocity.get();
-            motionMagicConfigs.MotionMagicJerk = motionJerk.get();
-
             leaderConfigurator.apply(slot0Configs);
             followerConfigurator.apply(slot0Configs);
-            leaderConfigurator.apply(motionMagicConfigs);
-            followerConfigurator.apply(motionMagicConfigs);
+            
+            // Update Dynamic Motion Magic parameters in real-time during tuning
+            if (isGoingUp) {
+                motionRequest.Velocity = motionCruiseVelocityUp.get();
+                motionRequest.Acceleration = motionAccelerationUp.get();
+                motionRequest.Jerk = motionJerkUp.get();
+            } else {
+                motionRequest.Velocity = motionCruiseVelocityDown.get();
+                motionRequest.Acceleration = motionAccelerationDown.get();
+                motionRequest.Jerk = motionJerkDown.get();
+            }
         }
     }
 
@@ -148,8 +166,30 @@ public class ElevatorIOReal implements ElevatorIO {
 
     @Override
     public void setElevatorTarget(double meters) {
+        // Default implementation - use last known direction or assume up for safety
+        setElevatorTarget(meters, isGoingUp);
+    }
+
+    @Override
+    public void setElevatorTarget(double meters, boolean goingUp) {
         setpointMeters = meters;
-        leader.setControl(motionRequest.withPosition(heightToTalonPos(Math.min(meters, MAX_EXTENSION_METERS.get()))));
+        isGoingUp = goingUp;
+        double targetPosition = heightToTalonPos(Math.min(meters, MAX_EXTENSION_METERS.get()));
+        
+        // Apply the appropriate motion magic configs based on direction
+        if (isGoingUp) {
+            // Going up - use up configs for slower, more controlled movement
+            motionRequest.Velocity = motionCruiseVelocityUp.get();
+            motionRequest.Acceleration = motionAccelerationUp.get();
+            motionRequest.Jerk = motionJerkUp.get();
+        } else {
+            // Going down - use down configs for faster movement (gravity assisted)
+            motionRequest.Velocity = motionCruiseVelocityDown.get();
+            motionRequest.Acceleration = motionAccelerationDown.get();
+            motionRequest.Jerk = motionJerkDown.get();
+        }
+        
+        leader.setControl(motionRequest.withPosition(targetPosition));
     }
 
     @Override
