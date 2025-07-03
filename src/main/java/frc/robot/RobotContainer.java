@@ -117,7 +117,7 @@ public class RobotContainer {
                                 RobotConstants.CANIVORE_CAN_BUS_NAME,
                                 RobotConstants.IntakeConstants.STATOR_CURRENT_LIMIT_AMPS,
                                 RobotConstants.IntakeConstants.SUPPLY_CURRENT_LIMIT_AMPS,
-                                RobotConstants.IntakeConstants.IS_INVERT,
+                                RobotConstants.IntakeConstants.IS_INTAKER_INVERT,
                                 RobotConstants.IntakeConstants.IS_BRAKE
                         ),
                         new RollerIOReal(
@@ -125,8 +125,10 @@ public class RobotContainer {
                             RobotConstants.CANIVORE_CAN_BUS_NAME,
                             RobotConstants.IntakeConstants.STATOR_CURRENT_LIMIT_AMPS,
                             RobotConstants.IntakeConstants.SUPPLY_CURRENT_LIMIT_AMPS,
-                            RobotConstants.IntakeConstants.IS_INVERT,
-                            RobotConstants.IntakeConstants.IS_BRAKE
+                            RobotConstants.IntakeConstants.IS_INDEXER_INVERT,
+                            RobotConstants.IntakeConstants.IS_BRAKE,
+                            RobotConstants.IntakeConstants.INDEX_FOLLOWER_MOTOR_ID,
+                            RobotConstants.IntakeConstants.INDEX_FOLLOWER_INVERT
                         ),
                         new BeambreakIOReal(RobotConstants.BeamBreakConstants.INTAKE_BEAMBREAK_ID)
                 );
@@ -397,46 +399,55 @@ public class RobotContainer {
     }
 
     public void configureTesterBindings() {
-
-
-        testerController
-                .b()
-                .whileTrue(
-                        superstructure
-                                .runGoal(() -> SuperstructureState.L3)
-                                .until(testerController.x())
-                                .andThen(
-                                        superstructure
-                                                .runGoal(() -> SuperstructureState.L3_EJECT)
-                                                .until(() -> !superstructure.hasCoral())
-                                )
-                );
-
-
-        testerController
-                .leftBumper()
-                .whileTrue(
-                        superstructure
-                                .runGoal(() -> SuperstructureState.NET_SCORE)
-                                .until(testerController.rightBumper())
-                                .andThen(
-                                        superstructure
-                                                .runGoal(() -> SuperstructureState.NET_SCORE_EJECT)
-                                                .until(() -> !superstructure.hasAlgae())
-                                )
-                );
-                
-        testerController.a()
-                .whileTrue(
-                        superstructure
-                                .runGoal(() -> SuperstructureState.L4)
-                                .until(testerController.x())
-                                .andThen(
-                                        superstructure
-                                                .runGoal(() -> SuperstructureState.L4_EJECT)
-                                                .until(() -> !superstructure.hasCoral())
-                                )
-                );
+        testerController.a().whileTrue(superstructure.runGoal(() -> SuperstructureState.CORAL_GROUND_INTAKE));
+        testerController.y().whileTrue(
+            superstructure.runGoal(() -> SuperstructureState.L4)
+                .until(testerController.rightTrigger())
+                .andThen(
+                    superstructure.runGoal(() -> SuperstructureState.L4_EJECT)
+                        .until(() -> !superstructure.hasCoral())
+                )
+        );
+        testerController.x().whileTrue(
+            superstructure.runGoal(() -> SuperstructureState.L3)
+                .until(testerController.rightTrigger())
+                .andThen(
+                    superstructure.runGoal(() -> SuperstructureState.L3_EJECT)
+                        .until(() -> !superstructure.hasCoral())
+                )
+        );
+        testerController.b().whileTrue(
+            superstructure.runGoal(() -> SuperstructureState.L2)
+                .until(testerController.rightTrigger())
+                .andThen(
+                    superstructure.runGoal(() -> SuperstructureState.L2_EJECT)
+                        .until(() -> !superstructure.hasCoral())
+                )
+        );
+        testerController.povUp().whileTrue(
+            superstructure.runGoal(() -> SuperstructureState.P2)
+                .until(()->superstructure.hasAlgae())
+        );
+        testerController.povDown().whileTrue(
+            superstructure.runGoal(() -> SuperstructureState.P1)
+                .until(()->superstructure.hasAlgae())
+        );
+        testerController.leftBumper().whileTrue(
+            superstructure.runGoal(() -> SuperstructureState.NET_SCORE)
+                .until(testerController.rightTrigger())
+                .andThen(
+                    superstructure.runGoal(() -> SuperstructureState.NET_SCORE_EJECT)
+                        .until(() -> !superstructure.hasAlgae())
+                )
+        );
+        testerController.start().onTrue(
+            Commands.runOnce(() -> {
+                destinationSupplier.setCurrentGamePiece(DestinationSupplier.GamePiece.CORAL_SCORING);
+            })
+            .andThen(
+                new ReefAimCommand(() -> false, driverController, indicatorSubsystem)
+            )
+        );
     }
 
     public Command getAutonomousCommand() {

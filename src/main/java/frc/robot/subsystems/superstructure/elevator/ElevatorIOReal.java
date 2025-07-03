@@ -50,10 +50,6 @@ public class ElevatorIOReal implements ElevatorIO {
 
         // Configs
         CurrentLimitsConfigs currentLimitsConfigs = new CurrentLimitsConfigs();
-        currentLimitsConfigs.StatorCurrentLimitEnable = true;
-        currentLimitsConfigs.SupplyCurrentLimitEnable = true;
-        currentLimitsConfigs.StatorCurrentLimit = 120.0;
-        currentLimitsConfigs.SupplyCurrentLimit = 70;
 
         leader.setPosition(heightToTalonPos(ELEVATOR_DEFAULT_POSITION_WHEN_DISABLED));
         follower.setPosition(heightToTalonPos(ELEVATOR_DEFAULT_POSITION_WHEN_DISABLED));

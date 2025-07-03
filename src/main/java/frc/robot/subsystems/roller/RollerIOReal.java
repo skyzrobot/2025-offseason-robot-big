@@ -5,6 +5,7 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -18,6 +19,7 @@ import edu.wpi.first.units.measure.Voltage;
 
 public class RollerIOReal implements RollerIO {
     private final TalonFX motor;
+    private final TalonFX followerMotor; // Can be null if no follower
     private final Slot0Configs slot0Configs = new Slot0Configs();
 
     private final VoltageOut voltageOut = new VoltageOut(0.0).withEnableFOC(true);
@@ -29,7 +31,13 @@ public class RollerIOReal implements RollerIO {
     private final StatusSignal<Current> supplyCurrentAmps;
     private final StatusSignal<Temperature> tempCelsius;
 
+    // Existing constructor for backward compatibility
     public RollerIOReal(int id, String canbus, int statorCurrentLimitAmps, int supplyCurrentLimitAmps, boolean invert, boolean brake) {
+        this(id, canbus, statorCurrentLimitAmps, supplyCurrentLimitAmps, invert, brake, -1, false);
+    }
+
+    // New constructor with follower motor support
+    public RollerIOReal(int id, String canbus, int statorCurrentLimitAmps, int supplyCurrentLimitAmps, boolean invert, boolean brake, int followerId, boolean followerInvert) {
         this.motor = new TalonFX(id, canbus);
 
         TalonFXConfiguration config = new TalonFXConfiguration();
@@ -43,6 +51,27 @@ public class RollerIOReal implements RollerIO {
 
         motor.clearStickyFaults();
 
+        // Configure follower motor if ID is provided (not -1)
+        if (followerId != -1) {
+            this.followerMotor = new TalonFX(followerId, canbus);
+            
+            TalonFXConfiguration followerConfig = new TalonFXConfiguration();
+            followerConfig.MotorOutput.Inverted = followerInvert ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
+            followerConfig.MotorOutput.NeutralMode = brake ? NeutralModeValue.Brake : NeutralModeValue.Coast;
+            followerConfig.CurrentLimits.SupplyCurrentLimit = supplyCurrentLimitAmps;
+            followerConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+            followerConfig.CurrentLimits.StatorCurrentLimit = statorCurrentLimitAmps;
+            followerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+            followerMotor.getConfigurator().apply(followerConfig);
+
+            followerMotor.clearStickyFaults();
+            
+            // Set up the follower relationship
+            followerMotor.setControl(new Follower(id, followerInvert));
+        } else {
+            this.followerMotor = null;
+        }
+
         velocityRotPerSec = motor.getVelocity();
         appliedVolts = motor.getMotorVoltage();
         statorCurrentAmps = motor.getStatorCurrent();
@@ -53,6 +82,9 @@ public class RollerIOReal implements RollerIO {
                 supplyCurrentAmps, tempCelsius);
 
         motor.optimizeBusUtilization();
+        if (followerMotor != null) {
+            followerMotor.optimizeBusUtilization();
+        }
     }
 
     @Override

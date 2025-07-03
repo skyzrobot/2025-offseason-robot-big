@@ -35,7 +35,7 @@ public final class RobotConstants {
     public static final boolean TUNING = true;
     public static final boolean DriverCamera = true;
     public static final boolean useReplay = false;
-    public static String CANIVORE_CAN_BUS_NAME = "10541Canivore0";
+    public static String CANIVORE_CAN_BUS_NAME = "6941Canivore0";
     public static String CLIMBER_CAN_BUS = "rio";
 
     /**
@@ -222,7 +222,7 @@ public final class RobotConstants {
          * Constants for the heading controller used in the swerve drivetrain.
          */
         public static class headingController {
-            public static final frc.robot.utils.TunableNumber HEADING_KP = new frc.robot.utils.TunableNumber(
+            public static final TunableNumber HEADING_KP = new TunableNumber(
                     "HEADING PID/kp", 0.08);
             public static final frc.robot.utils.TunableNumber HEADING_KI = new frc.robot.utils.TunableNumber(
                     "HEADING PID/ki", 0.000);
@@ -304,6 +304,7 @@ public final class RobotConstants {
     public static class IntakeConstants {
         public static final int INTAKE_MOTOR_ID = 15;
         public static final int INDEX_MOTOR_ID = 19;
+        public static final int INDEX_FOLLOWER_MOTOR_ID = 24; // Add your actual motor ID here
         public static final int INTAKE_PIVOT_MOTOR_ID = 16;
         public static final int INTAKE_PIVOT_ENCODER_ID = 17;
         public static final double INTAKE_PIVOT_ROTOR_ENCODER_RATIO = 45/11*56/20*56/8;
@@ -312,7 +313,9 @@ public final class RobotConstants {
         public static final int STATOR_CURRENT_LIMIT_AMPS = 80;
         public static final int SUPPLY_CURRENT_LIMIT_AMPS = 80;
         public static final boolean IS_BRAKE = true;
-        public static final boolean IS_INVERT = true;
+        public static final boolean IS_INTAKER_INVERT = true;
+        public static final boolean IS_INDEXER_INVERT = true;
+        public static final boolean INDEX_FOLLOWER_INVERT = true; // Set based on your mechanical setup
         public static final double REDUCTION = 1;
         public static final double moi = 0;//inertia for simulation
         public static final double ROLLER_RATIO = 1;
@@ -324,7 +327,7 @@ public final class RobotConstants {
         public static final TunableNumber INTAKE_PIVOT_JERK = new TunableNumber("INTAKE_PIVOT/jerk", 0);
         public static final TunableNumber INTAKE_PIVOT_TOLERANCE = new TunableNumber("INTAKE_PIVIOT/tolerance", 3.5);
 
-        public static final double INTAKE_PIVOT_ENCODER_OFFSET = 0.146474609375;
+        public static final double INTAKE_PIVOT_ENCODER_OFFSET = 0.17822265625 - 0.25;
         //Motion constants for intake roller
         public static final TunableNumber INTAKE_VOLTAGE = new TunableNumber("INTAKE_ROLLER/intakeVoltage", 15.0);
         public static final TunableNumber INDEX_ROLLER_VOLTAGE = new TunableNumber("INTAKE_ROLLER/indexRollerVoltage", 15.0);
@@ -408,7 +411,7 @@ public final class RobotConstants {
         public static final TunableNumber motionJerkDown = new TunableNumber("Elevator/MotionJerkDown",
                 0.0);
         public static final TunableNumber MAX_EXTENSION_METERS = new TunableNumber("Elevator/maxExtension",
-                1.41);
+                1.475);
         public static final TunableNumber ELEVATOR_ZEROING_CURRENT = new TunableNumber("Elevator/zeroingCurrent",
                 40);
         public static final TunableNumber SAFE_HEIGHT_FLIP = new TunableNumber("Elevator/safeHeightFlip", 0.41);
