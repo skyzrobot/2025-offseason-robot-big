@@ -36,7 +36,7 @@ public final class RobotConstants {
 
   // basic constants
   public static final boolean disableHAL = false;
-  public static final double LOOPER_DT = 1 / 50.0;
+  public static final double LOOPER_DT = 1 / 45.0;
   public static final boolean TUNING = true;
   public static final boolean DriverCamera = true;
   public static final boolean useReplay = false;
@@ -291,7 +291,7 @@ public final class RobotConstants {
     public static SwerveSimConfig kSimConfig = SwerveSimConfig.builder()
         .name("Swerve")
         .dtS(LOOPER_DT)
-        .wheelDiameter(Inch.of(4.03))
+        .wheelDiameter(Inch.of(4.1))
         .driveGearRatio(7.0)
         .steerGearRatio(20.0)
         .driveMotor(DCMotor.getKrakenX60Foc(1))
@@ -311,7 +311,7 @@ public final class RobotConstants {
     public static SwerveSJTU6Config kRealConfig = SwerveSJTU6Config.builder()
         .name("Swerve")
         .dtS(LOOPER_DT)
-        .wheelDiameter(Inch.of(4.01))
+        .wheelDiameter(Inch.of(4.1))
         .driveGearRatio(6.7460317460317460317460317460317)
         .steerGearRatio(21.428571428571428571428571428571)
         .defaultSwerveLimit(kDefaultSwerveLimit)
@@ -319,7 +319,7 @@ public final class RobotConstants {
         .moduleConfigs(new SwerveConfig.SwerveModuleConfig[]{
             kModuleCompFL, kModuleCompFR, kModuleCompBL, kModuleCompBR
         })
-        .odometryFrequency(Hertz.of(100))
+        .odometryFrequency(Hertz.of(50))
         .driveStatorCurrentLimit(Amps.of(110))
         .steerStatorCurrentLimit(Amps.of(110))
         .canivoreCanBusName(CANIVORE_CAN_BUS_NAME)
@@ -340,7 +340,7 @@ public final class RobotConstants {
       }
 
       private final static class Steer {
-        static final double kP = 12;
+        static final double kP = 10;
         static final double kI = 0.001;
         static final double kD = 0.15;
         static final double kS = 0.005;

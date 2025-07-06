@@ -101,10 +101,11 @@ public class Swerve extends SubsystemBase {
     // odom
     var swerveModulePositionsWithTime = getSampledModulePositions();
     var rotations = imuIOInputs.odometryRotations;
+    var now = Timer.getTimestamp();
     for (int i = 0; i < swerveModulePositionsWithTime.size(); i++) {
       var positionWithTime = swerveModulePositionsWithTime.get(i);
       poseEstimator.updateWithTime(
-          Timer.getTimestamp(), rotations[i], // FIXME: there's a discrepancy between Phoenix time and rio time. need to find the offset. this fix is temporary
+          now, rotations[i], // FIXME: there's a discrepancy between Phoenix time and rio time. need to find the offset. this fix is temporary
           positionWithTime.getSecond()
       );
     }
@@ -222,9 +223,7 @@ public class Swerve extends SubsystemBase {
       Pose3d visionRobotPoseMeters,
       double timestampSeconds,
       Matrix<N4, N1> visionMeasurementStdDevs) {
-    odometryLock.lock();
     poseEstimator.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
-    odometryLock.unlock();
   }
 
 

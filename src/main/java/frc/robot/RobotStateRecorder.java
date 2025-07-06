@@ -18,8 +18,8 @@ public class RobotStateRecorder extends TransformRecorder{
   private static TimeInterpolatableBuffer<Pose2d> velocityRobotBuffer;
 
   private RobotStateRecorder() {
-    setBufferDuration(5.0);
-    velocityRobotBuffer = TimeInterpolatableBuffer.createBuffer(5.0);
+    setBufferDuration(2.0);
+    velocityRobotBuffer = TimeInterpolatableBuffer.createBuffer(2.0);
 
     // add default transforms
     putTransform(kTransformWorldDriverStationBlue, kFrameWorld, kFrameDriverStationBlue); // static: TWorldDSB
@@ -38,13 +38,13 @@ public class RobotStateRecorder extends TransformRecorder{
     velocityRobotBuffer.addSample(time.in(Seconds), toPose2d(speed));
   }
 
-  public static Pose2d getVelocityRobotCurr() {
+  public static Pose2d getVelocityRobotCurrent() {
     return velocityRobotBuffer.getSample(Timer.getTimestamp()).orElse(new Pose2d());
   }
 
   public static Pose2d getVelocityWorldRobotCurrent() {
     // robot-relative velocity (dx, dy, dθ) and current robot pose in world
-    Pose2d velocityRobot = getVelocityRobotCurr();
+    Pose2d velocityRobot = getVelocityRobotCurrent();
     Pose3d poseWorldRobot = getPoseWorldRobotCurrent();
 
     // drop to 2D to get the robot's heading in the XY plane

@@ -19,13 +19,14 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter.AdvantageScopeOpenBehavior;
 
 import static frc.robot.RobotConstants.DriverCamera;
+import static frc.robot.RobotConstants.LOOPER_DT;
 
 public class Robot extends LoggedRobot {
   private Command autonomousCommand;
   private RobotContainer robotContainer;
 
   public Robot() {
-
+    super(LOOPER_DT);
   }
 
   @Override
@@ -53,12 +54,6 @@ public class Robot extends LoggedRobot {
     PDP.clearStickyFaults();
     PDP.close();
 
-    // Camera used by driver to help aiming
-    // Remember to adjust fps & resolution in elastic (5fps, 300*200)
-    // If network is bad or rio is in high cpu usage, disable it
-    if (DriverCamera) {
-      //    CameraServer.startAutomaticCapture("Driver Camera", "/dev/video0");
-    }
     robotContainer = new RobotContainer();
   }
 

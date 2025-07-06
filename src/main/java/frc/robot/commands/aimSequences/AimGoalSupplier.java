@@ -19,15 +19,16 @@ import org.littletonrobotics.junction.Logger;
 import java.util.List;
 
 public class AimGoalSupplier {
-    @NTParameter(tableName = "Params/aimparam")
+    @NTParameter(tableName = "Params/AimParams")
     private static class AimParams {
         static final double MaxDistanceReefLineup = 1.0;
-        static final double RobotToPipeMeters = 0.5;
+        static final double RobotToPipeMeters = 0.6;
         static final double RobotToAlgaeMeters = 0.4;
         static final double AlgaeToTagMeters = 0.2;
         static final double HexagonDangerZoneOffset = 0.3;
         static final double HexagonDangerDegrees = 45.0;
         static final double EdgeCaseMaxDelta = 0.2;
+        static final double ShiftingTerminate = 0.5;
     }
 
     private record TagCondition(int tagA, int tagB, char axis, int positiveResult, int negativeResult) {
@@ -50,6 +51,11 @@ public class AimGoalSupplier {
                         0.0,
                         1.0);
         double shiftYT = MathUtil.clamp(yDistance <= 0.2 ? 0.0 : -offset.getX() / Reef.faceLength, 0.0, 1.0);
+
+        if(shiftXT < AimParamsNT.ShiftingTerminate.getValue())
+            shiftXT = 0.0;
+        if(shiftYT < AimParamsNT.ShiftingTerminate.getValue())
+            shiftYT = 0.0;
         goal = goal.transformBy(
                 new Transform2d(
                         shiftXT * AimParamsNT.MaxDistanceReefLineup.getValue(),

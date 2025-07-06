@@ -308,6 +308,14 @@ public class RobotContainer {
         );
 
     driverController.b().whileTrue(superstructure.runGoal(() -> SuperstructureState.CORAL_OUTTAKE));
+    driverController.x().whileTrue(
+        Commands.runOnce(() -> {
+              destinationSupplier.setCurrentGamePiece(DestinationSupplier.GamePiece.CORAL_SCORING);
+            })
+            .andThen(
+                new ReefAimCommand(swerve, indicatorSubsystem)
+            )
+    );
 
     // Left trigger binding - only executes if there is coral
     driverController
