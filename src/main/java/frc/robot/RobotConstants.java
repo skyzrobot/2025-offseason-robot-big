@@ -455,6 +455,14 @@ public final class RobotConstants {
         public static final TunableNumber CAMERA_TO_ROBOT_X = new TunableNumber("PhotonVision/cameraToRobotX", 0.0);
         public static final TunableNumber CAMERA_TO_ROBOT_Y = new TunableNumber("PhotonVision/cameraToRobotY", 0.0);
         public static final TunableNumber CAMERA_TO_ROBOT_ROTATION_DEGREES = new TunableNumber("PhotonVision/cameraToRobotRotationDegrees", 0.0);
+        
+        // Camera resolution (for pixel coordinate processing)
+        public static final TunableNumber CAMERA_RESOLUTION_X = new TunableNumber("PhotonVision/cameraResolutionX", 640);
+        public static final TunableNumber CAMERA_RESOLUTION_Y = new TunableNumber("PhotonVision/cameraResolutionY", 480);
+        
+        // Distance estimation parameters (trigonometry-based only)
+        public static final TunableNumber DISTANCE_SCALE_FACTOR = new TunableNumber("PhotonVision/distanceScaleFactor", 1.0);
+        public static final TunableNumber GROUND_HEIGHT_METERS = new TunableNumber("PhotonVision/groundHeightMeters", 0.0);
     }
 
     /**

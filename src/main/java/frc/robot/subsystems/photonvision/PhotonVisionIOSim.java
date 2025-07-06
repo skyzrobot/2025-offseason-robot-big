@@ -17,11 +17,28 @@ public class PhotonVisionIOSim implements PhotonVisionIO {
     public void updateInputs(PhotonVisionIOInputs inputs) {
         inputs.connected = connected;
         inputs.name = name;
-        inputs.nearestCoralPosition = null;//TODO: random coral position based on alliance color
+        inputs.id = id;
+        inputs.hasTargets = false;
+        inputs.targetCount = 0;
+        inputs.latencyMs = 0;
+        inputs.timestampMs = System.currentTimeMillis();
+        
+        // Empty arrays for no targets
+        inputs.targetYaw = new double[0];
+        inputs.targetPitch = new double[0];
+        inputs.targetArea = new double[0];
+        inputs.targetSkew = new double[0];
+        inputs.targetPoseAmbiguity = new double[0];
+        inputs.targetFiducialId = new int[0];
+        inputs.targetPixelX = new double[0];
+        inputs.targetPixelY = new double[0];
+        
+        // TODO: Implement simulation with random target detections based on alliance color
+        // This could include generating simulated raw detection data for testing
     }
 
     @Override
     public void takeOutputSnapshot() {
-        return;
+        // No-op for simulation
     }
 }

@@ -1,26 +1,20 @@
 package frc.robot.subsystems.photonvision;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
+import org.littletonrobotics.junction.Logger;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static frc.robot.RobotConstants.PhotonvisionConstants.*;
-import org.littletonrobotics.junction.Logger;
 
 public class PhotonVisionIOReal implements PhotonVisionIO {
 
     private final String name;
     private final PhotonCamera camera;
     private final int id;
-    private double lastObservedConf;
-    private Pose2d nearestCoralPosition = null;
-    private int lastObservedPeriod = 0;
 
     public PhotonVisionIOReal(int id) {
         this.id = id;
@@ -30,139 +24,145 @@ public class PhotonVisionIOReal implements PhotonVisionIO {
         System.out.println("PhotonVision: Camera instance created for: " + name);
     }
 
-    /**
-     * Uses target information provided by PhotonVision to estimate the ground position (Translation2d) of the target relative to robot.
-     *
-     * @param target         The target detected by PhotonVision
-     * @param cameraHeight   Height of the camera from the ground (in meters)
-     * @param cameraPitchRad Pitch angle of the camera relative to the ground (positive = up, in radians)
-     * @param cameraToRobot  Transform2d representing the camera's position and orientation relative to the robot
-     *                       //* @param robotPose        Current Pose2d of the robot on the field
-     * @return Pose2d of the detected target on the field (in field coordinate system)
-     */
-    public static Transform2d estimateGroundTargetPose(
-            PhotonTrackedTarget target,
-            double cameraHeight,
-            double cameraPitchRad,
-            Transform2d cameraToRobot
-            //Pose2d robotPose
-    ) {
-        // Get yaw and pitch from the target (PhotonVision provides these in degrees)
-        double yawRad = Math.toRadians(target.getYaw());
-        double pitchRad = Math.toRadians(target.getPitch());
-
-        // Calculate total vertical angle from camera to target
-        double totalPitch = cameraPitchRad + pitchRad;
-
-        // Prevent division by zero or extremely small angles
-        if (Math.abs(Math.tan(totalPitch)) < 1e-5) {
-            return null;  // Or throw an exception
-        }
-
-        // Compute horizontal ground distance from camera to target
-        double distance = cameraHeight / Math.tan(totalPitch);
-
-        // Target position in the camera's coordinate system
-        double xCamera = distance * Math.cos(yawRad);  // forward
-        double yCamera = distance * Math.sin(yawRad);  // left/right
-
-        Translation2d targetRelativeToCamera = new Translation2d(xCamera, yCamera);
-
-        // Convert from camera-relative to robot-relative coordinates
-        Transform2d cameraToTarget = new Transform2d(targetRelativeToCamera, new Rotation2d());
-        Transform2d robotToTarget = cameraToRobot.plus(cameraToTarget);
-
-        return robotToTarget;
-//        // Convert from robot-relative to field-relative coordinates
-//        Pose2d targetPose = robotPose.plus(robotToTarget);
-//
-//        return targetPose;
-    }
-
     @Override
     public void updateInputs(PhotonVisionIOInputs inputs) {
-        processResult();
+        // Get all unread results (non-deprecated method)
+        List<PhotonPipelineResult> results = camera.getAllUnreadResults();
+        
+        // Basic connection info
         inputs.connected = camera.isConnected();
         inputs.name = camera.getName();
-        inputs.nearestCoralPosition = nearestCoralPosition;
         inputs.id = id;
-        inputs.lastObservedConf = lastObservedConf;
-        inputs.lastObservedPeriod = lastObservedPeriod;
+        
+        // Process the latest result if available
+        if (!results.isEmpty()) {
+            PhotonPipelineResult result = results.get(results.size() - 1); // Get the most recent result
+            
+            inputs.hasTargets = result.hasTargets();
+            inputs.latencyMs = 0; // Latency method not available in this PhotonVision version
+            inputs.timestampMs = (long) (result.getTimestampSeconds() * 1000);
+            
+            if (result.hasTargets()) {
+                List<PhotonTrackedTarget> targets = result.getTargets();
+                inputs.targetCount = targets.size();
+                
+                // Initialize arrays for raw detection data
+                inputs.targetYaw = new double[targets.size()];
+                inputs.targetPitch = new double[targets.size()];
+                inputs.targetArea = new double[targets.size()];
+                inputs.targetSkew = new double[targets.size()];
+                inputs.targetPoseAmbiguity = new double[targets.size()];
+                inputs.targetFiducialId = new int[targets.size()];
+                inputs.targetPixelX = new double[targets.size()];
+                inputs.targetPixelY = new double[targets.size()];
+                
+                // Extract raw data from each target
+                for (int i = 0; i < targets.size(); i++) {
+                    PhotonTrackedTarget target = targets.get(i);
+                    
+                    inputs.targetYaw[i] = target.getYaw();
+                    inputs.targetPitch[i] = target.getPitch();
+                    inputs.targetArea[i] = target.getArea();
+                    inputs.targetSkew[i] = target.getSkew();
+                    inputs.targetPoseAmbiguity[i] = target.getPoseAmbiguity();
+                    inputs.targetFiducialId[i] = target.getFiducialId();
+                    
+                    // Extract pixel coordinates from target center
+                    // Note: PhotonVision API may vary by version - adjust method names as needed
+                    try {
+                        // Try to get pixel coordinates from target center or bounding box
+                        // These methods may need adjustment based on actual PhotonVision API
+                        var corners = target.getDetectedCorners();
+                        if (corners.size() >= 4) {
+                            // Calculate center from corners
+                            double centerX = corners.stream().mapToDouble(corner -> corner.x).average().orElse(0.0);
+                            double centerY = corners.stream().mapToDouble(corner -> corner.y).average().orElse(0.0);
+                            inputs.targetPixelX[i] = centerX;
+                            inputs.targetPixelY[i] = centerY;
+                        } else {
+                            // Fallback: use image center as approximate pixel location
+                            inputs.targetPixelX[i] = 0.0; // Will be updated when we know image dimensions
+                            inputs.targetPixelY[i] = 0.0; // Will be updated when we know image dimensions
+                        }
+                    } catch (Exception e) {
+                        // If pixel coordinate methods are not available, use 0 as placeholder
+                        inputs.targetPixelX[i] = 0.0;
+                        inputs.targetPixelY[i] = 0.0;
+                        System.out.println("Warning: Unable to extract pixel coordinates from target " + i + ": " + e.getMessage());
+                    }
+                }
+                
+                // Log raw detection data for debugging - grouped by target
+                Logger.recordOutput("PhotonVision/Camera" + id + "/TotalTargets", targets.size());
+                Logger.recordOutput("PhotonVision/Camera" + id + "/ResultTimestamp", result.getTimestampSeconds());
+                
+                // Log each target's data in its own folder
+                for (int i = 0; i < targets.size(); i++) {
+                    String targetPath = "PhotonVision/Camera" + id + "/Target" + i;
+                    Logger.recordOutput(targetPath + "/Yaw", inputs.targetYaw[i]);
+                    Logger.recordOutput(targetPath + "/Pitch", inputs.targetPitch[i]);
+                    Logger.recordOutput(targetPath + "/Area", inputs.targetArea[i]);
+                    Logger.recordOutput(targetPath + "/Skew", inputs.targetSkew[i]);
+                    Logger.recordOutput(targetPath + "/Ambiguity", inputs.targetPoseAmbiguity[i]);
+                    Logger.recordOutput(targetPath + "/FiducialId", inputs.targetFiducialId[i]);
+                    Logger.recordOutput(targetPath + "/PixelX", inputs.targetPixelX[i]);
+                    Logger.recordOutput(targetPath + "/PixelY", inputs.targetPixelY[i]);
+                    Logger.recordOutput(targetPath + "/Confidence", Math.max(0.0, 1.0 - inputs.targetPoseAmbiguity[i]));
+                }
+                
+                // Also log arrays for compatibility
+                Logger.recordOutput("PhotonVision/Camera" + id + "/Arrays/TargetYaw", inputs.targetYaw);
+                Logger.recordOutput("PhotonVision/Camera" + id + "/Arrays/TargetPitch", inputs.targetPitch);
+                Logger.recordOutput("PhotonVision/Camera" + id + "/Arrays/TargetArea", inputs.targetArea);
+                Logger.recordOutput("PhotonVision/Camera" + id + "/Arrays/TargetSkew", inputs.targetSkew);
+                Logger.recordOutput("PhotonVision/Camera" + id + "/Arrays/TargetAmbiguity", inputs.targetPoseAmbiguity);
+                Logger.recordOutput("PhotonVision/Camera" + id + "/Arrays/TargetFiducialId", inputs.targetFiducialId);
+                Logger.recordOutput("PhotonVision/Camera" + id + "/Arrays/TargetPixelX", inputs.targetPixelX);
+                Logger.recordOutput("PhotonVision/Camera" + id + "/Arrays/TargetPixelY", inputs.targetPixelY);
+                
+
+            } else {
+                // No targets detected
+                inputs.targetCount = 0;
+                inputs.targetYaw = new double[0];
+                inputs.targetPitch = new double[0];
+                inputs.targetArea = new double[0];
+                inputs.targetSkew = new double[0];
+                inputs.targetPoseAmbiguity = new double[0];
+                inputs.targetFiducialId = new int[0];
+                inputs.targetPixelX = new double[0];
+                inputs.targetPixelY = new double[0];
+                
+                // Log status for debugging
+                Logger.recordOutput("PhotonVision/Camera" + id + "/TotalTargets", 0);
+                Logger.recordOutput("PhotonVision/Camera" + id + "/ResultTimestamp", result.getTimestampSeconds());
+                System.out.println("=== PhotonVision Camera " + id + " === No targets detected at " + String.format("%.3f", result.getTimestampSeconds()) + "s");
+            }
+        } else {
+            // No results available
+            inputs.hasTargets = false;
+            inputs.targetCount = 0;
+            inputs.latencyMs = 0;
+            inputs.timestampMs = System.currentTimeMillis();
+            
+            // Empty arrays for no results
+            inputs.targetYaw = new double[0];
+            inputs.targetPitch = new double[0];
+            inputs.targetArea = new double[0];
+            inputs.targetSkew = new double[0];
+            inputs.targetPoseAmbiguity = new double[0];
+            inputs.targetFiducialId = new int[0];
+            inputs.targetPixelX = new double[0];
+            inputs.targetPixelY = new double[0];
+            
+            // Log status for debugging
+            Logger.recordOutput("PhotonVision/Camera" + id + "/TotalTargets", 0);
+            Logger.recordOutput("PhotonVision/Camera" + id + "/NoResults", true);
+        }
     }
 
     @Override
     public void takeOutputSnapshot() {
         camera.takeOutputSnapshot();
-    }
-
-    private void processResult() {
-        List<PhotonPipelineResult> results = camera.getAllUnreadResults();
-        if (results.isEmpty()) {
-            lastObservedPeriod++;
-            if (lastObservedPeriod > 5) nearestCoralPosition = null;
-            return;
-        }
-        for (int i = results.size() - 1; i >= 0; i--) {
-            /*
-                Logic:
-                1. Find the latest non-empty result
-                2. Detect the nearest relative to robot.
-                3. Return the Pose.
-             */
-            PhotonPipelineResult result = results.get(i);
-            if (!result.hasTargets()) continue;
-            
-            // Reset period counter since we have new targets
-            lastObservedPeriod = 0;
-            
-            // Find the nearest target
-            Transform2d nearestTargetTransform = null;
-            double nearestDistance = Double.MAX_VALUE;
-            double bestConfidence = 0.0;
-            
-            // Get camera configuration
-            double cameraHeight = CAMERA_HEIGHT_METERS.get();
-            double cameraPitchRad = Math.toRadians(CAMERA_PITCH_DEGREES.get());
-            Transform2d cameraToRobot = new Transform2d(
-                new Translation2d(CAMERA_TO_ROBOT_X.get(), CAMERA_TO_ROBOT_Y.get()),
-                new Rotation2d(Math.toRadians(CAMERA_TO_ROBOT_ROTATION_DEGREES.get()))
-            );
-            
-            for (PhotonTrackedTarget target : result.getTargets()) {
-                Transform2d targetTransform = estimateGroundTargetPose(
-                    target,
-                    cameraHeight,
-                    cameraPitchRad,
-                    cameraToRobot
-                );
-                
-                if (targetTransform != null) {
-                    double distance = targetTransform.getTranslation().getNorm();
-                    
-                    // Prefer closer targets, but also consider confidence
-                    if (distance < nearestDistance && target.getPoseAmbiguity() >= 0) {
-                        nearestDistance = distance;
-                        nearestTargetTransform = targetTransform;
-                        bestConfidence = 1.0 - target.getPoseAmbiguity();
-                    }
-                }
-            }
-            
-            // Update nearest coral position if we found a valid target
-            if (nearestTargetTransform != null) {
-                nearestCoralPosition = new Pose2d(
-                    nearestTargetTransform.getTranslation(),
-                    nearestTargetTransform.getRotation()
-                );
-                lastObservedConf = bestConfidence;
-                
-                // Log the detected coral position for debugging
-                Logger.recordOutput("PhotonVision/Camera" + id + "/NearestCoralDistance", nearestDistance);
-                Logger.recordOutput("PhotonVision/Camera" + id + "/NearestCoralConfidence", bestConfidence);
-                
-                System.out.println("PhotonVision Camera " + id + " detected coral at distance: " + nearestDistance + " meters");
-                break; // Use the latest result with targets
-            }
-        }
     }
 }
