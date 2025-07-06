@@ -11,36 +11,34 @@ import lib.ironpulse.swerve.Swerve;
 import lib.ironpulse.utils.Logging;
 import lib.ironpulse.utils.TimeDelayedBoolean;
 import lib.ntext.NTParameter;
+import org.littletonrobotics.junction.Logger;
+import org.photonvision.PhotonCamera;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
 public class ChaseCoralCommand extends Command {
   private final Swerve swerve;
-  private final PhotonVisionSubsystem vision;
+  //  private final PhotonVisionSubsystem vision;
+  private final PhotonCamera camera = new PhotonCamera("pv-cam1");
 
   private final PIDController driveController;
-  private final PIDController turnFeedController;
-  private final PIDController turnAngleController;
+  private final PIDController turnController;
   private final TimeDelayedBoolean isBlind = new TimeDelayedBoolean(0.5);
   State state = State.ACTIVE_CHASING;
-  private Pair<Double, Rotation2d> chaseTarget;
+  private Pair<Double, Double> chaseTarget;
 
   public ChaseCoralCommand(Swerve swerve, PhotonVisionSubsystem vision) {
     this.swerve = swerve;
-    this.vision = vision;
+//    this.vision = vision;
 
     driveController = new PIDController(
         ChaseCoralCommandParamsNT.driveKp.getValue(),
         ChaseCoralCommandParamsNT.driveKi.getValue(),
         ChaseCoralCommandParamsNT.driveKd.getValue()
     );
-    turnFeedController = new PIDController(
+    turnController = new PIDController(
         ChaseCoralCommandParamsNT.turnKp.getValue(),
         ChaseCoralCommandParamsNT.turnKi.getValue(),
         ChaseCoralCommandParamsNT.turnKd.getValue()
-    );
-    turnAngleController = new PIDController(
-        ChaseCoralCommandParamsNT.turnAngleKp.getValue(),
-        ChaseCoralCommandParamsNT.turnAngleKi.getValue(),
-        ChaseCoralCommandParamsNT.turnAngleKd.getValue()
     );
 
     addRequirements(swerve);
@@ -48,24 +46,27 @@ public class ChaseCoralCommand extends Command {
 
   @Override
   public void initialize() {
-    turnAngleController.enableContinuousInput(-Math.PI, Math.PI);
+    driveController.setP(ChaseCoralCommandParamsNT.driveKp.getValue());
+    driveController.setI(ChaseCoralCommandParamsNT.driveKi.getValue());
+    driveController.setD(ChaseCoralCommandParamsNT.driveKd.getValue());
+
+    turnController.setP(ChaseCoralCommandParamsNT.turnKp.getValue());
+    turnController.setI(ChaseCoralCommandParamsNT.turnKi.getValue());
+    turnController.setD(ChaseCoralCommandParamsNT.turnKd.getValue());
+
     driveController.reset();
-    turnFeedController.reset();
-    turnAngleController.reset();
-    chaseTarget = Pair.of(
-        0.0,
-        swerve.getEstimatedPose().getRotation().toRotation2d()
-    );
+    turnController.reset();
+    chaseTarget = Pair.of(0.0, 0.0);
     state = State.ACTIVE_CHASING;
   }
 
   @Override
   public void execute() {
     // handle state transition
-    if (!vision.getAllRawDetections().isEmpty())
-      state = State.ACTIVE_CHASING;
-    else
-      state = State.BLIND_CHASING;
+//    if (!vision.getAllRawDetections().isEmpty())
+    PhotonTrackedTarget target;
+    if (camera.getLatestResult().hasTargets() && camera.getLatestResult().getBestTarget().getPitch() > -10.0) state = State.ACTIVE_CHASING;
+    else state = State.BLIND_CHASING;
 
     // get
     Rotation2d currentAngle = swerve.getEstimatedPose().getRotation().toRotation2d();
@@ -74,37 +75,32 @@ public class ChaseCoralCommand extends Command {
     switch (state) {
       case ACTIVE_CHASING -> {
         Logging.info("Commands/ChaseCoralCommand", "Active Chasing!");
-        PhotonVisionSubsystem.RawDetection detection = vision.getLargestTarget();
-        double forwardVel = -driveController.calculate(
-            detection.pitch(),
-            ChaseCoralCommandParamsNT.chasePitchSetpoint.getValue()
-        );
+//        PhotonVisionSubsystem.RawDetection detection = vision.getLargestTarget();
+        if (!camera.getLatestResult().hasTargets()) {
+          state = State.BLIND_CHASING;
+          return;
+        }
+
+        var detection = camera.getLatestResult().getBestTarget();
+        double forwardVel = -driveController.calculate(detection.getPitch(), ChaseCoralCommandParamsNT.chasePitchSetpoint.getValue());
         forwardVel = MathUtil.clamp(forwardVel, 0.0, ChaseCoralCommandParamsNT.activeChaseMaxVelocityMps.getValue());
 
-        double deltaYaw = turnFeedController.calculate(
-            detection.yaw(),
-            ChaseCoralCommandParamsNT.chaseYawSetpoint.getValue()
-        );
-        chaseTarget = Pair.of(
-            forwardVel,
-            currentAngle.plus(Rotation2d.fromRadians(deltaYaw))
-        );
+        double angVel = turnController.calculate(detection.getYaw(), ChaseCoralCommandParamsNT.chaseYawSetpoint.getValue());
+
+        chaseTarget = Pair.of(forwardVel, angVel);
       }
       case BLIND_CHASING -> {
         Logging.info("Commands/ChaseCoralCommand", "Blind Chasing!");
-        chaseTarget = Pair.of(
-            MathUtil.clamp(chaseTarget.getFirst(), 0.0, ChaseCoralCommandParamsNT.blindChaseMaxVelocityMps.getValue()),
-            chaseTarget.getSecond()
-        );
+        chaseTarget = Pair.of(MathUtil.clamp(chaseTarget.getFirst(), 0.0, ChaseCoralCommandParamsNT.blindChaseMaxVelocityMps.getValue()), 0.0);
       }
     }
 
     // run target
-    swerve.runTwist(new ChassisSpeeds(
-        chaseTarget.getFirst(),
-        0.0,
-        turnAngleController.calculate(currentAngle.getRadians(), chaseTarget.getSecond().getRadians())
-    ));
+    swerve.runTwist(new ChassisSpeeds(chaseTarget.getFirst(), 0.0, chaseTarget.getSecond()));
+
+    // logging
+    Logger.recordOutput("Commands/ChaseCoralCommand/Linvel", chaseTarget.getFirst());
+    Logger.recordOutput("Commands/ChaseCoralCommand/AngCurrent", currentAngle.getRadians());
 
   }
 
@@ -131,10 +127,6 @@ public class ChaseCoralCommand extends Command {
     static final double turnKp = 0.5;
     static final double turnKi = 0.0;
     static final double turnKd = 0.0;
-
-    static final double turnAngleKp = 2.0;
-    static final double turnAngleKi = 0.0;
-    static final double turnAngleKd = 0.0;
 
     static final double chasePitchSetpoint = -14.0;
     static final double chaseYawSetpoint = 0.0;
