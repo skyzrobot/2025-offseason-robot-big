@@ -17,8 +17,7 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 
 public class ChaseCoralCommand extends Command {
   private final Swerve swerve;
-  //  private final PhotonVisionSubsystem vision;
-  private final PhotonCamera camera = new PhotonCamera("pv-cam1");
+  private final PhotonVisionSubsystem vision;
 
   private final PIDController driveController;
   private final PIDController turnController;
@@ -28,18 +27,16 @@ public class ChaseCoralCommand extends Command {
 
   public ChaseCoralCommand(Swerve swerve, PhotonVisionSubsystem vision) {
     this.swerve = swerve;
-//    this.vision = vision;
+    this.vision = vision;
 
     driveController = new PIDController(
         ChaseCoralCommandParamsNT.driveKp.getValue(),
         ChaseCoralCommandParamsNT.driveKi.getValue(),
-        ChaseCoralCommandParamsNT.driveKd.getValue()
-    );
+        ChaseCoralCommandParamsNT.driveKd.getValue());
     turnController = new PIDController(
         ChaseCoralCommandParamsNT.turnKp.getValue(),
         ChaseCoralCommandParamsNT.turnKi.getValue(),
-        ChaseCoralCommandParamsNT.turnKd.getValue()
-    );
+        ChaseCoralCommandParamsNT.turnKd.getValue());
 
     addRequirements(swerve);
   }
@@ -63,10 +60,10 @@ public class ChaseCoralCommand extends Command {
   @Override
   public void execute() {
     // handle state transition
-//    if (!vision.getAllRawDetections().isEmpty())
-    PhotonTrackedTarget target;
-    if (camera.getLatestResult().hasTargets() && camera.getLatestResult().getBestTarget().getPitch() > -10.0) state = State.ACTIVE_CHASING;
-    else state = State.BLIND_CHASING;
+    if (vision.hasAnyTargets())
+      state = State.ACTIVE_CHASING;
+    else
+      state = State.BLIND_CHASING;
 
     // get
     Rotation2d currentAngle = swerve.getEstimatedPose().getRotation().toRotation2d();
@@ -75,23 +72,23 @@ public class ChaseCoralCommand extends Command {
     switch (state) {
       case ACTIVE_CHASING -> {
         Logging.info("Commands/ChaseCoralCommand", "Active Chasing!");
-//        PhotonVisionSubsystem.RawDetection detection = vision.getLargestTarget();
-        if (!camera.getLatestResult().hasTargets()) {
-          state = State.BLIND_CHASING;
-          return;
-        }
+        PhotonVisionSubsystem.RawDetection detection = vision.getLargestTarget();
 
-        var detection = camera.getLatestResult().getBestTarget();
-        double forwardVel = -driveController.calculate(detection.getPitch(), ChaseCoralCommandParamsNT.chasePitchSetpoint.getValue());
+        double forwardVel = -driveController.calculate(detection.pitch(),
+            ChaseCoralCommandParamsNT.chasePitchSetpoint.getValue());
         forwardVel = MathUtil.clamp(forwardVel, 0.0, ChaseCoralCommandParamsNT.activeChaseMaxVelocityMps.getValue());
 
-        double angVel = turnController.calculate(detection.getYaw(), ChaseCoralCommandParamsNT.chaseYawSetpoint.getValue());
+        double angVel = turnController.calculate(
+            detection.yaw(),
+            ChaseCoralCommandParamsNT.chaseYawSetpoint.getValue());
 
         chaseTarget = Pair.of(forwardVel, angVel);
       }
       case BLIND_CHASING -> {
         Logging.info("Commands/ChaseCoralCommand", "Blind Chasing!");
-        chaseTarget = Pair.of(MathUtil.clamp(chaseTarget.getFirst(), 0.0, ChaseCoralCommandParamsNT.blindChaseMaxVelocityMps.getValue()), 0.0);
+        chaseTarget = Pair.of(
+            MathUtil.clamp(chaseTarget.getFirst(), 0.0, ChaseCoralCommandParamsNT.blindChaseMaxVelocityMps.getValue()),
+            0.0);
       }
     }
 

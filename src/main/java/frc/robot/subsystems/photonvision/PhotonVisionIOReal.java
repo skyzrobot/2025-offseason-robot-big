@@ -5,7 +5,6 @@ import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 import org.littletonrobotics.junction.Logger;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static frc.robot.RobotConstants.PhotonvisionConstants.*;
@@ -26,17 +25,16 @@ public class PhotonVisionIOReal implements PhotonVisionIO {
 
     @Override
     public void updateInputs(PhotonVisionIOInputs inputs) {
-        // Get all unread results (non-deprecated method)
-        List<PhotonPipelineResult> results = List.of(camera.getLatestResult());
+        // Get the latest result (regardless of read status to avoid flashing)
+        PhotonPipelineResult result = camera.getLatestResult();
         
         // Basic connection info
         inputs.connected = camera.isConnected();
         inputs.name = camera.getName();
         inputs.id = id;
         
-        // Process the latest result if available
-        if (!results.isEmpty()) {
-            PhotonPipelineResult result = results.get(results.size() - 1); // Get the most recent result
+        // Process the result
+        if (result != null) {
             
             inputs.hasTargets = result.hasTargets();
             inputs.latencyMs = 0; // Latency method not available in this PhotonVision version
@@ -139,7 +137,7 @@ public class PhotonVisionIOReal implements PhotonVisionIO {
                 System.out.println("=== PhotonVision Camera " + id + " === No targets detected at " + String.format("%.3f", result.getTimestampSeconds()) + "s");
             }
         } else {
-            // No results available
+            // Camera not returning results (likely disconnected or serious error)
             inputs.hasTargets = false;
             inputs.targetCount = 0;
             inputs.latencyMs = 0;
@@ -158,6 +156,7 @@ public class PhotonVisionIOReal implements PhotonVisionIO {
             // Log status for debugging
             Logger.recordOutput("PhotonVision/Camera" + id + "/TotalTargets", 0);
             Logger.recordOutput("PhotonVision/Camera" + id + "/NoResults", true);
+            System.out.println("Warning: PhotonVision Camera " + id + " returned null result - possible connection issue");
         }
     }
 
