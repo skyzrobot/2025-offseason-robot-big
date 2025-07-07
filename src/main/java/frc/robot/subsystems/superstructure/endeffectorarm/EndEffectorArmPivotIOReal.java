@@ -36,7 +36,7 @@ public class EndEffectorArmPivotIOReal implements EndEffectorArmPivotIO {
         config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
         config.CurrentLimits.SupplyCurrentLimit = 100.0;
         config.CurrentLimits.SupplyCurrentLimitEnable = true;
-        config.CurrentLimits.StatorCurrentLimit = 80.0;
+        config.CurrentLimits.StatorCurrentLimit = 60.0;
         config.CurrentLimits.StatorCurrentLimitEnable = true;
 
         //initialize CANcoder

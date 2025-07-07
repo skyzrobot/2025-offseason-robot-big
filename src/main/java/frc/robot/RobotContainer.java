@@ -262,25 +262,25 @@ public class RobotContainer {
         );
 
     driverController.b().whileTrue(superstructure.runGoal(() -> SuperstructureState.CORAL_OUTTAKE));
-//    driverController.x().whileTrue(
-//        Commands.runOnce(() -> {
-//              destinationSupplier.setCurrentGamePiece(DestinationSupplier.GamePiece.CORAL_SCORING);
-//            })
-//            .andThen(
-//                new ReefAimCommand(swerve, indicatorSubsystem)
-//            )
-//    );
+   driverController.x().whileTrue(
+       Commands.runOnce(() -> {
+             destinationSupplier.setCurrentGamePiece(DestinationSupplier.GamePiece.CORAL_SCORING);
+           })
+           .andThen(
+               new ReefAimCommand(swerve, indicatorSubsystem)
+           )
+   );
 //    driverController.x().whileTrue(
 //        new ChaseCoralCommand(swerve, photonVisionSubsystem)
 //    );
 
-    driverController.x().whileTrue(
-        Commands.either(
-            Commands.run(() -> climberSubsystem.setWantedState(ClimberSubsystem.WantedState.CLIMB)),
-            Commands.run(() -> climberSubsystem.setWantedState(ClimberSubsystem.WantedState.DEPLOY)),
-            climberSubsystem::hasDeployed
-        )
-    );
+    // driverController.x().whileTrue(
+    //     Commands.either(
+    //         Commands.run(() -> climberSubsystem.setWantedState(ClimberSubsystem.WantedState.CLIMB)),
+    //         Commands.run(() -> climberSubsystem.setWantedState(ClimberSubsystem.WantedState.DEPLOY)),
+    //         climberSubsystem::hasDeployed
+    //     )
+    // );
 
     // Y button - Coral intake assist drive
     driverController.y().whileTrue(
@@ -303,16 +303,17 @@ public class RobotContainer {
             new BlocklessEitherCommand(
                 createScoringCommand(false, SuperstructureState.L4),
                 new NetAimCommand(swerve, () -> driverController.getLeftX() * 2.5)
-                    .alongWith(
-                        superstructure.runGoal(() -> SuperstructureState.NET_SCORE)
-                            .until(driverController.y())
-                            .andThen(
-                                superstructure
-                                    .runGoal(() -> SuperstructureState.NET_SCORE_EJECT)
-                                    .until(() -> !superstructure.hasAlgae())
-                            )
-                            .onlyIf(superstructure::hasAlgae)
-                    ),
+                    // .alongWith(
+                    //     superstructure.runGoal(() -> SuperstructureState.NET_SCORE)
+                    //         .until(driverController.y())
+                    //         .andThen(
+                    //             superstructure
+                    //                 .runGoal(() -> SuperstructureState.NET_SCORE_EJECT)
+                    //                 .until(() -> !superstructure.hasAlgae())
+                    //         )
+                    //         .onlyIf(superstructure::hasAlgae)
+                    // ),
+                    ,
                 superstructure::hasCoral)
         );
     driverController
