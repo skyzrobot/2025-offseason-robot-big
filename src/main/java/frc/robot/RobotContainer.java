@@ -18,11 +18,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.commands.aimSequences.AimGoalSupplier;
-import frc.robot.commands.aimSequences.ChaseCoralCommand;
-import frc.robot.commands.aimSequences.ReefAimCommand;
-import frc.robot.commands.aimSequences.SuperCycleCommand;
 import frc.robot.commands.CoralIntakeAssistCommand;
+import frc.robot.commands.aimSequences.*;
 import frc.robot.subsystems.beambreak.BeambreakIO;
 import frc.robot.subsystems.beambreak.BeambreakIOReal;
 import frc.robot.subsystems.beambreak.BeambreakIOSim;
@@ -58,6 +55,7 @@ import frc.robot.subsystems.superstructure.intake.IntakePivotIO;
 import frc.robot.subsystems.superstructure.intake.IntakePivotIOReal;
 import frc.robot.subsystems.superstructure.intake.IntakePivotIOSim;
 import frc.robot.subsystems.superstructure.intake.IntakeSubsystem;
+import frc.robot.utils.BlocklessEitherCommand;
 import lib.ironpulse.rbd.TransformRecorder;
 import lib.ironpulse.swerve.Swerve;
 import lib.ironpulse.swerve.SwerveCommands;
@@ -332,7 +330,7 @@ public class RobotContainer {
             swerve,
             photonVisionSubsystem,
             () -> -driverController.getLeftY(),
-            () -> -driverController.getLeftX(), 
+            () -> -driverController.getLeftX(),
             () -> -driverController.getRightX(),
             RobotStateRecorder::getPoseDriverRobotCurrent,
             MetersPerSecond.of(0.04),
@@ -343,17 +341,21 @@ public class RobotContainer {
     // Left trigger binding - only executes if there is coral
     driverController
         .leftBumper()
-        .whileTrue(Commands.either(
-            createScoringCommand(false, SuperstructureState.L4),
-            superstructure
-                .runGoal(() -> SuperstructureState.NET_SCORE)
-                .until(driverController.y())
-                .andThen(
-                    superstructure
-                        .runGoal(() -> SuperstructureState.NET_SCORE_EJECT)
-                        .until(() -> !superstructure.hasAlgae())
-                ).onlyIf(superstructure::hasAlgae),
-            superstructure::hasCoral)
+        .whileTrue(
+            new BlocklessEitherCommand(
+                createScoringCommand(false, SuperstructureState.L4),
+                new NetAimCommand(swerve, () -> driverController.getLeftX() * 2.5)
+                    .alongWith(
+                        superstructure.runGoal(() -> SuperstructureState.NET_SCORE)
+                            .until(driverController.y())
+                            .andThen(
+                                superstructure
+                                    .runGoal(() -> SuperstructureState.NET_SCORE_EJECT)
+                                    .until(() -> !superstructure.hasAlgae())
+                            )
+                            .onlyIf(superstructure::hasAlgae)
+                    ),
+                superstructure::hasCoral)
         );
     driverController
         .leftTrigger()

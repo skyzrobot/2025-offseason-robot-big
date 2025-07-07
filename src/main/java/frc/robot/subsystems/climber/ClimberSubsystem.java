@@ -23,27 +23,27 @@ public class ClimberSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-//        io.updateInputs(inputs);
-//        SystemState newState = handleStateTransition();
-//
-//        Logger.processInputs("Climber", inputs);
-//        Logger.recordOutput("Climber/SystemState", newState.toString());
-//
-//        if (newState != systemState) {
-//            systemState = newState;
-//        }
-//
-//        switch (systemState) {
-//            case IDLING:
-//                io.setTargetPosition(idleAngle.get());
-//                break;
-//            case DEPLOYING:
-//                io.setTargetPosition(deployAngle.get());
-//                break;
-//            case CLIMBING:
-//                io.setTargetPosition(climbAngle.get());
-//                break;
-//        }
+        io.updateInputs(inputs);
+        SystemState newState = handleStateTransition();
+
+        Logger.processInputs("Climber", inputs);
+        Logger.recordOutput("Climber/SystemState", newState.toString());
+
+        if (newState != systemState) {
+            systemState = newState;
+        }
+
+        switch (systemState) {
+            case IDLING:
+                io.setTargetPosition(idleAngle.get());
+                break;
+            case DEPLOYING:
+                io.setTargetPosition(deployAngle.get());
+                break;
+            case CLIMBING:
+                io.setTargetPosition(climbAngle.get());
+                break;
+        }
     }
 
     private SystemState handleStateTransition() {

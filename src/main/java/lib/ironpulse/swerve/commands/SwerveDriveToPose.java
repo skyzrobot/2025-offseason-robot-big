@@ -23,21 +23,14 @@ import static lib.ironpulse.math.MathTools.epsilonEquals;
 
 public class SwerveDriveToPose extends Command {
     private final Swerve swerve;
-    @Setter
-    private Supplier<Pose3d> poseWorldRobotSupplier;
-    @Setter
-    private Supplier<Pose3d> poseWorldTargetSupplier;
-    @Setter
-    private Supplier<Pose2d> velocityWorldRobotSupplier;
-    @Setter
-    private Distance translationTolerance;
-    @Setter
-    private Angle rotationTolerance;
 
-    @Setter
-    private ProfiledPIDController translationController;
-    @Setter
-    private ProfiledPIDController rotationController;
+    protected Supplier<Pose3d> poseWorldRobotSupplier;
+    protected Supplier<Pose3d> poseWorldTargetSupplier;
+    protected Supplier<Pose2d> velocityWorldRobotSupplier;
+    protected Distance translationTolerance;
+    protected Angle rotationTolerance;
+    protected ProfiledPIDController translationController;
+    protected ProfiledPIDController rotationController;
 
     private final static String kTag = "Commands/DriveToPose";
 

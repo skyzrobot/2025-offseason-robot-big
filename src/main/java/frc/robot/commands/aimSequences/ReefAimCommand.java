@@ -73,17 +73,6 @@ public class ReefAimCommand extends Command {
           ReefAimCommandParamsNT.rotationOnTargetToleranceDegree.getValue() / 180.0f * Math.PI,
           ReefAimCommandParamsNT.rotationOnTargetVelocityToleranceDegreesPerSecond.getValue() / 180.0f * Math.PI
       );
-
-      Logging.info(
-          kTag, "Aiming Params: <Drive> Kp = %.2f, Ki = %.2f, Kd = %.2f" +
-              "<Rotation> Kp = %.2f, Ki = %.2f, Kd = %.2f",
-          ReefAimCommandParamsNT.translationKp.getValue(),
-          ReefAimCommandParamsNT.translationKi.getValue(),
-          ReefAimCommandParamsNT.translationKd.getValue(),
-          ReefAimCommandParamsNT.rotationKp.getValue(),
-          ReefAimCommandParamsNT.rotationKi.getValue(),
-          ReefAimCommandParamsNT.rotationKd.getValue()
-      );
     }
 
     // get current state
@@ -105,6 +94,7 @@ public class ReefAimCommand extends Command {
     poseWorldTarget = AimGoalSupplier.getDriveTarget(poseWorldRobot, finalDestinationPose);
 
     // PID init with field-relative velocities
+    rotationController.enableContinuousInput(0, Math.PI * 2);
     translationController.reset();
     rotationController.reset();
     indicatorSubsystem.setPattern(IndicatorIO.Patterns.AIMING);

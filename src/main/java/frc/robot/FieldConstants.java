@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.Filesystem;
 import lombok.Getter;
 
@@ -111,6 +112,8 @@ public class FieldConstants {
     }
 
     public static class Barge {
+        public static final double cageLineX = Units.inchesToMeters(345.428);
+
         public static final Translation2d farCage =
                 new Translation2d(Units.inchesToMeters(345.428), Units.inchesToMeters(286.779));
         public static final Translation2d middleCage =

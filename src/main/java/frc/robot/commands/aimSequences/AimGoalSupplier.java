@@ -29,6 +29,7 @@ public class AimGoalSupplier {
         static final double HexagonDangerDegrees = 45.0;
         static final double EdgeCaseMaxDelta = 0.2;
         static final double ShiftingTerminate = 0.5;
+        static final double NetClearanceDistance = 0.5;
     }
 
     private record TagCondition(int tagA, int tagB, char axis, int positiveResult, int negativeResult) {
@@ -94,6 +95,13 @@ public class AimGoalSupplier {
                         RobotConstants.ReefAimConstants.ALGAE_TO_TAG_METERS.get()),
                 new Rotation2d()));
         return goal;
+    }
+
+    public static Pose2d getFinalNetTarget() {
+        return AllianceFlipUtil.apply(new Pose2d(
+            new Translation2d(FieldConstants.Barge.cageLineX, 0.0),
+            Rotation2d.k180deg
+        ));
     }
 
     /**
