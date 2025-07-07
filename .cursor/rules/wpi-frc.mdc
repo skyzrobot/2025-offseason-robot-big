@@ -30,7 +30,7 @@ always refer to the above api for usages and implimentations when creating and d
 when writing a new feature,
 1. Always log the important outputs using advantage kit logging feature, unless the output is already autologged.
 2. do not add logging to the console, unless prompted by the user to debug a code
-2. Always add the numbers that may need changing by the user to RobotConstants.java as TunableNumbers
+2. Always add the numbers that may need changing by the user to RobotConstants.java as the annotated NTParam class
 </making_code_changes>
 
 <debugging>

@@ -22,6 +22,7 @@ import frc.robot.commands.aimSequences.AimGoalSupplier;
 import frc.robot.commands.aimSequences.ChaseCoralCommand;
 import frc.robot.commands.aimSequences.ReefAimCommand;
 import frc.robot.commands.aimSequences.SuperCycleCommand;
+import frc.robot.commands.CoralIntakeAssistCommand;
 import frc.robot.subsystems.beambreak.BeambreakIO;
 import frc.robot.subsystems.beambreak.BeambreakIOReal;
 import frc.robot.subsystems.beambreak.BeambreakIOSim;
@@ -325,6 +326,20 @@ public class RobotContainer {
         new ChaseCoralCommand(swerve, photonVisionSubsystem)
     );
 
+    // Y button - Coral intake assist drive
+    driverController.y().whileTrue(
+        new CoralIntakeAssistCommand(
+            swerve,
+            photonVisionSubsystem,
+            () -> -driverController.getLeftY(),
+            () -> -driverController.getLeftX(), 
+            () -> -driverController.getRightX(),
+            RobotStateRecorder::getPoseDriverRobotCurrent,
+            MetersPerSecond.of(0.04),
+            DegreesPerSecond.of(3.0)
+        )
+    );
+
     // Left trigger binding - only executes if there is coral
     driverController
         .leftBumper()
@@ -366,10 +381,6 @@ public class RobotContainer {
             createScoringCommand(true, SuperstructureState.L2)
         );
 
-    //TODO: Delete this as soon as we have intake
-    driverController.back().whileTrue(
-        superstructure.runGoal(SuperstructureState.CORAL_STATION_INTAKE)
-    );
   }
 
 
