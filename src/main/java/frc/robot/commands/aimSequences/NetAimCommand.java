@@ -12,6 +12,8 @@ import lib.ironpulse.swerve.Swerve;
 import lib.ironpulse.swerve.SwerveLimit;
 import lib.ironpulse.utils.Logging;
 import lib.ntext.NTParameter;
+
+import org.littletonrobotics.AllianceFlipUtil;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
@@ -95,8 +97,11 @@ public class NetAimCommand extends Command {
     double xCurr = poseWorldRobot.getTranslation().getX();
     double xFinal = poseWorldTarget.getTranslation().getX();
 
-    double vx = xController.calculate(xCurr, xFinal);
+    double vx = -xController.calculate(xCurr, xFinal);
     double vy = yVelocitySupplier.getAsDouble();
+    if (AllianceFlipUtil.shouldFlip()) {
+      vx = -vx;
+    }
     double thetaRT = poseRobotTarget.getRotation().getRadians();
     double omegaRT = -rotationController.calculate(thetaRT, 0.0);
 
@@ -141,20 +146,20 @@ public class NetAimCommand extends Command {
 
   @NTParameter(tableName = "Params/" + kTag)
   public static class NetAimCommandParams {
-    static final double xKp = 5.5;
+    static final double xKp = 3.5;
     static final double xKi = 0.01;
     static final double xKiZone = 0.5;
-    static final double xKd = 0.7;
-    static final double translationVelocityMaxFar = 4.6;
-    static final double translationVelocityMaxNear = 2.5;
-    static final double translationParamsChangeDistance = 1.5;
-    static final double translationAccelerationMax = 25.0;
+    static final double xKd = 0.1;
+    static final double translationVelocityMaxFar = 2.0;
+    static final double translationVelocityMaxNear = 1.0;
+    static final double translationParamsChangeDistance = 1.0;
+    static final double translationAccelerationMax = 15.0;
 
     static final double rotationKp = 4.0;
     static final double rotationKi = 0.01;
     static final double rotationKiZone = 0.5;
     static final double rotationKd = 0.5;
-    static final double rotationVelocityMax = 500.0;
-    static final double rotationAccelerationMax = 1500.0;
+    static final double rotationVelocityMax = 360.0;
+    static final double rotationAccelerationMax = 600.0;
   }
 }
