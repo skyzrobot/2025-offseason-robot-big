@@ -1,82 +1,117 @@
 package frc.robot.subsystems.climber;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.utils.TunableNumber;
+import lib.ntext.NTParameter;
 import lombok.Setter;
 import org.littletonrobotics.junction.Logger;
+
+import static edu.wpi.first.units.Units.Volts;
 
 //TODO: change motion logic and reset command afterwards
 
 public class ClimberSubsystem extends SubsystemBase {
-    private final ClimberIO io;
-    private final ClimberIOInputsAutoLogged inputs = new ClimberIOInputsAutoLogged();
-    private final TunableNumber deployAngle = new TunableNumber("CLIMBER/deployAngle", 900);
-    private final TunableNumber idleAngle = new TunableNumber("CLIMBER/idleAngle", 600);
-    private final TunableNumber climbAngle = new TunableNumber("CLIMBER/climbAngle", -270);
-    @Setter
-    private WantedState wantedState = WantedState.IDLE;
-    private SystemState systemState = SystemState.IDLING;
+  private final ClimberIO io;
+  private final ClimberIOInputsAutoLogged inputs = new ClimberIOInputsAutoLogged();
 
-    public ClimberSubsystem(ClimberIO io) {
-        this.io = io;
+  @Setter
+  private WantedState wantedState = WantedState.IDLE;
+  private SystemState systemState = SystemState.IDLING;
+
+  public ClimberSubsystem(ClimberIO io) {
+    this.io = io;
+  }
+
+  public boolean hasDeployed() {
+    return systemState == SystemState.DEPLOYING;
+  }
+
+  @Override
+  public void periodic() {
+    io.updateInputs(inputs);
+    SystemState newState = handleStateTransition();
+
+    Logger.processInputs("Climber", inputs);
+    Logger.recordOutput("Climber/SystemState", newState.toString());
+
+    if (newState != systemState) {
+      systemState = newState;
     }
 
-    @Override
-    public void periodic() {
-        io.updateInputs(inputs);
-        SystemState newState = handleStateTransition();
-
-        Logger.processInputs("Climber", inputs);
-        Logger.recordOutput("Climber/SystemState", newState.toString());
-
-        if (newState != systemState) {
-            systemState = newState;
-        }
-
-        switch (systemState) {
-            case IDLING:
-                io.setTargetPosition(idleAngle.get());
-                break;
-            case DEPLOYING:
-                io.setTargetPosition(deployAngle.get());
-                break;
-            case CLIMBING:
-                io.setTargetPosition(climbAngle.get());
-                break;
-        }
+    switch (systemState) {
+      case IDLING:
+        io.setTargetPosition(ClimberParamsNT.IdleAngle.getValue());
+        io.setRollerVoltage(Volts.of(0.0));
+        break;
+      case DEPLOYING:
+        io.setTargetPosition(ClimberParamsNT.DeployAngle.getValue());
+        io.setRollerVoltage(Volts.of(ClimberParamsNT.RollerLockOnVoltage.getValue()));
+        break;
+      case CLIMBING:
+        io.setTargetPosition(ClimberParamsNT.ClimbAngle.getValue());
+        io.setRollerVoltage(Volts.of(ClimberParamsNT.RollerHoldVoltage.getValue()));
+        break;
     }
 
-    private SystemState handleStateTransition() {
-        return switch (wantedState) {
-            case DEPLOY -> SystemState.DEPLOYING;
-            case CLIMB -> SystemState.CLIMBING;
-            case IDLE -> SystemState.IDLING;
-        };
-    }
+    if (ClimberParamsNT.isAnyChanged())
+      io.setParams(
+          ClimberParamsNT.Kp.getValue(),
+          ClimberParamsNT.Ki.getValue(),
+          ClimberParamsNT.Kd.getValue(),
+          ClimberParamsNT.CruiseVelocity.getValue(),
+          ClimberParamsNT.Acceleration.getValue(),
+          ClimberParamsNT.Jerk.getValue()
+      );
+  }
 
-    public void resetPosition() {
-        io.resetPosition();
-    }
+  private SystemState handleStateTransition() {
+    return switch (wantedState) {
+      case DEPLOY -> SystemState.DEPLOYING;
+      case CLIMB -> SystemState.CLIMBING;
+      case IDLE -> SystemState.IDLING;
+    };
+  }
 
-    public void setCoast() {
-        io.setCoast();
-    }
+  public void resetPosition() {
+    io.resetPosition();
+  }
 
-    public void setBrake() {
-        io.setBrake();
-    }
+  public void setCoast() {
+    io.setCoast();
+  }
 
-    public enum WantedState {
-        DEPLOY,
-        CLIMB,
-        IDLE
-    }
+  public void setBrake() {
+    io.setBrake();
+  }
 
-    public enum SystemState {
-        DEPLOYING,
-        CLIMBING,
-        IDLING
-    }
+  public enum WantedState {
+    DEPLOY,
+    CLIMB,
+    IDLE
+  }
 
+  public enum SystemState {
+    DEPLOYING,
+    CLIMBING,
+    IDLING
+  }
+
+
+  @NTParameter(tableName = "Params/Subsystems/Climber")
+  public static final class ClimberParams {
+    static final double RollerLockOnVoltage = -12.0;
+    static final double RollerHoldVoltage = -1.0;
+
+    static final double Kp = 18.0;
+    static final double Ki = 0.0;
+    static final double Kd = 0.01;
+
+    static final double CruiseVelocity = 10000.0;
+    static final double Acceleration = 10000.0;
+    static final double Jerk = 0.0;
+
+    static final double DeployAngle = 375.0;
+    static final double IdleAngle = 375.0;
+    static final double ClimbAngle = -175.0;
+  }
 
 }

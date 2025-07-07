@@ -20,7 +20,7 @@ public class LimelightSubsystem extends SubsystemBase {
     private final Map<String, LimelightIO> limelightIOs;
     private final Map<String, LimelightIOInputsAutoLogged> limelightInputs;
     @Getter
-    public Optional<PoseEstimate[]> estimatedPose;
+    public Optional<PoseEstimate[]> estimatedPose = Optional.empty();
 
     private boolean useMegaTag2 = false;
 

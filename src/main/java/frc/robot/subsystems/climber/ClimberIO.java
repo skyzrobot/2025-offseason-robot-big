@@ -1,39 +1,40 @@
 package frc.robot.subsystems.climber;
 
-import frc.robot.RobotConstants.ClimberConstants.ClimberGainsClass;
+import edu.wpi.first.units.measure.Voltage;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface ClimberIO {
-    default void updateInputs(ClimberIOInputs inputs) {
-    }
+  default void updateInputs(ClimberIOInputs inputs) {
+  }
 
-    default void setTargetPosition(double targetPositionDeg) {
-    }
+  default void setTargetPosition(double targetPositionDeg) {
+  }
 
-    default void resetPosition() {
-    }
+  default void setRollerVoltage(Voltage voltage) {
+  }
 
-    default void setCoast() {
-    }
+  default void resetPosition() {
+  }
 
-    default void setBrake() {
-    }
+  default void setCoast() {
+  }
 
-    @AutoLog
-    class ClimberIOInputs {
-        public double currentPositionDeg = 0.0;
-        public double targetPositionDeg = 0.0;
-        public double velocityRotationsPerSec = 0.0;
-        public double appliedVolts = 0.0;
-        public double statorCurrentAmps = 0.0;
-        public double supplyCurrentAmps = 0.0;
-        public double tempCelsius = 0.0;
+  default void setBrake() {
+  }
 
-        public double ClimberKP = ClimberGainsClass.CLIMBER_KP.get();
-        public double ClimberKI = ClimberGainsClass.CLIMBER_KI.get();
-        public double ClimberKD = ClimberGainsClass.CLIMBER_KD.get();
-        public double ClimberKA = ClimberGainsClass.CLIMBER_KA.get();
-        public double ClimberKV = ClimberGainsClass.CLIMBER_KV.get();
-        public double ClimberKS = ClimberGainsClass.CLIMBER_KS.get();
-    }
+  default void setParams(double kP, double kI, double kD, double cruiseVelocity, double acceleration, double jerk) {
+
+  }
+
+  @AutoLog
+  class ClimberIOInputs {
+    public double currentPositionDeg = 0.0;
+    public double targetPositionDeg = 0.0;
+    public double velocityRotationsPerSec = 0.0;
+    public double appliedVolts = 0.0;
+    public double statorCurrentAmps = 0.0;
+    public double supplyCurrentAmps = 0.0;
+    public double tempCelsius = 0.0;
+    public double rollerStatorCurrentAmps = 0.0;
+  }
 }

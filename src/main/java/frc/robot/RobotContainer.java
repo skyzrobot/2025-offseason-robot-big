@@ -15,15 +15,16 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.CoralIntakeAssistCommand;
 import frc.robot.commands.aimSequences.*;
-import frc.robot.subsystems.beambreak.BeambreakIO;
 import frc.robot.subsystems.beambreak.BeambreakIOReal;
 import frc.robot.subsystems.beambreak.BeambreakIOSim;
 import frc.robot.subsystems.climber.ClimberIO;
+import frc.robot.subsystems.climber.ClimberIOReal;
 import frc.robot.subsystems.climber.ClimberIOSim;
 import frc.robot.subsystems.climber.ClimberSubsystem;
 import frc.robot.subsystems.indicator.IndicatorIO;
@@ -31,27 +32,22 @@ import frc.robot.subsystems.indicator.IndicatorIOARGB;
 import frc.robot.subsystems.indicator.IndicatorIOSim;
 import frc.robot.subsystems.indicator.IndicatorSubsystem;
 import frc.robot.subsystems.limelight.LimelightIOReal;
-import frc.robot.subsystems.limelight.LimelightIOReplay;
 import frc.robot.subsystems.limelight.LimelightSubsystem;
 import frc.robot.subsystems.photonvision.PhotonVisionIOReal;
 import frc.robot.subsystems.photonvision.PhotonVisionIOSim;
 import frc.robot.subsystems.photonvision.PhotonVisionSubsystem;
 import frc.robot.subsystems.questnav.QuestNavSubsystem;
-import frc.robot.subsystems.roller.RollerIO;
 import frc.robot.subsystems.roller.RollerIOReal;
 import frc.robot.subsystems.roller.RollerIOSim;
 import frc.robot.subsystems.superstructure.DestinationSupplier;
 import frc.robot.subsystems.superstructure.Superstructure;
 import frc.robot.subsystems.superstructure.SuperstructureState;
-import frc.robot.subsystems.superstructure.elevator.ElevatorIO;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOReal;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOSim;
 import frc.robot.subsystems.superstructure.elevator.ElevatorSubsystem;
-import frc.robot.subsystems.superstructure.endeffectorarm.EndEffectorArmPivotIO;
 import frc.robot.subsystems.superstructure.endeffectorarm.EndEffectorArmPivotIOReal;
 import frc.robot.subsystems.superstructure.endeffectorarm.EndEffectorArmPivotIOSim;
 import frc.robot.subsystems.superstructure.endeffectorarm.EndEffectorArmSubsystem;
-import frc.robot.subsystems.superstructure.intake.IntakePivotIO;
 import frc.robot.subsystems.superstructure.intake.IntakePivotIOReal;
 import frc.robot.subsystems.superstructure.intake.IntakePivotIOSim;
 import frc.robot.subsystems.superstructure.intake.IntakeSubsystem;
@@ -104,150 +100,98 @@ public class RobotContainer {
 
 
   public RobotContainer() {
-    if (!RobotConstants.useReplay) {
-      if (RobotBase.isReal()) {
-        // Real hardware initialization
-        swerve = new Swerve(
-            RobotConstants.SwerveConstants.kRealConfig,
-            new ImuIOPigeon(RobotConstants.SwerveConstants.kRealConfig),
-            new SwerveModuleIOSJTU6(RobotConstants.SwerveConstants.kRealConfig, 0),
-            new SwerveModuleIOSJTU6(RobotConstants.SwerveConstants.kRealConfig, 1),
-            new SwerveModuleIOSJTU6(RobotConstants.SwerveConstants.kRealConfig, 2),
-            new SwerveModuleIOSJTU6(RobotConstants.SwerveConstants.kRealConfig, 3)
-        );
-        indicatorSubsystem = new IndicatorSubsystem(new IndicatorIOARGB());
-        elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOReal());
-        intakeSubsystem = new IntakeSubsystem(
-            new IntakePivotIOReal(),
-            new RollerIOReal(
-                RobotConstants.IntakeConstants.INTAKE_MOTOR_ID,
-                RobotConstants.CANIVORE_CAN_BUS_NAME,
-                RobotConstants.IntakeConstants.STATOR_CURRENT_LIMIT_AMPS,
-                RobotConstants.IntakeConstants.SUPPLY_CURRENT_LIMIT_AMPS,
-                RobotConstants.IntakeConstants.IS_INTAKER_INVERT,
-                RobotConstants.IntakeConstants.IS_BRAKE
-            ),
-            new RollerIOReal(
-                RobotConstants.IntakeConstants.INDEX_MOTOR_ID,
-                RobotConstants.CANIVORE_CAN_BUS_NAME,
-                RobotConstants.IntakeConstants.STATOR_CURRENT_LIMIT_AMPS,
-                RobotConstants.IntakeConstants.SUPPLY_CURRENT_LIMIT_AMPS,
-                RobotConstants.IntakeConstants.IS_INDEXER_INVERT,
-                RobotConstants.IntakeConstants.IS_BRAKE,
-                RobotConstants.IntakeConstants.INDEX_FOLLOWER_MOTOR_ID,
-                RobotConstants.IntakeConstants.INDEX_FOLLOWER_INVERT
-            ),
-            new BeambreakIOReal(RobotConstants.BeamBreakConstants.INTAKE_BEAMBREAK_ID)
-        );
-        climberSubsystem = new ClimberSubsystem(new ClimberIOSim());
-        endEffectorArmSubsystem = new EndEffectorArmSubsystem(
-            new EndEffectorArmPivotIOReal(),
-            new RollerIOReal(
-                RobotConstants.EndEffectorArmConstants.END_EFFECTOR_ARM_ROLLER_MOTOR_ID,
-                RobotConstants.CANIVORE_CAN_BUS_NAME,
-                RobotConstants.EndEffectorArmConstants.STATOR_CURRENT_LIMIT_AMPS,
-                RobotConstants.EndEffectorArmConstants.SUPPLY_CURRENT_LIMIT_AMPS,
-                RobotConstants.EndEffectorArmConstants.IS_INVERT,
-                RobotConstants.EndEffectorArmConstants.IS_BRAKE
-            ),
-            new BeambreakIOReal(RobotConstants.BeamBreakConstants.ENDEFFECTORARM_CORAL_BEAMBREAK_ID),
-            new BeambreakIOReal(RobotConstants.BeamBreakConstants.ENDEFFECTORARM_ALGAE_BEAMBREAK_ID)
-        );
-        limelightSubsystem = new LimelightSubsystem(new HashMap<>() {{
-          put(LIMELIGHT_LEFT, new LimelightIOReal(LIMELIGHT_LEFT));
-          put(LIMELIGHT_RIGHT, new LimelightIOReal(LIMELIGHT_RIGHT));
-        }});
-//        questNavSubsystem = new QuestNavSubsystem(new QuestNavIOReal());
-        photonVisionSubsystem = new PhotonVisionSubsystem(new PhotonVisionIOReal(0));
-      } else {
-        // Simulation initialization
-        swerve = new Swerve(
-            RobotConstants.SwerveConstants.kSimConfig,
-            new ImuIOSim(),
-            new SwerveModuleIOSim(RobotConstants.SwerveConstants.kSimConfig, 0),
-            new SwerveModuleIOSim(RobotConstants.SwerveConstants.kSimConfig, 1),
-            new SwerveModuleIOSim(RobotConstants.SwerveConstants.kSimConfig, 2),
-            new SwerveModuleIOSim(RobotConstants.SwerveConstants.kSimConfig, 3)
-        );
-
-        indicatorSubsystem = new IndicatorSubsystem(new IndicatorIOSim());
-        elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSim());
-        intakeSubsystem = new IntakeSubsystem(
-            new IntakePivotIOSim(),
-            new RollerIOSim(1, RobotConstants.IntakeConstants.ROLLER_RATIO,
-                new SimpleMotorFeedforward(0.0, 0.24),
-                new ProfiledPIDController(0.5, 0.0, 0.0,
-                    new TrapezoidProfile.Constraints(15, 1))),
-            new RollerIOSim(1, 1.0, new SimpleMotorFeedforward(0.0, 0.24),
-                new ProfiledPIDController(0.5, 0.0, 0.0,
-                    new TrapezoidProfile.Constraints(15, 1))),
-            new BeambreakIOSim(RobotConstants.BeamBreakConstants.INTAKE_BEAMBREAK_ID)
-        );
-        climberSubsystem = new ClimberSubsystem(new ClimberIO() {
-        });
-        limelightSubsystem = new LimelightSubsystem(new HashMap<>() {{
-          put(LIMELIGHT_LEFT, new LimelightIOReal(LIMELIGHT_LEFT));
-          put(LIMELIGHT_RIGHT, new LimelightIOReal(LIMELIGHT_RIGHT));
-        }});
-        endEffectorArmSubsystem = new EndEffectorArmSubsystem(
-            new EndEffectorArmPivotIOSim(),
-            new RollerIOSim(1, 1.0, new SimpleMotorFeedforward(0.0, 0.24),
-                new ProfiledPIDController(0.5, 0.0, 0.0,
-                    new TrapezoidProfile.Constraints(15, 1))),
-            new BeambreakIOSim(RobotConstants.BeamBreakConstants.ENDEFFECTORARM_CORAL_BEAMBREAK_ID),
-            new BeambreakIOSim(RobotConstants.BeamBreakConstants.ENDEFFECTORARM_ALGAE_BEAMBREAK_ID)
-        );
-//        questNavSubsystem = new QuestNavSubsystem(new QuestNavIOSim());
-        photonVisionSubsystem = new PhotonVisionSubsystem(new PhotonVisionIOSim(0));
-      }
-    }
-
-    // in the case of replay, no implementation is needed
-    if (indicatorSubsystem == null) {
-      indicatorSubsystem = new IndicatorSubsystem(new IndicatorIO() {
-      });
-    }
-    if (limelightSubsystem == null) {
-      limelightSubsystem = new LimelightSubsystem(new HashMap<>() {{
-        put(LIMELIGHT_LEFT, new LimelightIOReplay("LimelightL"));
-        put(LIMELIGHT_RIGHT, new LimelightIOReplay("LimelightR"));
-      }});
-    }
-    if (endEffectorArmSubsystem == null) {
-      endEffectorArmSubsystem = new EndEffectorArmSubsystem(
-          new EndEffectorArmPivotIO() {
-          },
-          new RollerIO() {
-          },
-          new BeambreakIO() {
-          },
-          new BeambreakIO() {
-          }
+    if (RobotBase.isReal()) {
+      // Real hardware initialization
+      swerve = new Swerve(
+          RobotConstants.SwerveConstants.kRealConfig,
+          new ImuIOPigeon(RobotConstants.SwerveConstants.kRealConfig),
+          new SwerveModuleIOSJTU6(RobotConstants.SwerveConstants.kRealConfig, 0),
+          new SwerveModuleIOSJTU6(RobotConstants.SwerveConstants.kRealConfig, 1),
+          new SwerveModuleIOSJTU6(RobotConstants.SwerveConstants.kRealConfig, 2),
+          new SwerveModuleIOSJTU6(RobotConstants.SwerveConstants.kRealConfig, 3)
       );
-    }
-    if (climberSubsystem == null) {
-      climberSubsystem = new ClimberSubsystem(new ClimberIO() {
-      });
-    }
-    if (intakeSubsystem == null) {
+      indicatorSubsystem = new IndicatorSubsystem(new IndicatorIOARGB());
+      elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOReal());
       intakeSubsystem = new IntakeSubsystem(
-          new IntakePivotIO() {
-          },
-          new RollerIO() {
-          },
-          new RollerIO() {
-          },
-          new BeambreakIO() {
-          }
+          new IntakePivotIOReal(),
+          new RollerIOReal(
+              RobotConstants.IntakeConstants.INTAKE_MOTOR_ID,
+              RobotConstants.CANIVORE_CAN_BUS_NAME,
+              RobotConstants.IntakeConstants.STATOR_CURRENT_LIMIT_AMPS,
+              RobotConstants.IntakeConstants.SUPPLY_CURRENT_LIMIT_AMPS,
+              RobotConstants.IntakeConstants.IS_INTAKER_INVERT,
+              RobotConstants.IntakeConstants.IS_BRAKE
+          ),
+          new RollerIOReal(
+              RobotConstants.IntakeConstants.INDEX_MOTOR_ID,
+              RobotConstants.CANIVORE_CAN_BUS_NAME,
+              RobotConstants.IntakeConstants.STATOR_CURRENT_LIMIT_AMPS,
+              RobotConstants.IntakeConstants.SUPPLY_CURRENT_LIMIT_AMPS,
+              RobotConstants.IntakeConstants.IS_INDEXER_INVERT,
+              RobotConstants.IntakeConstants.IS_BRAKE,
+              RobotConstants.IntakeConstants.INDEX_FOLLOWER_MOTOR_ID,
+              RobotConstants.IntakeConstants.INDEX_FOLLOWER_INVERT
+          ),
+          new BeambreakIOReal(RobotConstants.BeamBreakConstants.INTAKE_BEAMBREAK_ID)
       );
+      climberSubsystem = new ClimberSubsystem(new ClimberIOReal());
+      endEffectorArmSubsystem = new EndEffectorArmSubsystem(
+          new EndEffectorArmPivotIOReal(),
+          new RollerIOReal(
+              RobotConstants.EndEffectorArmConstants.END_EFFECTOR_ARM_ROLLER_MOTOR_ID,
+              RobotConstants.CANIVORE_CAN_BUS_NAME,
+              RobotConstants.EndEffectorArmConstants.STATOR_CURRENT_LIMIT_AMPS,
+              RobotConstants.EndEffectorArmConstants.SUPPLY_CURRENT_LIMIT_AMPS,
+              RobotConstants.EndEffectorArmConstants.IS_INVERT,
+              RobotConstants.EndEffectorArmConstants.IS_BRAKE
+          ),
+          new BeambreakIOReal(RobotConstants.BeamBreakConstants.ENDEFFECTORARM_CORAL_BEAMBREAK_ID),
+          new BeambreakIOReal(RobotConstants.BeamBreakConstants.ENDEFFECTORARM_ALGAE_BEAMBREAK_ID)
+      );
+      limelightSubsystem = new LimelightSubsystem(new HashMap<>() {{
+        put(LIMELIGHT_LEFT, new LimelightIOReal(LIMELIGHT_LEFT));
+        put(LIMELIGHT_RIGHT, new LimelightIOReal(LIMELIGHT_RIGHT));
+      }});
+      photonVisionSubsystem = new PhotonVisionSubsystem(new PhotonVisionIOReal(0));
+    } else {
+      // Simulation initialization
+      swerve = new Swerve(
+          RobotConstants.SwerveConstants.kSimConfig,
+          new ImuIOSim(),
+          new SwerveModuleIOSim(RobotConstants.SwerveConstants.kSimConfig, 0),
+          new SwerveModuleIOSim(RobotConstants.SwerveConstants.kSimConfig, 1),
+          new SwerveModuleIOSim(RobotConstants.SwerveConstants.kSimConfig, 2),
+          new SwerveModuleIOSim(RobotConstants.SwerveConstants.kSimConfig, 3)
+      );
+
+      indicatorSubsystem = new IndicatorSubsystem(new IndicatorIOSim());
+      elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSim());
+      intakeSubsystem = new IntakeSubsystem(
+          new IntakePivotIOSim(),
+          new RollerIOSim(1, RobotConstants.IntakeConstants.ROLLER_RATIO,
+              new SimpleMotorFeedforward(0.0, 0.24),
+              new ProfiledPIDController(0.5, 0.0, 0.0,
+                  new TrapezoidProfile.Constraints(15, 1))),
+          new RollerIOSim(1, 1.0, new SimpleMotorFeedforward(0.0, 0.24),
+              new ProfiledPIDController(0.5, 0.0, 0.0,
+                  new TrapezoidProfile.Constraints(15, 1))),
+          new BeambreakIOSim(RobotConstants.BeamBreakConstants.INTAKE_BEAMBREAK_ID)
+      );
+      climberSubsystem = new ClimberSubsystem(new ClimberIOSim());
+      limelightSubsystem = new LimelightSubsystem(new HashMap<>() {{
+        put(LIMELIGHT_LEFT, new LimelightIOReal(LIMELIGHT_LEFT));
+        put(LIMELIGHT_RIGHT, new LimelightIOReal(LIMELIGHT_RIGHT));
+      }});
+      endEffectorArmSubsystem = new EndEffectorArmSubsystem(
+          new EndEffectorArmPivotIOSim(),
+          new RollerIOSim(1, 1.0, new SimpleMotorFeedforward(0.0, 0.24),
+              new ProfiledPIDController(0.5, 0.0, 0.0,
+                  new TrapezoidProfile.Constraints(15, 1))),
+          new BeambreakIOSim(RobotConstants.BeamBreakConstants.ENDEFFECTORARM_CORAL_BEAMBREAK_ID),
+          new BeambreakIOSim(RobotConstants.BeamBreakConstants.ENDEFFECTORARM_ALGAE_BEAMBREAK_ID)
+      );
+      photonVisionSubsystem = new PhotonVisionSubsystem(new PhotonVisionIOSim(0));
     }
-    if (elevatorSubsystem == null) {
-      elevatorSubsystem = new ElevatorSubsystem(new ElevatorIO() {
-      });
-    }
-//    if (questNavSubsystem == null) {
-//      questNavSubsystem = new QuestNavSubsystem(new QuestNavIO.Default());
-//    }
 
 
     superstructure = new Superstructure(intakeSubsystem, endEffectorArmSubsystem, elevatorSubsystem);
@@ -256,11 +200,17 @@ public class RobotContainer {
     //autoActions = new AutoActions(indicatorSubsystem, elevatorSubsystem, endEffectorArmSubsystem, intakeSubsystem);
     //autoFile = new AutoFile(autoActions);
 
+//    CommandScheduler.getInstance().unregisterAllSubsystems();
+//    CommandScheduler.getInstance().registerSubsystem(
+//        climberSubsystem, swerve
+//    );
+    CommandScheduler.getInstance().unregisterSubsystem(climberSubsystem);
 
     //configureAutoChooser();
     configureDriverBindings();
     configureStreamDeckBindings();
     configureTesterBindings();
+
   }
 
   // private void configureAutoChooser() {
@@ -320,8 +270,16 @@ public class RobotContainer {
 //                new ReefAimCommand(swerve, indicatorSubsystem)
 //            )
 //    );
+//    driverController.x().whileTrue(
+//        new ChaseCoralCommand(swerve, photonVisionSubsystem)
+//    );
+
     driverController.x().whileTrue(
-        new ChaseCoralCommand(swerve, photonVisionSubsystem)
+        Commands.either(
+            Commands.run(() -> climberSubsystem.setWantedState(ClimberSubsystem.WantedState.CLIMB)),
+            Commands.run(() -> climberSubsystem.setWantedState(ClimberSubsystem.WantedState.DEPLOY)),
+            climberSubsystem::hasDeployed
+        )
     );
 
     // Y button - Coral intake assist drive
@@ -557,13 +515,13 @@ public class RobotContainer {
     limelightSubsystem.estimatedPose.ifPresent(estimate -> {
       if (estimate[0] != null) {
         swerve.addVisionMeasurement(
-            new Pose3d(estimate[0].pose()), estimate[0].timestampSeconds(), VecBuilder.fill(0.5, 0.5, 0.5, 9999.0)
+            new Pose3d(estimate[0].pose()), estimate[0].timestampSeconds(), VecBuilder.fill(0.1, 0.1, 0.3, 9999.0)
         );
       }
 
       if (estimate[1] != null) {
         swerve.addVisionMeasurement(
-            new Pose3d(estimate[1].pose()), estimate[1].timestampSeconds(), VecBuilder.fill(0.5, 0.5, 0.5, 9999.0)
+            new Pose3d(estimate[1].pose()), estimate[1].timestampSeconds(), VecBuilder.fill(0.1, 0.1, 0.3, 9999.0)
         );
       }
     });

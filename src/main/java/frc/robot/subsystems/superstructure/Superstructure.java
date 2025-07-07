@@ -172,7 +172,7 @@ public class Superstructure extends SubsystemBase {
         // Run periodic
         intake.periodic();
         endEffectorArm.periodic();
-        elevator.periodic();
+//        elevator.periodic();
 
         //simulated gamepiece tracking
         if (!RobotBase.isReal() && !RobotConstants.useReplay) {

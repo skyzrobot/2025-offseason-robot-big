@@ -438,26 +438,7 @@ public final class RobotConstants {
   public static class ClimberConstants {
     public static final int CLIMBER_MOTOR_ID = 52;
     public static final double CLIMBER_RATIO = 5 * 5 * 4;
-
-    public static final TunableNumber CLIMBER_CRUISE_VELOCITY = new TunableNumber("CLIMBER/ClimberCruiseVelocity", 100);
-    public static final TunableNumber CLIMBER_ACCELERATION = new TunableNumber("CLIMBER/ClimberAcceleration", 200);
-    public static final TunableNumber CLIMBER_JERK = new TunableNumber("CLIMBER/ClimberJerk", 0);
-
-    /**
-     * Constants for the CLIMBER pivot motor gains in the CLIMBER subsystem.
-     */
-    public static class ClimberGainsClass {
-      public static final TunableNumber CLIMBER_KP = new TunableNumber("CLIMBER PID/kp",
-          2.001);
-      public static final TunableNumber CLIMBER_KI = new TunableNumber("CLIMBER PID/ki", 0);
-      public static final TunableNumber CLIMBER_KD = new TunableNumber("CLIMBER PID/kd",
-          0.01);
-      public static final TunableNumber CLIMBER_KA = new TunableNumber("CLIMBER PID/ka", 0);
-      public static final TunableNumber CLIMBER_KV = new TunableNumber("CLIMBER PID/kv",
-          0);
-      public static final TunableNumber CLIMBER_KS = new TunableNumber("CLIMBER PID/ks",
-          0);
-    }
+    public static final int CLIMBER_ROLLER_MOTOR_ID = 55;
   }
 
   /**

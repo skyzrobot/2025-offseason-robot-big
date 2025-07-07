@@ -96,7 +96,10 @@ public class Swerve extends SubsystemBase {
     imuIOInputs.yawVelocityRadPerSecCmd = getChassisSpeeds().omegaRadiansPerSecond;
     imuIO.updateInputs(imuIOInputs);
     Logger.processInputs(config.name + "/IMU", imuIOInputs);
-    modules.forEach(SwerveModule::updateInputs);
+    modules.forEach(module -> {
+      module.updateInputs();
+      module.periodic();
+    });
 
     // odom
     var swerveModulePositionsWithTime = getSampledModulePositions();
@@ -111,10 +114,6 @@ public class Swerve extends SubsystemBase {
     }
     odometryLock.unlock();
     LoggedTracer.record(config.name + "/Inputs");
-
-    // module periodic
-    modules.forEach((SwerveModule::periodic));
-    if (DriverStation.isDisabled()) modules.forEach(SwerveModule::runStop);
 
     // telemetry
     Logger.recordOutput(config.name + "/Mode", mode);
