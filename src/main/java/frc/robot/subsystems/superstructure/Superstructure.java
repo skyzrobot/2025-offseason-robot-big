@@ -153,7 +153,6 @@ public class Superstructure extends SubsystemBase {
                     SuperstructureState.CORAL_STOW,
                     SuperstructureState.ALGAE_STOW,
                     SuperstructureState.CORAL_INDEXED_INTAKE,
-                    SuperstructureState.L3,
                     SuperstructureState.L4,
                     SuperstructureState.P2,
                     SuperstructureState.NET_SCORE
@@ -162,6 +161,7 @@ public class Superstructure extends SubsystemBase {
             Set.of(
                     SuperstructureState.L1_SHOOT_SIDE,
                     SuperstructureState.L2,
+                    SuperstructureState.L3,
                     SuperstructureState.P1,
                     SuperstructureState.CORAL_STATION_INTAKE
             );
@@ -516,13 +516,14 @@ public class Superstructure extends SubsystemBase {
                     .andThen(Commands.waitUntil(this::poseAtGoal));
         
         }
-        if (to == SuperstructureState.L4){
-            return runElevator(to.getValue().getPose().elevatorHeight())
-                .andThen(
-                    Commands.waitUntil(elevator::isAtGoal),
-                    runSuperstructurePose(to.getValue().getPose()),
-                    Commands.waitUntil(this::poseAtGoal));
+        if (to == SuperstructureState.L2 || to == SuperstructureState.L2_EJECT||to == SuperstructureState.L3){
+            return runEndEffectorArm(to.getValue().getPose().endEffectorAngle())
+                    .andThen( Commands.waitUntil(endEffectorArm::isAtGoal),
+                                runSuperstructurePose(to.getValue().getPose()),
+                                Commands.waitUntil(this::poseAtGoal),
+                                runSuperstructureRollers(to));
         }
+
         if (to == SuperstructureState.CORAL_STATION_INTAKE){
             return runEndEffectorArm(to.getValue().getPose().endEffectorAngle())
                     .andThen(Commands.waitUntil(endEffectorArm::isAtGoal),
@@ -544,9 +545,8 @@ public class Superstructure extends SubsystemBase {
                 return runSuperstructurePose(to.getValue().getPose())
                         .andThen(Commands.waitUntil(endEffectorArm::isAtGoal));
             } else {
-                //TODO:check this 
                 return runSuperstructurePose(to.getValue().getPose())
-                        .andThen(Commands.waitUntil(elevator::isSafeToFlip));
+                        .andThen(Commands.waitUntil(elevator::isAtGoal));
             }
         }
         return runSuperstructurePose(to.getValue().getPose())

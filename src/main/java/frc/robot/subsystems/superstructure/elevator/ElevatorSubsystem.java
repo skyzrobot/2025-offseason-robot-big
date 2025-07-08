@@ -25,7 +25,7 @@ import static frc.robot.RobotConstants.ElevatorConstants.ELEVATOR_SPOOL_DIAMETER
 
 import java.util.function.DoubleSupplier;
 
-public class ElevatorSubsystem extends SubsystemBase {
+public class ElevatorSubsystem {
     @Getter
     private final ElevatorIO io;
     private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
@@ -50,88 +50,88 @@ public class ElevatorSubsystem extends SubsystemBase {
     @AutoLogOutput(key = "Elevator/stopDueToLimit")
     private boolean stopDueToLimit = false;
 
-    // SysId routine for elevator characterization
-    private final SysIdRoutine m_sysIdRoutine;
+    // // SysId routine for elevator characterization
+    // private final SysIdRoutine m_sysIdRoutine;
 
     public ElevatorSubsystem(ElevatorIO io) {
         this.io = io;
         
-        // Initialize SysId routine after io is set
-        this.m_sysIdRoutine = new SysIdRoutine(
-            new SysIdRoutine.Config(
-                Units.Volts.of(ElevatorConstants.SYSID_RAMP_RATE_VOLTS_PER_SEC.get()).per(Units.Second), // Use default ramp rate (1 V/s) - can be adjusted via ElevatorConstants.SYSID_RAMP_RATE_VOLTS_PER_SEC
-                Units.Volts.of(ElevatorConstants.SYSID_DYNAMIC_VOLTAGE.get()),
-                null, // Use default timeout (10 s) - can be adjusted via ElevatorConstants.SYSID_TIMEOUT_SECONDS  
-                // Log state with Phoenix SignalLogger class
-                (state) -> SignalLogger.writeString("sysid-state", state.toString())
-            ),
-            new SysIdRoutine.Mechanism(
-                (Voltage volts) -> {
-                    io.setElevatorVoltage(volts.in(Units.Volts));
-                    // Manually log the three required signals for SysId
-                    SignalLogger.writeDouble("sysid-elevator-voltage", inputs.motorVoltage, "V");
-                    SignalLogger.writeDouble("sysid-elevator-position", inputs.positionMeters, "m");
-                    SignalLogger.writeDouble("sysid-elevator-velocity", inputs.velocityMetersPerSec, "m/s");
-                },
-                null, // No log consumer needed - using manual logging above
-                this
-            )
-        );
+        // // Initialize SysId routine after io is set
+        // this.m_sysIdRoutine = new SysIdRoutine(
+        //     new SysIdRoutine.Config(
+        //         Units.Volts.of(ElevatorConstants.SYSID_RAMP_RATE_VOLTS_PER_SEC.get()).per(Units.Second), // Use default ramp rate (1 V/s) - can be adjusted via ElevatorConstants.SYSID_RAMP_RATE_VOLTS_PER_SEC
+        //         Units.Volts.of(ElevatorConstants.SYSID_DYNAMIC_VOLTAGE.get()),
+        //         null, // Use default timeout (10 s) - can be adjusted via ElevatorConstants.SYSID_TIMEOUT_SECONDS  
+        //         // Log state with Phoenix SignalLogger class
+        //         (state) -> SignalLogger.writeString("sysid-state", state.toString())
+        //     ),
+        //     new SysIdRoutine.Mechanism(
+        //         (Voltage volts) -> {
+        //             io.setElevatorVoltage(volts.in(Units.Volts));
+        //             // Manually log the three required signals for SysId
+        //             SignalLogger.writeDouble("sysid-elevator-voltage", inputs.motorVoltage, "V");
+        //             SignalLogger.writeDouble("sysid-elevator-position", inputs.positionMeters, "m");
+        //             SignalLogger.writeDouble("sysid-elevator-velocity", inputs.velocityMetersPerSec, "m/s");
+        //         },
+        //         null, // No log consumer needed - using manual logging above
+        //         this
+        //     )
+        // );
     }
 
-    // SysId characterization commands
-        /**
-     * Returns a command that runs a quasistatic test in the given direction.
-     * @param direction The direction to run the test (kForward = up, kReverse = down)
-     * @return The SysId quasistatic command
-     */
-    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
-        return Commands.sequence(
-            Commands.runOnce(() -> runningCharacterization = true),
-            m_sysIdRoutine.quasistatic(direction),
-            Commands.runOnce(() -> runningCharacterization = false)
-        );
-    }
+    // // SysId characterization commands
+    //     /**
+    //  * Returns a command that runs a quasistatic test in the given direction.
+    //  * @param direction The direction to run the test (kForward = up, kReverse = down)
+    //  * @return The SysId quasistatic command
+    //  */
+    // public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+    //     return Commands.sequence(
+    //         Commands.runOnce(() -> runningCharacterization = true),
+    //         m_sysIdRoutine.quasistatic(direction),
+    //         Commands.runOnce(() -> runningCharacterization = false)
+    //     );
+    // }
 
-    /**
-     * Returns a command that runs a dynamic test in the given direction.
-     * @param direction The direction to run the test (kForward = up, kReverse = down)
-     * @return The SysId dynamic command
-     */
-    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
-        return Commands.sequence(
-            Commands.runOnce(() -> runningCharacterization = true),
-            m_sysIdRoutine.dynamic(direction),
-            Commands.runOnce(() -> runningCharacterization = false)
-        );
-    }
+    // /**
+    //  * Returns a command that runs a dynamic test in the given direction.
+    //  * @param direction The direction to run the test (kForward = up, kReverse = down)
+    //  * @return The SysId dynamic command
+    //  */
+    // public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+    //     return Commands.sequence(
+    //         Commands.runOnce(() -> runningCharacterization = true),
+    //         m_sysIdRoutine.dynamic(direction),
+    //         Commands.runOnce(() -> runningCharacterization = false)
+    //     );
+    // }
 
-    /**
-     * Returns a command that runs the complete SysId characterization sequence.
-     * Automatically starts SignalLogger, pauses climber, runs all 4 tests, then stops logging.
-     * @param climberSubsystem The climber subsystem to pause during testing
-     * @return Complete SysId characterization command sequence
-     */
-    public Command sysIdComplete(frc.robot.subsystems.climber.ClimberSubsystem climberSubsystem) {
-        return Commands.sequence(
-            Commands.runOnce(SignalLogger::start),
-            Commands.print("Starting Elevator SysId - Climber Paused"),
-            Commands.waitSeconds(0.5), // Let climber settle
-            Commands.print("Starting Elevator SysId - Quasistatic Forward"),
-            sysIdQuasistatic(SysIdRoutine.Direction.kForward),
-            Commands.waitSeconds(1.0), // Brief pause between tests
-            Commands.print("Starting Elevator SysId - Quasistatic Reverse"),
-            sysIdQuasistatic(SysIdRoutine.Direction.kReverse),
-            Commands.waitSeconds(1.0),
-            Commands.print("Starting Elevator SysId - Dynamic Forward"),
-            sysIdDynamic(SysIdRoutine.Direction.kForward),
-            Commands.waitSeconds(1.0),
-            Commands.print("Starting Elevator SysId - Dynamic Reverse"),
-            sysIdDynamic(SysIdRoutine.Direction.kReverse),
-            Commands.runOnce(SignalLogger::stop),
-            Commands.print("Elevator SysId Complete - Climber Resumed - Check logs")
-        );
-    }
+    // /**
+    //  * Returns a command that runs the complete SysId characterization sequence.
+    //  * Automatically starts SignalLogger, pauses climber, runs all 4 tests, then stops logging.
+    //  * @param climberSubsystem The climber subsystem to pause during testing
+    //  * @return Complete SysId characterization command sequence
+    //  */
+    // public Command sysIdComplete(frc.robot.subsystems.climber.ClimberSubsystem climberSubsystem) {
+    //     return Commands.sequence(
+    //         Commands.runOnce(SignalLogger::start),
+    //         Commands.print("Starting Elevator SysId - Climber Paused"),
+    //         Commands.waitSeconds(0.5), // Let climber settle
+    //         Commands.print("Starting Elevator SysId - Quasistatic Forward"),
+    //         sysIdQuasistatic(SysIdRoutine.Direction.kForward),
+    //         Commands.waitSeconds(1.0), // Brief pause between tests
+    //         Commands.print("Starting Elevator SysId - Quasistatic Reverse"),
+    //         sysIdQuasistatic(SysIdRoutine.Direction.kReverse),
+    //         Commands.waitSeconds(1.0),
+    //         Commands.print("Starting Elevator SysId - Dynamic Forward"),
+    //         sysIdDynamic(SysIdRoutine.Direction.kForward),
+    //         Commands.waitSeconds(1.0),
+    //         Commands.print("Starting Elevator SysId - Dynamic Reverse"),
+    //         sysIdDynamic(SysIdRoutine.Direction.kReverse),
+    //         Commands.runOnce(SignalLogger::stop),
+    //         Commands.print("Elevator SysId Complete - Climber Resumed - Check logs")
+    //     );
+    // }
 
     public void periodic() {
         io.updateInputs(inputs);
@@ -164,14 +164,14 @@ public class ElevatorSubsystem extends SubsystemBase {
             atGoal = false;
         }
         
-        // Continuously log elevator signals during characterization
-        if (runningCharacterization) {
-            SignalLogger.writeDouble("elevator-motor-voltage", inputs.motorVoltage, "V");
-            SignalLogger.writeDouble("elevator-position", inputs.positionMeters, "m");
-            SignalLogger.writeDouble("elevator-velocity", inputs.velocityMetersPerSec, "m/s");
-            SignalLogger.writeDouble("elevator-applied-volts", inputs.appliedVolts, "V");
-            SignalLogger.writeDouble("elevator-stator-current", inputs.statorCurrentAmps, "A");
-        }
+        // // Continuously log elevator signals during characterization
+        // if (runningCharacterization) {
+        //     SignalLogger.writeDouble("elevator-motor-voltage", inputs.motorVoltage, "V");
+        //     SignalLogger.writeDouble("elevator-position", inputs.positionMeters, "m");
+        //     SignalLogger.writeDouble("elevator-velocity", inputs.velocityMetersPerSec, "m/s");
+        //     SignalLogger.writeDouble("elevator-applied-volts", inputs.appliedVolts, "V");
+        //     SignalLogger.writeDouble("elevator-stator-current", inputs.statorCurrentAmps, "A");
+        // }
         
         LoggedTracer.record("Elevator");
     }

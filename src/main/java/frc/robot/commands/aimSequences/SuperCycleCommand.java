@@ -35,7 +35,6 @@ public class SuperCycleCommand extends SequentialCommandGroup {
     addRequirements(superstructure);
 
     addCommands(
-        Commands.either(
             // preshoot and shoot coral, then take the algae
             Commands.sequence(
                 // preshoot coral(press right trigger to end)
@@ -49,11 +48,7 @@ public class SuperCycleCommand extends SequentialCommandGroup {
                     ).until(() -> !superstructure.hasCoral()),
                 // take algae
                 takeAlgae()
-            ),
-            // if no coral, just take algae
-            takeAlgae(),
-            superstructure::hasCoral
-        )
+            )
     );
   }
 

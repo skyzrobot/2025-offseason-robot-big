@@ -23,7 +23,7 @@ public record SuperstructurePose(DoubleSupplier elevatorHeight, DoubleSupplier e
     @Getter
     @RequiredArgsConstructor
     enum Preset {
-        CORAL_STOW("Coral Stow",        0.57,   135,   60),
+        CORAL_STOW("Coral Stow",        0.6,   135,   60),
         ALGAE_STOW("Algae Stow",        0.6,    0,   60),
         START("Start",                  0.5,     0,    60),
         L1_INTAKE_SIDE("L1 Intake Side", 0.16,   0,   60),
@@ -39,7 +39,7 @@ public record SuperstructurePose(DoubleSupplier elevatorHeight, DoubleSupplier e
         CORAL_STATION_INTAKE("Coral Station Intake", 0.2, 180, 60),
         IDLE("Idle",                    0.01,    0,   132),
         PROCESSOR("Processor", 0.16, 0, 60),
-        AVOID("Avoid",                  0.57,     0,   60);
+        AVOID("Avoid",                  0.6,     0,   60);
 
 
         

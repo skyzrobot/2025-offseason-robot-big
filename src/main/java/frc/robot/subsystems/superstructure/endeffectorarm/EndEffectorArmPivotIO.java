@@ -1,8 +1,7 @@
 package frc.robot.subsystems.superstructure.endeffectorarm;
 
 import org.littletonrobotics.junction.AutoLog;
-
-import static frc.robot.RobotConstants.EndEffectorArmConstants.EndEffectorArmPivotGainsClass.*;
+import frc.robot.EndEffectorArmParamsNT;
 
 public interface EndEffectorArmPivotIO {
     default void updateInputs(EndEffectorArmPivotIOInputs inputs) {
@@ -28,12 +27,12 @@ public interface EndEffectorArmPivotIO {
         public double supplyCurrentAmps = 0.0;
         public double tempCelsius = 0.0;
 
-        public double endEffectorArmPivotKP = END_EFFECTOR_ARM_PIVOT_KP.get();
-        public double endEffectorArmPivotKI = END_EFFECTOR_ARM_PIVOT_KI.get();
-        public double endEffectorArmPivotKD = END_EFFECTOR_ARM_PIVOT_KD.get();
-        public double endEffectorArmPivotKA = END_EFFECTOR_ARM_PIVOT_KA.get();
-        public double endEffectorArmPivotKV = END_EFFECTOR_ARM_PIVOT_KV.get();
-        public double endEffectorArmPivotKS = END_EFFECTOR_ARM_PIVOT_KS.get();
-        public double endEffectorArmPivotKG = END_EFFECTOR_ARM_PIVOT_KG.get();
+        public double endEffectorArmPivotKP = EndEffectorArmParamsNT.pivotKP.getValue();
+        public double endEffectorArmPivotKI = EndEffectorArmParamsNT.pivotKI.getValue();
+        public double endEffectorArmPivotKD = EndEffectorArmParamsNT.pivotKD.getValue();
+        public double endEffectorArmPivotKA = EndEffectorArmParamsNT.pivotKA.getValue();
+        public double endEffectorArmPivotKV = EndEffectorArmParamsNT.pivotKV.getValue();
+        public double endEffectorArmPivotKS = EndEffectorArmParamsNT.pivotKS.getValue();
+        public double endEffectorArmPivotKG = EndEffectorArmParamsNT.pivotKG.getValue();
     }
 } 

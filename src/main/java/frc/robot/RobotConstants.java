@@ -458,7 +458,7 @@ public final class RobotConstants {
 
     // Dynamic Motion Magic configs - separate for up and down movement
     public static final TunableNumber motionAccelerationUp = new TunableNumber("Elevator/MotionAccelerationUp",
-        400);
+        600);
     public static final TunableNumber motionCruiseVelocityUp = new TunableNumber("Elevator/MotionCruiseVelocityUp",
         250);
     public static final TunableNumber motionJerkUp = new TunableNumber("Elevator/MotionJerkUp",
@@ -487,7 +487,7 @@ public final class RobotConstants {
    * Constants for the elevator motor gains.
    */
   public static class ElevatorGainsClass {
-    public static final TunableNumber ELEVATOR_KP = new TunableNumber("ELEVATOR PID/kp", 2.3);
+    public static final TunableNumber ELEVATOR_KP = new TunableNumber("ELEVATOR PID/kp", 3.75);
     public static final TunableNumber ELEVATOR_KI = new TunableNumber("ELEVATOR PID/ki", 0);
     public static final TunableNumber ELEVATOR_KD = new TunableNumber("ELEVATOR PID/kd", 0);
     public static final TunableNumber ELEVATOR_KA = new TunableNumber("ELEVATOR PID/ka", 0.0068);
@@ -551,49 +551,93 @@ public final class RobotConstants {
     public static final boolean IS_INVERT = false;
     // Pivot motor configuration
     public static final double ROTOR_SENSOR_RATIO = 1.0 / 8 * 90 / 18 * 60;
+
+
+
+    @NTParameter(tableName = "Params/EndEffectorArm")
+    public static final class EndEffectorArmParams {
+      // Encoder and position constants
+      static final double encoderOffset = 0.65625;
+      static final double maxAngleDegrees = 370.0;
+      static final double pivotTolerance = 3.5;
+
+      // Motion Magic parameters
+      static final double motionMagicCruiseVelocity = 10000000; // degrees/second
+      static final double motionMagicAcceleration = 6300; // degrees/second^2
+      static final double motionMagicJerk = 70000; // degrees/second^3
+
+      // Roller voltages for different operations
+      static final double coralIntakeVoltage = 12.0;
+      static final double coralOuttakeVoltage = -6.0;
+      static final double coralPreshootVoltage = -10.0;
+      static final double algaeIntakeVoltage = 8.0;
+      static final double algaePreshootVoltage = -12.0;
+      static final double coralHoldVoltage = 0.5;
+      static final double algaeHoldVoltage = 1.5;
+      static final double coralShootVoltage = -12.0;
+      static final double coralShootVoltageL1 = -2.0;
+      static final double algaeNetShootVoltage = -15.0;
+      static final double algaeProcessorShootVoltage = -4.0;
+      static final double coralShootDelayTime = 0.2;
+
+      // Pivot motor gains
+      static final double pivotKP = 100;
+      static final double pivotKI = 0.0;
+      static final double pivotKD = 05;
+      static final double pivotKA = 0.001; // Use calculated theoretical value
+      static final double pivotKV = 0.2145; // Use calculated theoretical value
+      static final double pivotKS = 0;
+      static final double pivotKG = -0.17;
+
+      // Roller motor gains (currently open loop)
+      static final double rollerKP = 0.0;
+      static final double rollerKI = 0.0;
+      static final double rollerKD = 0.0;
+      static final double rollerKA = 0.0;
+      static final double rollerKV = 0.0;
+      static final double rollerKS = 0.0;
+    }
+
+    /**
+     * @deprecated Use EndEffectorArmParams instead. Legacy constants for backward compatibility.
+     */
+    @Deprecated
     public static final TunableNumber END_EFFECTOR_ARM_ENCODER_OFFSET = new TunableNumber("EEARM/Pivot/encoderOffset", 0.65625);
+    @Deprecated
     public static final TunableNumber MAX_ANGLE_DEGREES = new TunableNumber("EEARM/Pivot/maxAngleDegrees", 370.0);
+    @Deprecated
     public static final TunableNumber END_EFFECTOR_ARM_PIVIOT_TOLERANCE = new TunableNumber("EEARM/Pivot/tolerance", 3.5);
 
     // Roller voltages for different operations
+    @Deprecated
     public static final TunableNumber CORAL_INTAKE_VOLTAGE = new TunableNumber("EEARM/Roller/coralIntakeVoltage", 12.0);
+    @Deprecated
     public static final TunableNumber CORAL_OUTTAKE_VOLTAGE = new TunableNumber("EEARM/Roller/coralOuttakeVoltage", -6.0);
+    @Deprecated
     public static final TunableNumber CORAL_PRESHOOT_VOLTAGE = new TunableNumber("EEARM/Roller/coralPreShootVoltage", -10.0);
+    @Deprecated
     public static final TunableNumber ALGAE_INTAKE_VOLTAGE = new TunableNumber("EEARM/Roller/algaeIntakeVoltage", 8.0);
+    @Deprecated
     public static final TunableNumber ALGAE_PRESHOOT_VOLTAGE = new TunableNumber("EEARM/Roller/algaePreShootVoltage", -12.0);
+    @Deprecated
     public static final TunableNumber CORAL_HOLD_VOLTAGE = new TunableNumber("EEARM/Roller/coralHoldVoltage", 0.5);
+    @Deprecated
     public static final TunableNumber ALGAE_HOLD_VOLTAGE = new TunableNumber("EEARM/Roller/algaeHoldVoltage", 1.5);
+    @Deprecated
     public static final TunableNumber CORAL_SHOOT_VOLTAGE = new TunableNumber("EEARM/Roller/coralShootVoltage", -12.0);
+    @Deprecated
     public static final TunableNumber CORAL_SHOOT_VOLTAGE_L1 = new TunableNumber("EEARM/Roller/coralShootVoltageL1", -2.0);
+    @Deprecated
     public static final TunableNumber ALGAE_NET_SHOOT_VOLTAGE = new TunableNumber("EEARM/Roller/algaeNetShootVoltage", -15.0);
+    @Deprecated
     public static final TunableNumber ALGAE_PROCESSOR_SHOOT_VOLTAGE = new TunableNumber("EEARM/Roller/algaeProcessorShootVoltage", -4.0);
+    @Deprecated
     public static final TunableNumber CORAL_SHOOT_DELAY_TIME = new TunableNumber("EEARM/Roller/coralShootDelayTime", 0.2);
 
-    /**
-     * Constants for the EndEffectorArm pivot motor gains.
-     */
-    public static class EndEffectorArmPivotGainsClass {
-      public static final TunableNumber END_EFFECTOR_ARM_PIVOT_KP = new TunableNumber("EEARM/Pivot/PID/kp", 5.9);
-      public static final TunableNumber END_EFFECTOR_ARM_PIVOT_KI = new TunableNumber("EEARM/Pivot/PID/ki", 0);
-      public static final TunableNumber END_EFFECTOR_ARM_PIVOT_KD = new TunableNumber("EEARM/Pivot/PID/kd", 0.1);//0.3 or 0.1 or 0.01
-      public static final TunableNumber END_EFFECTOR_ARM_PIVOT_KA = new TunableNumber("EEARM/Pivot/PID/ka", 0);
-      public static final TunableNumber END_EFFECTOR_ARM_PIVOT_KV = new TunableNumber("EEARM/Pivot/PID/kv", 0);
-      public static final TunableNumber END_EFFECTOR_ARM_PIVOT_KS = new TunableNumber("EEARM/Pivot/PID/ks", 0.015);
-      public static final TunableNumber END_EFFECTOR_ARM_PIVOT_KG = new TunableNumber("EEARM/Pivot/PID/kg", -0.025);
-    }
 
-    /**
-     * Constants for the EndEffectorArm roller motor gains.
-     */
-    // EndEffector roller is currently open loop
-    public static class EndEffectorArmRollerGainsClass {
-      public static final TunableNumber END_EFFECTOR_ARM_ROLLER_KP = new TunableNumber("EEARM/Roller/PID/kp", 0);
-      public static final TunableNumber END_EFFECTOR_ARM_ROLLER_KI = new TunableNumber("EEARM/Roller/PID/ki", 0);
-      public static final TunableNumber END_EFFECTOR_ARM_ROLLER_KD = new TunableNumber("EEARM/Roller/PID/kd", 0);
-      public static final TunableNumber END_EFFECTOR_ARM_ROLLER_KA = new TunableNumber("EEARM/Roller/PID/ka", 0);
-      public static final TunableNumber END_EFFECTOR_ARM_ROLLER_KV = new TunableNumber("EEARM/Roller/PID/kv", 0);
-      public static final TunableNumber END_EFFECTOR_ARM_ROLLER_KS = new TunableNumber("EEARM/Roller/PID/ks", 0);
-    }
+
+
+ 
   }
 
   /**

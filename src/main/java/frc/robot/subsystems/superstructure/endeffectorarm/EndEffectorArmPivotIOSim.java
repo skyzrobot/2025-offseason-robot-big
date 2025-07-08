@@ -9,6 +9,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.VoltageUnit;
+import frc.robot.EndEffectorArmParamsNT;
 import frc.robot.RobotConstants;
 import frc.robot.RobotConstants.EndEffectorArmConstants;
 
@@ -41,9 +42,9 @@ public class EndEffectorArmPivotIOSim implements EndEffectorArmPivotIO {
     private static final Vector<N2> B = VecBuilder.fill(0, gearbox.KtNMPerAmp / moi);
 
     private final ProfiledPIDController controller = new ProfiledPIDController(
-            EndEffectorArmConstants.EndEffectorArmPivotGainsClass.END_EFFECTOR_ARM_PIVOT_KP.get(),
-            EndEffectorArmConstants.EndEffectorArmPivotGainsClass.END_EFFECTOR_ARM_PIVOT_KI.get(),
-            EndEffectorArmConstants.EndEffectorArmPivotGainsClass.END_EFFECTOR_ARM_PIVOT_KD.get(),
+            EndEffectorArmParamsNT.pivotKP.getValue(),
+            EndEffectorArmParamsNT.pivotKI.getValue(),
+            EndEffectorArmParamsNT.pivotKD.getValue(),
             new Constraints(
                 180.0, // deg/s, adjust as needed
                 180  // deg/s^2, adjust as needed
@@ -63,10 +64,10 @@ public class EndEffectorArmPivotIOSim implements EndEffectorArmPivotIO {
     @Override
     public void updateInputs(EndEffectorArmPivotIOInputs inputs) {
         for (int i = 0; i < RobotConstants.LOOPER_DT / (1.0 / 1000.0); i++) {
-            double feedforward = EndEffectorArmConstants.EndEffectorArmPivotGainsClass.END_EFFECTOR_ARM_PIVOT_KS.get() * Math.signum(simState.get(1)) +
-                               EndEffectorArmConstants.EndEffectorArmPivotGainsClass.END_EFFECTOR_ARM_PIVOT_KV.get() * simState.get(1) +
-                               EndEffectorArmConstants.EndEffectorArmPivotGainsClass.END_EFFECTOR_ARM_PIVOT_KA.get() * 0.0 + // acceleration term
-                               EndEffectorArmConstants.EndEffectorArmPivotGainsClass.END_EFFECTOR_ARM_PIVOT_KG.get(); // gravity compensation
+            double feedforward = EndEffectorArmParamsNT.pivotKS.getValue() * Math.signum(simState.get(1)) +
+                               EndEffectorArmParamsNT.pivotKV.getValue() * simState.get(1) +
+                               EndEffectorArmParamsNT.pivotKA.getValue() * 0.0 + // acceleration term
+                               EndEffectorArmParamsNT.pivotKG.getValue(); // gravity compensation
             setInputTorqueCurrent(
                     controller.calculate(simState.get(0)) * SCALE_FACTOR + feedforward);
             update(1.0 / 1000.0);

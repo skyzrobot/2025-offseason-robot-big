@@ -3,6 +3,7 @@ package frc.robot.subsystems.superstructure.endeffectorarm;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.EndEffectorArmParamsNT;
 import frc.robot.RobotConstants;
 import frc.robot.RobotConstants.EndEffectorArmConstants;
 import frc.robot.subsystems.beambreak.BeambreakIO;
@@ -18,7 +19,6 @@ import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import static frc.robot.RobotConstants.EndEffectorArmConstants.*;
-import static frc.robot.RobotConstants.EndEffectorArmConstants.EndEffectorArmRollerGainsClass.*;
 
 import java.util.function.DoubleSupplier;
 
@@ -65,14 +65,14 @@ public class EndEffectorArmSubsystem {
         this.coralBeambreakIO = coralBeambreakIO;
         this.algaeBeambreakIO = algaeBeambreakIO;
 
-        // Apply initial PID gains
+        // Apply initial PID gains using NTParam values
         rollerIO.updateConfigs(
-            END_EFFECTOR_ARM_ROLLER_KP.get(),
-            END_EFFECTOR_ARM_ROLLER_KI.get(),
-            END_EFFECTOR_ARM_ROLLER_KD.get(),
-            END_EFFECTOR_ARM_ROLLER_KA.get(),
-            END_EFFECTOR_ARM_ROLLER_KV.get(),
-            END_EFFECTOR_ARM_ROLLER_KS.get()
+            EndEffectorArmParamsNT.rollerKP.getValue(),
+            EndEffectorArmParamsNT.rollerKI.getValue(),
+            EndEffectorArmParamsNT.rollerKD.getValue(),
+            EndEffectorArmParamsNT.rollerKA.getValue(),
+            EndEffectorArmParamsNT.rollerKV.getValue(),
+            EndEffectorArmParamsNT.rollerKS.getValue()
         );
     }
 
@@ -84,10 +84,12 @@ public class EndEffectorArmSubsystem {
         rollerIO.updateInputs(armRollerIOInputs);
 
         // Check if angle exceeds maximum limit
-        if (wantedAngle > EndEffectorArmConstants.MAX_ANGLE_DEGREES.get()) {
+        if (wantedAngle > EndEffectorArmParamsNT.maxAngleDegrees.getValue()) {
             stopDueToLimit = true;
+            System.out.println("EndEffectorArm setpoint " + wantedAngle + " exceeds maximum angle of " + 
+                EndEffectorArmParamsNT.maxAngleDegrees.getValue() + " degrees");
             throw new IllegalArgumentException("EndEffectorArm setpoint " + wantedAngle + " exceeds maximum angle of " + 
-                EndEffectorArmConstants.MAX_ANGLE_DEGREES.get() + " degrees");
+                EndEffectorArmParamsNT.maxAngleDegrees.getValue() + " degrees");
         } else if (stopDueToLimit) {
             // Reset stopDueToLimit if angle is now valid
             stopDueToLimit = false;
@@ -100,6 +102,7 @@ public class EndEffectorArmSubsystem {
             hasAlgae = algaeBeambreakInputs.isBeambreakOn;
             SmartDashboard.putBoolean("GamePiece/EEHasCoral", hasCoral);
             SmartDashboard.putBoolean("GamePiece/EEHasAlgae", hasAlgae);
+
         }
 
         // Process and log inputs
@@ -109,21 +112,21 @@ public class EndEffectorArmSubsystem {
         Logger.processInputs(NAME + "/Roller", armRollerIOInputs);
 
         // Update goal status and set pivot angle
-        atGoal = isNearAngle(wantedAngle,EndEffectorArmConstants.END_EFFECTOR_ARM_PIVIOT_TOLERANCE.get());
+        atGoal = isNearAngle(wantedAngle, EndEffectorArmParamsNT.pivotTolerance.getValue());
         if (!stopDueToLimit) {
             armPivotIO.setPivotAngle(wantedAngle);
         }
 
         // Update tunable numbers if tuning is enabled
-        if (RobotConstants.TUNING) {
+        if (RobotConstants.TUNING && EndEffectorArmParamsNT.isAnyChanged()) {
             // Update roller PID gains if tuning is enabled
             rollerIO.updateConfigs(
-                END_EFFECTOR_ARM_ROLLER_KP.get(),
-                END_EFFECTOR_ARM_ROLLER_KI.get(),
-                END_EFFECTOR_ARM_ROLLER_KD.get(),
-                END_EFFECTOR_ARM_ROLLER_KA.get(),
-                END_EFFECTOR_ARM_ROLLER_KV.get(),
-                END_EFFECTOR_ARM_ROLLER_KS.get()
+                EndEffectorArmParamsNT.rollerKP.getValue(),
+                EndEffectorArmParamsNT.rollerKI.getValue(),
+                EndEffectorArmParamsNT.rollerKD.getValue(),
+                EndEffectorArmParamsNT.rollerKA.getValue(),
+                EndEffectorArmParamsNT.rollerKV.getValue(),
+                EndEffectorArmParamsNT.rollerKS.getValue()
             );
         }
         LoggedTracer.record("EndEffectorArm");

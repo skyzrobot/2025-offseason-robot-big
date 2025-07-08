@@ -3,14 +3,16 @@ package frc.robot.subsystems.superstructure.endeffectorarm;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.PositionDutyCycle;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.*;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.*;
+import frc.robot.EndEffectorArmParamsNT;
 import frc.robot.RobotConstants;
 
 import static frc.robot.RobotConstants.EndEffectorArmConstants.*;
@@ -26,6 +28,7 @@ public class EndEffectorArmPivotIOReal implements EndEffectorArmPivotIO {
     private final StatusSignal<Current> supplyCurrentAmps = motor.getSupplyCurrent();
     private final StatusSignal<Temperature> tempCelsius = motor.getDeviceTemp();
     private final StatusSignal<Angle> currentPositionRot = motor.getPosition();
+    private final MotionMagicVoltage motionMagicRequest = new MotionMagicVoltage(0.0).withEnableFOC(true);
 
     double targetAngleDeg = 0.0;
 
@@ -41,7 +44,7 @@ public class EndEffectorArmPivotIOReal implements EndEffectorArmPivotIO {
 
         //initialize CANcoder
         CANcoderConfiguration CANconfig = new CANcoderConfiguration();
-        CANconfig.MagnetSensor.MagnetOffset = END_EFFECTOR_ARM_ENCODER_OFFSET.get();
+        CANconfig.MagnetSensor.MagnetOffset = EndEffectorArmParamsNT.encoderOffset.getValue();
         CANconfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
         CANcoder.getConfigurator().apply(CANconfig);
         //integrate with fused encoder
@@ -49,15 +52,23 @@ public class EndEffectorArmPivotIOReal implements EndEffectorArmPivotIO {
         config.Feedback.FeedbackRemoteSensorID = END_EFFECTOR_ARM_ENCODER_ID;
         config.Feedback.RotorToSensorRatio = ROTOR_SENSOR_RATIO;
 
+        // Configure Motion Magic using NTParam values
+        var motionMagicConfigs = new MotionMagicConfigs();
+        motionMagicConfigs.MotionMagicCruiseVelocity = EndEffectorArmParamsNT.motionMagicCruiseVelocity.getValue() ; // Convert degrees/sec to rotations/sec
+        motionMagicConfigs.MotionMagicAcceleration = EndEffectorArmParamsNT.motionMagicAcceleration.getValue(); // Convert degrees/sec^2 to rotations/sec^2
+        motionMagicConfigs.MotionMagicJerk = EndEffectorArmParamsNT.motionMagicJerk.getValue(); // Convert degrees/sec^3 to rotations/sec^3
+        config.withMotionMagic(motionMagicConfigs);
+
         config.withSlot0(new Slot0Configs()
-                .withKP(RobotConstants.EndEffectorArmConstants.EndEffectorArmPivotGainsClass.END_EFFECTOR_ARM_PIVOT_KP.get())
-                .withKI(RobotConstants.EndEffectorArmConstants.EndEffectorArmPivotGainsClass.END_EFFECTOR_ARM_PIVOT_KI.get())
-                .withKD(RobotConstants.EndEffectorArmConstants.EndEffectorArmPivotGainsClass.END_EFFECTOR_ARM_PIVOT_KD.get())
-                .withKA(RobotConstants.EndEffectorArmConstants.EndEffectorArmPivotGainsClass.END_EFFECTOR_ARM_PIVOT_KA.get())
-                .withKV(RobotConstants.EndEffectorArmConstants.EndEffectorArmPivotGainsClass.END_EFFECTOR_ARM_PIVOT_KV.get())
-                .withKS(RobotConstants.EndEffectorArmConstants.EndEffectorArmPivotGainsClass.END_EFFECTOR_ARM_PIVOT_KS.get())
-                .withKG(RobotConstants.EndEffectorArmConstants.EndEffectorArmPivotGainsClass.END_EFFECTOR_ARM_PIVOT_KG.get())
+                .withKP(EndEffectorArmParamsNT.pivotKP.getValue())
+                .withKI(EndEffectorArmParamsNT.pivotKI.getValue())
+                .withKD(EndEffectorArmParamsNT.pivotKD.getValue())
+                .withKA(EndEffectorArmParamsNT.pivotKA.getValue())
+                .withKV(EndEffectorArmParamsNT.pivotKV.getValue())
+                .withKS(EndEffectorArmParamsNT.pivotKS.getValue())
+                .withKG(EndEffectorArmParamsNT.pivotKG.getValue())
                 .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign)
+                .withGravityType(GravityTypeValue.Arm_Cosine)
         );
 
         motor.getConfigurator().apply(config);
@@ -98,15 +109,34 @@ public class EndEffectorArmPivotIOReal implements EndEffectorArmPivotIO {
         inputs.targetAngleDeg = targetAngleDeg;
 
         if (RobotConstants.TUNING) {
-            inputs.endEffectorArmPivotKP = EndEffectorArmPivotGainsClass.END_EFFECTOR_ARM_PIVOT_KP.get();
-            inputs.endEffectorArmPivotKI = EndEffectorArmPivotGainsClass.END_EFFECTOR_ARM_PIVOT_KI.get();
-            inputs.endEffectorArmPivotKD = EndEffectorArmPivotGainsClass.END_EFFECTOR_ARM_PIVOT_KD.get();
-            inputs.endEffectorArmPivotKA = EndEffectorArmPivotGainsClass.END_EFFECTOR_ARM_PIVOT_KA.get();
-            inputs.endEffectorArmPivotKV = EndEffectorArmPivotGainsClass.END_EFFECTOR_ARM_PIVOT_KV.get();
-            inputs.endEffectorArmPivotKS = EndEffectorArmPivotGainsClass.END_EFFECTOR_ARM_PIVOT_KS.get();
-            inputs.endEffectorArmPivotKG = EndEffectorArmPivotGainsClass.END_EFFECTOR_ARM_PIVOT_KG.get();
-
-            updateGains(inputs.endEffectorArmPivotKP, inputs.endEffectorArmPivotKI, inputs.endEffectorArmPivotKD, inputs.endEffectorArmPivotKA, inputs.endEffectorArmPivotKV, inputs.endEffectorArmPivotKS, inputs.endEffectorArmPivotKG);
+            // Check if NTParams have changed and update gains accordingly
+            if (EndEffectorArmParamsNT.isAnyChanged()) {
+                updateGains(
+                    EndEffectorArmParamsNT.pivotKP.getValue(),
+                    EndEffectorArmParamsNT.pivotKI.getValue(), 
+                    EndEffectorArmParamsNT.pivotKD.getValue(),
+                    EndEffectorArmParamsNT.pivotKA.getValue(),
+                    EndEffectorArmParamsNT.pivotKV.getValue(),
+                    EndEffectorArmParamsNT.pivotKS.getValue(),
+                    EndEffectorArmParamsNT.pivotKG.getValue()
+                );
+                
+                // Update Motion Magic parameters if they changed
+                var motionMagicConfigs = new MotionMagicConfigs();
+                motionMagicConfigs.MotionMagicCruiseVelocity = EndEffectorArmParamsNT.motionMagicCruiseVelocity.getValue() / 360.0;
+                motionMagicConfigs.MotionMagicAcceleration = EndEffectorArmParamsNT.motionMagicAcceleration.getValue() / 360.0;
+                motionMagicConfigs.MotionMagicJerk = EndEffectorArmParamsNT.motionMagicJerk.getValue() / 360.0;
+                motor.getConfigurator().apply(motionMagicConfigs);
+            }
+            
+            // Log current values for tuning
+            inputs.endEffectorArmPivotKP = EndEffectorArmParamsNT.pivotKP.getValue();
+            inputs.endEffectorArmPivotKI = EndEffectorArmParamsNT.pivotKI.getValue();
+            inputs.endEffectorArmPivotKD = EndEffectorArmParamsNT.pivotKD.getValue();
+            inputs.endEffectorArmPivotKA = EndEffectorArmParamsNT.pivotKA.getValue();
+            inputs.endEffectorArmPivotKV = EndEffectorArmParamsNT.pivotKV.getValue();
+            inputs.endEffectorArmPivotKS = EndEffectorArmParamsNT.pivotKS.getValue();
+            inputs.endEffectorArmPivotKG = EndEffectorArmParamsNT.pivotKG.getValue();
         }
     }
 
@@ -127,7 +157,7 @@ public class EndEffectorArmPivotIOReal implements EndEffectorArmPivotIO {
     @Override
     public void setPivotAngle(double targetAngleDeg) {
         this.targetAngleDeg = targetAngleDeg;
-        motor.setControl(new PositionDutyCycle(angleToTalonPos(targetAngleDeg + 63)).withEnableFOC(true));
+        motor.setControl(motionMagicRequest.withPosition(angleToTalonPos(targetAngleDeg + 63)));
     }
 
     private double angleToTalonPos(double angleDeg) {
