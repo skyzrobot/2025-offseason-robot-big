@@ -25,9 +25,7 @@ public class CoralRecorder {
       info.setAddedTime(info.getAddedTime() + dt);
       // decay confidence
       info.setConfidence(info.getConfidence() - dt / CoralRecorderParamsNT.confidenceTimeDecay.getValue());
-      if (info.getConfidence() <= 0.0) {
-        iterator.remove();
-      }
+      if (info.getConfidence() <= 0.0) iterator.remove();
     }
   }
 
@@ -54,7 +52,7 @@ public class CoralRecorder {
     } else {
       // does not have any near coral, create a new one
       CoralInfo info = new CoralInfo(
-          loc, 0.0, CoralRecorderParamsNT.confidenceStart.getValue()
+          loc, 0.0, CoralRecorderParamsNT.confidenceStart.getValue(), true
       );
       coralInfos.add(info);
     }
@@ -79,6 +77,8 @@ public class CoralRecorder {
 
   public Translation2d[] getCoralLocations() {
     double threshold = CoralRecorderParamsNT.confidenceThreshold.getValue();
+    System.out.println(coralInfos.size());
+
     return coralInfos.stream()
         // only include reliable corals
         .filter(info -> info.getConfidence() > threshold)
@@ -98,6 +98,7 @@ public class CoralRecorder {
     public Translation2d translation;
     public double addedTime;
     public double confidence;
+    public boolean hasUpdate;
   }
 
   @NTParameter(tableName = "Params/CoralRecorder")

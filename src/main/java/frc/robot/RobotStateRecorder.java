@@ -46,7 +46,7 @@ public class RobotStateRecorder extends TransformRecorder {
 
     // logging
     Logger.recordOutput("RobotStateRecorder/poseWorldRobot", RobotStateRecorder.getPoseWorldRobotCurrent());
-    Logger.recordOutput("RobotStateRecorder/velocityRobot", RobotStateRecorder.getPoseDriverRobotCurrent());
+    Logger.recordOutput("RobotStateRecorder/velocityRobot", RobotStateRecorder.getVelocityRobotCurrent());
     Logger.recordOutput("RobotStateRecorder/velocityWorldRobot", RobotStateRecorder.getVelocityWorldRobotCurrent());
     Logger.recordOutput("RobotStateRecorder/corals", recorder.getCoralLocations());
   }

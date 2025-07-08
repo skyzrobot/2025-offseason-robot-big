@@ -10,7 +10,6 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
@@ -61,7 +60,6 @@ import lib.ironpulse.swerve.sim.ImuIOSim;
 import lib.ironpulse.swerve.sim.SwerveModuleIOSim;
 import lib.ironpulse.swerve.sjtu6.ImuIOPigeon;
 import lib.ironpulse.swerve.sjtu6.SwerveModuleIOSJTU6;
-import org.littletonrobotics.junction.Logger;
 
 import java.util.HashMap;
 
@@ -240,18 +238,16 @@ public class RobotContainer {
     );
 
 
-    driverController.start().onTrue(SwerveCommands.reset(
-        swerve, new Pose3d(
-            new Pose2d(new Translation2d(0, 0), new Rotation2d()))
-    ).alongWith(Commands.runOnce(
-        () -> {
-          RobotStateRecorder.getInstance().resetTransform(
-              TransformRecorder.kFrameWorld,
-              TransformRecorder.kFrameRobot
-          );
-          lastResetTime = Timer.getFPGATimestamp();
-          indicatorSubsystem.setPattern(IndicatorIO.Patterns.RESET_ODOM);
-        })));
+    driverController.start().onTrue(SwerveCommands.resetAngle(swerve, new Rotation2d())
+        .alongWith(Commands.runOnce(
+            () -> {
+              RobotStateRecorder.getInstance().resetTransform(
+                  TransformRecorder.kFrameWorld,
+                  TransformRecorder.kFrameRobot
+              );
+              lastResetTime = Timer.getFPGATimestamp();
+              indicatorSubsystem.setPattern(IndicatorIO.Patterns.RESET_ODOM);
+            })));
 
 
     // Coral intake - chooses between ground and indexed intake based on conditions
@@ -448,9 +444,10 @@ public class RobotContainer {
     return Commands.sequence(
         Commands.runOnce(() -> destinationSupplier.updateBranch(isRightBranch)),
         Commands.runOnce(() -> destinationSupplier.setStateSetPoint(state)),
-        new SuperCycleCommand(swerve, superstructure, indicatorSubsystem, driverController, () -> false)
+        new SuperCycleCommand(swerve, superstructure, indicatorSubsystem).finallyDo(
+            () -> createDangerZoneExitCommand().schedule()
+        )
         // After SuperCycleCommand completes, continue to algae prestate until out of danger zone
-        //createDangerZoneExitCommand()
     ).onlyIf(() -> superstructure.hasCoral());
   }
 

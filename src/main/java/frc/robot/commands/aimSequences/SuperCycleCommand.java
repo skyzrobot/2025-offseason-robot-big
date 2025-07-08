@@ -9,6 +9,7 @@ import frc.robot.subsystems.indicator.IndicatorSubsystem;
 import frc.robot.subsystems.superstructure.DestinationSupplier;
 import frc.robot.subsystems.superstructure.Superstructure;
 import frc.robot.subsystems.superstructure.SuperstructureState;
+import frc.robot.utils.BlocklessEitherCommand;
 import lib.ironpulse.swerve.Swerve;
 
 import java.util.function.BooleanSupplier;
@@ -17,20 +18,14 @@ public class SuperCycleCommand extends SequentialCommandGroup {
   private final Swerve swerve;
   private final Superstructure superstructure;
   private final IndicatorSubsystem indicatorSubsystem;
-  private final CommandXboxController driverController;
-  private BooleanSupplier stop;
 
   public SuperCycleCommand(
       Swerve swerve,
       Superstructure superstructure,
-      IndicatorSubsystem indicatorSubsystem,
-      CommandXboxController driverController,
-      BooleanSupplier stop) {
+      IndicatorSubsystem indicatorSubsystem) {
     this.swerve = swerve;
     this.indicatorSubsystem = indicatorSubsystem;
     this.superstructure = superstructure;
-    this.driverController = driverController;
-    this.stop = stop;
 
     addRequirements(superstructure);
 
