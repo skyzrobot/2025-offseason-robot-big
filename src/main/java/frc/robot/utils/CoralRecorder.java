@@ -14,6 +14,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
+import org.littletonrobotics.junction.Logger;
+
 public class CoralRecorder {
   public List<CoralInfo> coralInfos = new ArrayList<>();
 
@@ -77,6 +79,41 @@ public class CoralRecorder {
     }
 
     if (nearest != null) return Optional.of(nearest);
+    return Optional.empty();
+  }
+
+  public Optional<CoralInfo> getMostInDirectionCoral(Pose2d robotPose) {
+    var pRobot = robotPose.getTranslation();
+    var robotHeading = robotPose.getRotation();
+    
+    CoralInfo mostAligned = null;
+    double maxDotProduct = Double.NEGATIVE_INFINITY;
+    
+    for (CoralInfo info : coralInfos) {
+      if (info.getConfidence() <= CoralRecorderParamsNT.confidenceThreshold.getValue()) continue;
+      
+      // Calculate vector from robot to coral
+      Translation2d robotToCoral = info.getTranslation().minus(pRobot);
+      
+      // Skip if coral is at robot position
+      if (robotToCoral.getNorm() == 0.0) continue;
+      
+      // Normalize the vector to get direction
+      Translation2d directionToCoral = robotToCoral.div(robotToCoral.getNorm());
+      
+      // Calculate dot product with robot's heading direction
+      Translation2d robotHeadingVector = new Translation2d(robotHeading.getCos(), robotHeading.getSin());
+      double dotProduct = directionToCoral.getX() * robotHeadingVector.getX() + 
+                         directionToCoral.getY() * robotHeadingVector.getY();
+      
+      // Find coral with highest dot product (most aligned with robot heading)
+      if (dotProduct > maxDotProduct) {
+        maxDotProduct = dotProduct;
+        mostAligned = info;
+      }
+    }
+    
+    if (mostAligned != null) return Optional.of(mostAligned);
     return Optional.empty();
   }
 

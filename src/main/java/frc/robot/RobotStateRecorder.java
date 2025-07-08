@@ -2,6 +2,7 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -43,6 +44,13 @@ public class RobotStateRecorder extends TransformRecorder {
   public static void periodic() {
     // update recorder
     recorder.update(RobotConstants.LOOPER_DT);
+    Optional<CoralRecorder.CoralInfo> mostAlignedCoral = recorder.getMostInDirectionCoral(getPoseWorldRobotCurrent().toPose2d());
+    Optional<CoralRecorder.CoralInfo> nearestCoral = recorder.getNearestCoral(getPoseWorldRobotCurrent().toPose2d());
+
+    if (mostAlignedCoral.isPresent() && nearestCoral.isPresent()){
+    Logger.recordOutput("RobotStateRecorder/mostAlignedCoral", new Pose2d(mostAlignedCoral.get().getTranslation(), new Rotation2d(0)));
+    Logger.recordOutput("RobotStateRecorder/nearestCoral", new Pose2d(nearestCoral.get().getTranslation(), new Rotation2d(0)));
+    }
 
     // logging
     Logger.recordOutput("RobotStateRecorder/poseWorldRobot", RobotStateRecorder.getPoseWorldRobotCurrent());
