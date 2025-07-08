@@ -545,10 +545,6 @@ public class RobotContainer {
         TransformRecorder.kFrameRobot
     );
     RobotStateRecorder.putVelocityRobot(now, swerve.getChassisSpeeds());
-
-    Logger.recordOutput("TF/TWR", RobotStateRecorder.getPoseWorldRobotCurrent());
-    Logger.recordOutput("TF/TDR", RobotStateRecorder.getPoseDriverRobotCurrent());
-    Logger.recordOutput("TF/VR", RobotStateRecorder.getPoseDriverRobotCurrent());
-    Logger.recordOutput("TF/VWR", RobotStateRecorder.getVelocityWorldRobotCurrent());
+    RobotStateRecorder.periodic();
   }
 }

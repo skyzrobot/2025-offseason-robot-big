@@ -16,6 +16,7 @@ import frc.robot.PhotonVisionParamsNT;
 import java.util.ArrayList;
 import java.util.List;
 
+import static edu.wpi.first.units.Units.Seconds;
 import static frc.robot.RobotConstants.PhotonvisionConstants.SNAPSHOT_ENABLED;
 import static frc.robot.RobotConstants.PhotonvisionConstants.SNAPSHOT_PERIOD;
 
@@ -66,7 +67,7 @@ public class PhotonVisionSubsystem extends SubsystemBase {
             // Get robot pose from when detection was captured (accounts for robot movement during processing)
             double detectionTime = detection.timestampMs / 1000.0;
             Pose3d robotPoseAtDetection = RobotStateRecorder.getInstance().getTransform(
-                edu.wpi.first.units.Units.Seconds.of(detectionTime),
+                Seconds.of(detectionTime),
                 lib.ironpulse.rbd.TransformRecorder.kFrameWorld,
                 lib.ironpulse.rbd.TransformRecorder.kFrameRobot
             ).orElse(RobotStateRecorder.getPoseWorldRobotCurrent());
@@ -74,6 +75,9 @@ public class PhotonVisionSubsystem extends SubsystemBase {
             // Transform to world coordinates
             Pose3d worldPose = robotPoseAtDetection.transformBy(
                 new Transform3d(robotRelativePose.getTranslation(), robotRelativePose.getRotation()));
+
+            // Add to RobotStateRecorder
+            RobotStateRecorder.addCoralMeasurement(worldPose.toPose2d().getTranslation());
             
             // Log poses
             String basePath = "PhotonVision/Camera" + detection.cameraId + "/Target" + getTargetIndex(detection);

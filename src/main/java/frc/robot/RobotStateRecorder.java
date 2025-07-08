@@ -8,18 +8,24 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
+import frc.robot.utils.CoralRecorder;
 import lib.ironpulse.rbd.TransformRecorder;
+import org.littletonrobotics.junction.Logger;
+
+import java.util.Optional;
 
 import static edu.wpi.first.units.Units.Seconds;
 import static lib.ironpulse.math.MathTools.toPose2d;
 
-public class RobotStateRecorder extends TransformRecorder{
+public class RobotStateRecorder extends TransformRecorder {
   private static RobotStateRecorder instance;
   private static TimeInterpolatableBuffer<Pose2d> velocityRobotBuffer;
+  private static CoralRecorder recorder;
 
   private RobotStateRecorder() {
     setBufferDuration(2.0);
     velocityRobotBuffer = TimeInterpolatableBuffer.createBuffer(2.0);
+    recorder = new CoralRecorder();
 
     // add default transforms
     putTransform(kTransformWorldDriverStationBlue, kFrameWorld, kFrameDriverStationBlue); // static: TWorldDSB
@@ -32,6 +38,17 @@ public class RobotStateRecorder extends TransformRecorder{
       instance = new RobotStateRecorder();
     }
     return instance;
+  }
+
+  public static void periodic() {
+    // update recorder
+    recorder.update(RobotConstants.LOOPER_DT);
+
+    // logging
+    Logger.recordOutput("RobotStateRecorder/poseWorldRobot", RobotStateRecorder.getPoseWorldRobotCurrent());
+    Logger.recordOutput("RobotStateRecorder/velocityRobot", RobotStateRecorder.getPoseDriverRobotCurrent());
+    Logger.recordOutput("RobotStateRecorder/velocityWorldRobot", RobotStateRecorder.getVelocityWorldRobotCurrent());
+    Logger.recordOutput("RobotStateRecorder/corals", recorder.getCoralLocations());
   }
 
   public static void putVelocityRobot(Time time, ChassisSpeeds speed) {
@@ -74,5 +91,13 @@ public class RobotStateRecorder extends TransformRecorder{
             : RobotStateRecorder.kFrameDriverStationRed,
         TransformRecorder.kFrameRobot
     ).orElse(new Pose3d());
+  }
+
+  public static void addCoralMeasurement(Translation2d loc) {
+    recorder.addCoralMeasurement(loc, RobotConstants.LOOPER_DT);
+  }
+
+  public static Optional<CoralRecorder.CoralInfo> getNearestCoral() {
+    return recorder.getNearestCoral(getPoseWorldRobotCurrent().toPose2d());
   }
 }
