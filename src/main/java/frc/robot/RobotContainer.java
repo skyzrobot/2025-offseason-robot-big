@@ -274,18 +274,17 @@ public class RobotContainer {
 
 
     // Y button - Coral intake assist drive
-    // driverController.y().whileTrue(
-    // new CoralIntakeAssistCommand(
-    // swerve,
-    // photonVisionSubsystem,
-    // () -> -driverController.getLeftY(),
-    // () -> -driverController.getLeftX(),
-    // () -> -driverController.getRightX(),
-    // RobotStateRecorder::getPoseDriverRobotCurrent,
-    // MetersPerSecond.of(0.04),
-    // DegreesPerSecond.of(3.0)
-    // )
-    // );
+    driverController.y().whileTrue(
+      new CoralIntakeAssistCommand(
+        swerve,
+        () -> -driverController.getLeftY(),
+        () -> -driverController.getLeftX(),
+        () -> -driverController.getRightX(),
+        RobotStateRecorder::getPoseDriverRobotCurrent,
+        MetersPerSecond.of(0.04),
+        DegreesPerSecond.of(3.0)
+      )
+    );
 
     // Left trigger binding - only executes if there is coral
     driverController
@@ -347,7 +346,7 @@ public class RobotContainer {
   }
 
   public void configureTesterBindings() {
-    testerController.a().whileTrue(superstructure.runGoal(() -> SuperstructureState.CORAL_GROUND_INTAKE));
+    testerController.a().whileTrue(superstructure.runGoal(() -> SuperstructureState.CORAL_INDEXED_INTAKE));
     testerController.y().whileTrue(
         superstructure.runGoal(() -> SuperstructureState.L4)
             .until(testerController.rightTrigger())

@@ -108,4 +108,8 @@ public class RobotStateRecorder extends TransformRecorder {
   public static Optional<CoralRecorder.CoralInfo> getNearestCoral() {
     return recorder.getNearestCoral(getPoseWorldRobotCurrent().toPose2d());
   }
+
+  public static Optional<CoralRecorder.CoralInfo> getMostInDirectionCoral() {
+    return recorder.getMostInDirectionCoral(getPoseWorldRobotCurrent().toPose2d());
+  }
 }

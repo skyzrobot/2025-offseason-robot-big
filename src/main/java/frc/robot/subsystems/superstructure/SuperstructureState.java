@@ -52,7 +52,7 @@ public enum SuperstructureState {
     () -> EndEffectorArmConstants.CORAL_OUTTAKE_VOLTAGE.get())),
     CORAL_INDEXED_INTAKE(createState(Preset.CORAL_INDEXED_INTAKE,
         () -> IntakeConstants.INTAKE_VOLTAGE.get(), 
-        () -> 0,
+        () -> IntakeConstants.INDEX_HOLD_VOLTAGE.get(),
         () -> EndEffectorArmConstants.ALGAE_HOLD_VOLTAGE.get())),
     CORAL_STATION_INTAKE(createState(Preset.CORAL_STATION_INTAKE,
         () -> 0, 
