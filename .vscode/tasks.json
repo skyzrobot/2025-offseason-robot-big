@@ -80,7 +80,7 @@
         {
             "label": "Deploy to Simulation",
             "dependsOn": [
-                "Kill Gradle Processes",
+                // "Kill Gradle Processes",
                 "Run Simulation"
             ],
             "dependsOrder": "sequence",

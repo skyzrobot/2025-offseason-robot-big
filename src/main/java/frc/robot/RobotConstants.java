@@ -8,6 +8,7 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModule.ClosedLoopOutputType;
 import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModuleConstants;
 import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModuleConstantsFactory;
+import com.pathplanner.lib.config.RobotConfig;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -18,6 +19,7 @@ import lib.ironpulse.swerve.SwerveLimit;
 import lib.ironpulse.swerve.SwerveModuleLimit;
 import lib.ironpulse.swerve.sim.SwerveSimConfig;
 import lib.ironpulse.swerve.sjtu6.SwerveSJTU6Config;
+import lib.ironpulse.utils.Logging;
 import lib.ntext.NTParameter;
 
 import static edu.wpi.first.units.Units.*;
@@ -33,7 +35,6 @@ import static edu.wpi.first.units.Units.*;
  * wherever the constants are needed, to reduce verbosity.
  */
 public final class RobotConstants {
-
   // basic constants
   public static final boolean disableHAL = false;
   public static final double LOOPER_DT = 1 / 45.0;
@@ -43,6 +44,16 @@ public final class RobotConstants {
   public static final String PARAMETER_TAG = "Param";
   public static String CANIVORE_CAN_BUS_NAME = "6941Canivore0";
   public static String CLIMBER_CAN_BUS = "rio";
+
+  // auto robot config
+  public static RobotConfig AUTO_ROBOT_CONFIG;
+  static {
+    try {
+      AUTO_ROBOT_CONFIG = RobotConfig.fromGUISettings();
+    } catch (Exception e) {
+      Logging.error("Constants", "Failed to load AUTO_ROBOT_CONFIG. %s", e.getMessage());
+    }
+  }
 
   /**
    * Constants related to the robot's indicators, such as LEDs.
@@ -295,11 +306,11 @@ public final class RobotConstants {
         .driveGearRatio(7.0)
         .steerGearRatio(20.0)
         .driveMotor(DCMotor.getKrakenX60Foc(1))
-        .driveMomentOfInertia(KilogramSquareMeters.of(0.025))
+        .driveMomentOfInertia(KilogramSquareMeters.of(0.04))
         .driveStdDevPos(0.0000001)
         .driveStdDevVel(0.000001)
         .steerMotor(DCMotor.getKrakenX60Foc(1))
-        .steerMomentOfInertia(KilogramSquareMeters.of(0.004))
+        .steerMomentOfInertia(KilogramSquareMeters.of(0.01))
         .steerStdDevPos(0.0000001)
         .steerStdDevVel(0.000001)
         .defaultSwerveLimit(kDefaultSwerveLimit)
@@ -321,7 +332,7 @@ public final class RobotConstants {
         })
         .odometryFrequency(Hertz.of(50))
         .driveStatorCurrentLimit(Amps.of(110))
-        .steerStatorCurrentLimit(Amps.of(110))
+        .steerStatorCurrentLimit(Amps.of(50))
         .canivoreCanBusName(CANIVORE_CAN_BUS_NAME)
         .pigeonId(PIGEON_ID)
         .build();

@@ -18,8 +18,14 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.auto.AutoActions;
+import frc.robot.auto.AutoRoutines;
+import frc.robot.auto.AutoSelector;
 import frc.robot.commands.CoralIntakeAssistCommand;
-import frc.robot.commands.aimSequences.*;
+import frc.robot.commands.aimSequences.AimGoalSupplier;
+import frc.robot.commands.aimSequences.NetAimCommand;
+import frc.robot.commands.aimSequences.ReefAimCommand;
+import frc.robot.commands.aimSequences.SuperCycleCommand;
 import frc.robot.subsystems.beambreak.BeambreakIOReal;
 import frc.robot.subsystems.beambreak.BeambreakIOSim;
 import frc.robot.subsystems.climber.ClimberIOReal;
@@ -55,6 +61,7 @@ import lib.ironpulse.swerve.Swerve;
 import lib.ironpulse.swerve.SwerveCommands;
 import lib.ironpulse.swerve.sim.ImuIOSim;
 import lib.ironpulse.swerve.sim.SwerveModuleIOSim;
+import lib.ironpulse.swerve.sim.SwerveModuleIOSimpleSim;
 import lib.ironpulse.swerve.sjtu6.ImuIOPigeon;
 import lib.ironpulse.swerve.sjtu6.SwerveModuleIOSJTU6;
 import lombok.Getter;
@@ -155,10 +162,10 @@ public class RobotContainer {
       swerve = new Swerve(
           RobotConstants.SwerveConstants.kSimConfig,
           new ImuIOSim(),
-          new SwerveModuleIOSim(RobotConstants.SwerveConstants.kSimConfig, 0),
-          new SwerveModuleIOSim(RobotConstants.SwerveConstants.kSimConfig, 1),
-          new SwerveModuleIOSim(RobotConstants.SwerveConstants.kSimConfig, 2),
-          new SwerveModuleIOSim(RobotConstants.SwerveConstants.kSimConfig, 3));
+          new SwerveModuleIOSimpleSim(RobotConstants.SwerveConstants.kSimConfig, 0),
+          new SwerveModuleIOSimpleSim(RobotConstants.SwerveConstants.kSimConfig, 1),
+          new SwerveModuleIOSimpleSim(RobotConstants.SwerveConstants.kSimConfig, 2),
+          new SwerveModuleIOSimpleSim(RobotConstants.SwerveConstants.kSimConfig, 3));
 
       indicatorSubsystem = new IndicatorSubsystem(new IndicatorIOSim());
       elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSim());
@@ -191,6 +198,13 @@ public class RobotContainer {
 
     superstructure = new Superstructure(intakeSubsystem, endEffectorArmSubsystem, elevatorSubsystem);
 
+
+    // init auto actions
+    AutoActions.init(swerve, superstructure, indicatorSubsystem);
+    AutoSelector.getInstance().registerAuto(
+        "TestAuto", AutoRoutines.testAuto()
+    );
+
     // autoChooser = new LoggedDashboardChooser<>("Chooser",
     // CustomAutoChooser.buildAutoChooser("New Auto"));
     // autoActions = new AutoActions(indicatorSubsystem, elevatorSubsystem,
@@ -201,23 +215,13 @@ public class RobotContainer {
     // CommandScheduler.getInstance().registerSubsystem(
     // climberSubsystem, swerve
     // );
-     CommandScheduler.getInstance().unregisterSubsystem(climberSubsystem);
+    CommandScheduler.getInstance().unregisterSubsystem(climberSubsystem);
 
-    // configureAutoChooser();
     configureDriverBindings();
     configureStreamDeckBindings();
     configureTesterBindings();
 
   }
-
-  // private void configureAutoChooser() {
-  // autoChooser.addOption("4CoralLeft", "4CoralLeft");
-  // autoChooser.addOption("4CoralRight", "4CoralRight");
-  // autoChooser.addOption("1Coral1AlgaeMiddle", "1Coral1AlgaeMiddle");
-  // autoChooser.addOption("1Coral3AlgaeMiddle", "1Coral3AlgaeMiddle");
-  // autoChooser.addOption("Test", "Test");
-  // autoChooser.addOption("None", "None");
-  // }
 
   private void configureDriverBindings() {
     // TODO: consider enabling the auto scoring button whilst the superstructure is
@@ -259,9 +263,9 @@ public class RobotContainer {
     // new ReefAimCommand(swerve, indicatorSubsystem)
     // )
     // );
-     driverController.x().whileTrue(
-     new ChaseCoralCommand(swerve, photonVisionSubsystem)
-     );
+//     driverController.x().whileTrue(
+//     new ChaseCoralCommand(swerve, photonVisionSubsystem)
+//     );
 
 //    driverController.x().whileTrue(
 //      Commands.either(
@@ -275,15 +279,15 @@ public class RobotContainer {
 
     // Y button - Coral intake assist drive
     driverController.y().whileTrue(
-      new CoralIntakeAssistCommand(
-        swerve,
-        () -> -driverController.getLeftY(),
-        () -> -driverController.getLeftX(),
-        () -> -driverController.getRightX(),
-        RobotStateRecorder::getPoseDriverRobotCurrent,
-        MetersPerSecond.of(0.04),
-        DegreesPerSecond.of(3.0)
-      )
+        new CoralIntakeAssistCommand(
+            swerve,
+            () -> -driverController.getLeftY(),
+            () -> -driverController.getLeftX(),
+            () -> -driverController.getRightX(),
+            RobotStateRecorder::getPoseDriverRobotCurrent,
+            MetersPerSecond.of(0.04),
+            DegreesPerSecond.of(3.0)
+        )
     );
 
 
@@ -291,21 +295,24 @@ public class RobotContainer {
         .leftBumper()
         .whileTrue(
             new BlocklessEitherCommand(
+                // coral
                 createScoringCommand(false, SuperstructureState.L4),
+
+                // algae
                 Commands.parallel(
-                    new NetAimCommand(swerve, () -> driverController.getLeftX() * 4.5),
-                    Commands.waitUntil(() -> {
-                      Pose2d poseWorldRobot = RobotStateRecorder.getPoseWorldRobotCurrent().toPose2d();
-                      return AimGoalSupplier.isNearNet(poseWorldRobot);
-                    }).andThen(
-                        superstructure.runGoal(() -> SuperstructureState.NET_SCORE).until(superstructure::poseAtGoal)
+                        new NetAimCommand(swerve, () -> driverController.getLeftX() * 4.5),
+                        Commands.waitUntil(() -> {
+                          Pose2d poseWorldRobot = RobotStateRecorder.getPoseWorldRobotCurrent().toPose2d();
+                          return AimGoalSupplier.isNearNet(poseWorldRobot);
+                        }).andThen(
+                            superstructure.runGoal(() -> SuperstructureState.NET_SCORE).until(superstructure::poseAtGoal)
+                        )
                     )
-                )
-                .andThen(
-                    superstructure
-                        .runGoal(() -> SuperstructureState.NET_SCORE_EJECT)
-                        .until(() -> !superstructure.hasAlgae()))
-                .onlyIf(superstructure::hasAlgae),
+                    .andThen(
+                        superstructure
+                            .runGoal(() -> SuperstructureState.NET_SCORE_EJECT)
+                            .until(() -> !superstructure.hasAlgae()))
+                    .onlyIf(superstructure::hasAlgae),
                 superstructure::hasCoral));
     driverController
         .leftTrigger()
@@ -379,8 +386,8 @@ public class RobotContainer {
                     .until(() -> !superstructure.hasAlgae())));
     testerController.start().whileTrue(
         Commands.runOnce(() -> {
-          destinationSupplier.setCurrentGamePiece(DestinationSupplier.GamePiece.CORAL_SCORING);
-        })
+              destinationSupplier.setCurrentGamePiece(DestinationSupplier.GamePiece.CORAL_SCORING);
+            })
             .andThen(
                 new ReefAimCommand(swerve, indicatorSubsystem)));
 
@@ -439,7 +446,7 @@ public class RobotContainer {
             ),
             // If intake button is not pressed, do nothing
             Commands.none(),
-            () -> driverController.rightStick().getAsBoolean()
+            ()-> superstructure.getState() == SuperstructureState.CORAL_GROUND_INTAKE
         ),
         () -> superstructure.hasCoral()
     );
@@ -506,12 +513,12 @@ public class RobotContainer {
    */
   private Command createDangerZoneExitCommand() {
     return Commands.sequence(
-        // Set game piece to algae intaking to get correct prestate
-        Commands.runOnce(() -> destinationSupplier.setCurrentGamePiece(DestinationSupplier.GamePiece.ALGAE_INTAKING)),
-        // Continue running to algae prestate until out of danger zone
-        superstructure
-            .runGoal(() -> destinationSupplier.getPreState())
-            .until(() -> !isInReefDangerZone()))
+            // Set game piece to algae intaking to get correct prestate
+            Commands.runOnce(() -> destinationSupplier.setCurrentGamePiece(DestinationSupplier.GamePiece.ALGAE_INTAKING)),
+            // Continue running to algae prestate until out of danger zone
+            superstructure
+                .runGoal(() -> destinationSupplier.getPreState())
+                .until(() -> !isInReefDangerZone()))
         .onlyIf(this::isInReefDangerZone); // Only run if actually in danger zone
   }
 

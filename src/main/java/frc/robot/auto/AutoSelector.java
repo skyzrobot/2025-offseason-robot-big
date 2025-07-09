@@ -6,13 +6,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 public class AutoSelector {
   private SendableChooser<Command> autoSelector;
-  private AutoSelector instance;
+  private static AutoSelector instance;
 
   private AutoSelector() {
+    autoSelector = new SendableChooser<>();
     SmartDashboard.putData("Auto Selector", autoSelector);
   }
 
-  public AutoSelector getInstance() {
+  public static AutoSelector getInstance() {
     if (instance == null) {
       instance = new AutoSelector();
     }

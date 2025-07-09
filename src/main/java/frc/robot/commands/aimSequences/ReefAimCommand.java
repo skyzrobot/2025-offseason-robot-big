@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Robot;
 import frc.robot.RobotConstants;
 import frc.robot.RobotStateRecorder;
 import frc.robot.subsystems.indicator.IndicatorIO;
@@ -116,8 +117,11 @@ public class ReefAimCommand extends Command {
     double vRT_norm = -translationController.calculate(pRT_norm, 0.0);
 
     // compute rotation err, turn into angular velocity scalar
-    double thetaRT = poseRobotTarget.getRotation().getRadians();
-    double omegaRT = -rotationController.calculate(thetaRT, 0.0);
+    double thetaRTOriginal = poseRobotTarget.getRotation().getRadians();
+    double thetaRTAdjusted = poseRobotTarget.getTranslation().getAngle().getRadians();
+    double maxThetaAdjustment = ReefAimCommandParamsNT.rotationAdjustmentMaxDegree.getValue();
+    thetaRTAdjusted = MathUtil.clamp(thetaRTAdjusted, thetaRTOriginal - maxThetaAdjustment, thetaRTOriginal + maxThetaAdjustment);
+    double omegaRT = -rotationController.calculate(thetaRTOriginal, 0.0);
 
     // set limit
     double dCurr = finalDestinationPose.relativeTo(poseWorldRobot).getTranslation().getNorm(); // use final destination
@@ -146,7 +150,6 @@ public class ReefAimCommand extends Command {
     Logger.recordOutput(kTag + "/finalDestinationPose", finalDestinationPose);
     Logger.recordOutput(kTag + "/pRTNorm", pRT_norm);
     Logger.recordOutput(kTag + "/vRTNorm", vRT_norm);
-    Logger.recordOutput(kTag + "/thetaRT", thetaRT);
     Logger.recordOutput(kTag + "/maxTranslationVelocityMps", maxTranslationVelocityMps);
   }
 
@@ -176,7 +179,7 @@ public class ReefAimCommand extends Command {
     Logger.recordOutput(kTag + "/rotationOnTarget", rotationOnTarget);
     Logger.recordOutput(kTag + "/translationStationary", translationStationary);
     Logger.recordOutput(kTag + "/rotationStationary", rotationStationary);
-    return translationOnTarget && rotationOnTarget && translationStationary && rotationStationary;
+    return (translationOnTarget && rotationOnTarget && translationStationary && rotationStationary);
   }
 
   @Override
@@ -213,5 +216,6 @@ public class ReefAimCommand extends Command {
     static final double translationOnTargetVelocityMetersPerSecond = 0.25;
     static final double rotationOnTargetToleranceDegree = 1.0;
     static final double rotationOnTargetVelocityToleranceDegreesPerSecond = 12.0;
+    static final double rotationAdjustmentMaxDegree = 5.0;
   }
 }

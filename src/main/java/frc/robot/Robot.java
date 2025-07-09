@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.FieldConstants.Reef;
+import frc.robot.auto.AutoSelector;
 import frc.robot.commands.aimSequences.AimGoalSupplier;
 import frc.robot.utils.LoggedTracer;
 import lib.ironpulse.utils.PhoenixUtils;
@@ -89,12 +90,14 @@ public class Robot extends LoggedRobot {
   public void autonomousInit() {
     try {
       //todo: add autonomous command
-      autonomousCommand = Commands.none();
+      autonomousCommand = AutoSelector.getInstance().getAutoCommand();
+//      autonomousCommand = Commands.none();
     } catch (Exception e) {
       System.out.println("Autonomous command failed: " + e);
       e.printStackTrace();
       autonomousCommand = null;
     }
+
     if (autonomousCommand != null) {
       autonomousCommand.schedule();
     }

@@ -57,7 +57,5 @@ public record SuperstructurePose(DoubleSupplier elevatorHeight, DoubleSupplier e
                 new LoggedTunableNumber("Superstructure/" + name + "/Pivot", endEffectorAngle),
                 new LoggedTunableNumber("Superstructure/" + name + "/Intake", intakeAngle));
         }
-
-        
     }
 } 
