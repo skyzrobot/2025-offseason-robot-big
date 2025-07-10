@@ -488,6 +488,7 @@ public final class RobotConstants {
         40);
     public static final TunableNumber SAFE_HEIGHT_FLIP = new TunableNumber("Elevator/safeHeightFlip", 0.41);
 
+    public static final TunableNumber FLYBY_HEIGHT = new TunableNumber("Elevator/FlybyHeight", 0.8);
     // SysId characterization constants
     public static final TunableNumber SYSID_RAMP_RATE_VOLTS_PER_SEC = new TunableNumber("ELEVATOR/SysId/rampRateVoltsPerSec", 1);
     public static final TunableNumber SYSID_DYNAMIC_VOLTAGE = new TunableNumber("ELEVATOR/SysId/dynamicVoltage", 5);
