@@ -21,6 +21,7 @@ public class AimGoalSupplier {
   @Setter
   private static ReefFace selectedTarget = ReefFace.NearFlat;
 
+
   /**
    * Calculates the optimal drive target position based on the robot's current position and goal position
    *
@@ -110,12 +111,6 @@ public class AimGoalSupplier {
     return FieldConstants.aprilTagType.getLayout().getTagPose(
         AllianceFlipUtil.shouldFlip() ? selectedTarget.redId : selectedTarget.blueId
     ).get().toPose2d();
-  }
-
-  public static boolean isInReefDangerZone(Pose2d robotPose) {
-    return (robotPose.getX() - getNearestTag(robotPose).getX() < 0.4
-        || robotPose.getY() - getNearestTag(robotPose).getY() < 0.4) &&
-        Math.abs(robotPose.getRotation().minus(getNearestTag(robotPose).getRotation()).getDegrees()) < 45;
   }
 
   /**

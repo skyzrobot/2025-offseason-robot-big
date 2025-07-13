@@ -182,7 +182,7 @@ public class Superstructure extends SubsystemBase {
         elevator.periodic();
 
         //simulated gamepiece tracking
-        if (!RobotBase.isReal() && !RobotConstants.useReplay) {
+        if (!RobotBase.isReal()) {
             if (simIntakeTimer.update(atGoal() && state == SuperstructureState.CORAL_GROUND_INTAKE)) {
                 intake.setIndexRollerHasCoral(false);
                 endEffectorArm.setHasCoral(true);
@@ -205,30 +205,31 @@ public class Superstructure extends SubsystemBase {
             if (atGoal() && state == SuperstructureState.NET_SCORE_EJECT) {
                 endEffectorArm.setHasAlgae(false);
             }
-        }
 
-        //log the gamepiece tracking
-        measuredPoseVisualizer.logCoralPose3D(
+            //log the gamepiece tracking
+            measuredPoseVisualizer.logCoralPose3D(
                 intake.isIndexRollerHasCoral(),
                 endEffectorArm.isHasCoral(),
                 endEffectorArm.isHasAlgae()
-        );
+            );
 
-        measuredPoseVisualizer.update(
+            measuredPoseVisualizer.update(
                 elevator.getElevatorPosition(),
                 intake.getCurrentAngle(),
                 endEffectorArm.getCurrentAngle()
-        );
-        setpointPoseVisualizer.update(
+            );
+            setpointPoseVisualizer.update(
                 elevator.getWantedPosition(),
                 intake.getWantedAngle(),
                 endEffectorArm.getWantedAngle()
-        );
-        goalPoseVisualizer.update(
+            );
+            goalPoseVisualizer.update(
                 goal.getValue().getPose().elevatorHeight().getAsDouble(),
                 goal.getValue().getPose().intakeAngle().getAsDouble(),
                 goal.getValue().getPose().endEffectorAngle().getAsDouble()
-        );
+            );
+        }
+
         // if we complete the current command, there are three things that we should planning to do
         // 1. update state (to next, which is current state)
         // 2. update next (to the next target state, which should be found through bfs)

@@ -1,10 +1,11 @@
 package frc.robot.utils;
 
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import frc.robot.FieldConstants;
+import lib.ironpulse.math.obstacle.Obstacle2d;
+import lib.ironpulse.math.obstacle.PolygonObstacle2d;
 import lib.ntext.NTParameter;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,9 +15,23 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-import org.littletonrobotics.junction.Logger;
-
 public class CoralRecorder {
+  public static Obstacle2d kRedReefHexagon = new PolygonObstacle2d(
+      new Translation2d(14.50, 4.858),
+      new Translation2d(13.059, 5.689),
+      new Translation2d(11.618, 4.858),
+      new Translation2d(11.618, 3.194),
+      new Translation2d(13.059, 2.362),
+      new Translation2d(14.500, 3.194)
+  );
+  public static Obstacle2d kBlueReefHexagon = new PolygonObstacle2d(
+      new Translation2d(FieldConstants.fieldLength - 14.50, 4.858),
+      new Translation2d(FieldConstants.fieldLength - 13.059, 5.689),
+      new Translation2d(FieldConstants.fieldLength - 11.618, 4.858),
+      new Translation2d(FieldConstants.fieldLength - 11.618, 3.194),
+      new Translation2d(FieldConstants.fieldLength - 13.059, 2.362),
+      new Translation2d(FieldConstants.fieldLength - 14.500, 3.194)
+  );
   public List<CoralInfo> coralInfos = new ArrayList<>();
 
   public void update(double dt) {
@@ -34,6 +49,8 @@ public class CoralRecorder {
   public void addCoralMeasurement(Translation2d loc, double dt) {
     if (loc.getX() < 0.0 || loc.getX() > FieldConstants.fieldLength) return;
     if (loc.getY() < 0.0 || loc.getY() > FieldConstants.fieldWidth) return;
+    if (kRedReefHexagon.isInside(loc)) return;
+    if (kBlueReefHexagon.isInside(loc)) return;
 
     // find nearest coral
     CoralInfo nearest = null;
@@ -49,7 +66,7 @@ public class CoralRecorder {
     // if have near coral and within radius, update to current
     if (nearest != null && minDistance <= CoralRecorderParamsNT.sameCoralRadiusMeters.getValue()) {
       nearest.setConfidence(
-          Math.min(1.0, nearest.getConfidence() + dt *  CoralRecorderParamsNT.confidenceTimeObservationGain.getValue())
+          Math.min(1.0, nearest.getConfidence() + dt * CoralRecorderParamsNT.confidenceTimeObservationGain.getValue())
       );
       nearest.setTranslation(
           nearest.getTranslation().interpolate(loc, CoralRecorderParamsNT.confidenceNewObservationProportion.getValue())
@@ -83,34 +100,34 @@ public class CoralRecorder {
   public Optional<CoralInfo> getMostInDirectionCoral(Pose2d robotPose) {
     var pRobot = robotPose.getTranslation();
     var robotHeading = robotPose.getRotation();
-    
+
     CoralInfo mostAligned = null;
     double maxDotProduct = Double.NEGATIVE_INFINITY;
-    
+
     for (CoralInfo info : coralInfos) {
       if (info.getConfidence() <= CoralRecorderParamsNT.confidenceThreshold.getValue()) continue;
-      
+
       // Calculate vector from robot to coral
       Translation2d robotToCoral = info.getTranslation().minus(pRobot);
-      
+
       // Skip if coral is at robot position
       if (robotToCoral.getNorm() == 0.0) continue;
-      
+
       // Normalize the vector to get direction
       Translation2d directionToCoral = robotToCoral.div(robotToCoral.getNorm());
-      
+
       // Calculate dot product with robot's heading direction
       Translation2d robotHeadingVector = new Translation2d(robotHeading.getCos(), robotHeading.getSin());
-      double dotProduct = directionToCoral.getX() * robotHeadingVector.getX() + 
-                         directionToCoral.getY() * robotHeadingVector.getY();
-      
+      double dotProduct = directionToCoral.getX() * robotHeadingVector.getX() +
+          directionToCoral.getY() * robotHeadingVector.getY();
+
       // Find coral with highest dot product (most aligned with robot heading)
       if (dotProduct > maxDotProduct) {
         maxDotProduct = dotProduct;
         mostAligned = info;
       }
     }
-    
+
     if (mostAligned != null) return Optional.of(mostAligned);
     return Optional.empty();
   }

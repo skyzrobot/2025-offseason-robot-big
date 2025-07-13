@@ -20,10 +20,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.auto.AutoActions;
 import frc.robot.auto.AutoSelector;
-import frc.robot.auto.routines.AutoLeft1C;
-import frc.robot.auto.routines.AutoLeft5C1A;
-import frc.robot.auto.routines.AutoRight5C1A;
-import frc.robot.auto.routines.AutoTest;
+import frc.robot.auto.routines.*;
 import frc.robot.commands.CoralIntakeAssistCommand;
 import frc.robot.commands.aimSequences.*;
 import frc.robot.subsystems.beambreak.BeambreakIOReal;
@@ -201,6 +198,7 @@ public class RobotContainer {
     // init auto actions
     AutoActions.init(swerve, superstructure, indicatorSubsystem, photonVisionSubsystem);
     AutoSelector.getInstance().registerAuto("TestAuto", new AutoTest());
+    AutoSelector.getInstance().registerAuto("TestComplexAuto", new AutoComplexTest());
     AutoSelector.getInstance().registerAuto("Right 5C1A", new AutoRight5C1A());
     AutoSelector.getInstance().registerAuto("Left 5C1A", new AutoLeft5C1A());
     AutoSelector.getInstance().registerAuto("Left 1C", new AutoLeft1C());
