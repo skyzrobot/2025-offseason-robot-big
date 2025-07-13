@@ -340,7 +340,7 @@ public class CoralIntakeAssistCommand extends Command {
     
     @NTParameter(tableName = "Params/Commands/CoralIntakeAssist")
     public static class CoralIntakeAssistParams {
-        static final double assistKp = 4;                        // Proportional gain for assist velocity
+        static final double assistKp = 1.0;                        // Proportional gain for assist velocity
         static final double maxAssistVelocity = 3.0;               // Maximum assist velocity (m/s)
         static final double minRobotSpeed = 0.2;                   // Minimum robot speed to activate assist (m/s)
         static final double maxAngleTowardsCoralDegrees = 55.0;

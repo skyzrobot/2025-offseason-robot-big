@@ -108,7 +108,7 @@ public class AutoActions {
   }
 
   public static Command chase() {
-    return new ChaseCoralCommand(swerve, photon).until(AutoActions::isInIntakeDangerZone);
+    return new ChaseCoralCommand(swerve).until(AutoActions::isInIntakeDangerZone);
   }
 
   public static Command chaseAndBackoff() {

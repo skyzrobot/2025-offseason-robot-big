@@ -16,8 +16,10 @@ import lombok.Getter;
 import lombok.Setter;
 import org.littletonrobotics.junction.Logger;
 
+import javax.swing.text.html.Option;
 import java.util.Optional;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Seconds;
 import static lib.ironpulse.math.MathTools.toPose2d;
 
@@ -116,5 +118,13 @@ public class RobotStateRecorder extends TransformRecorder {
 
   public static Optional<CoralRecorder.CoralInfo> getMostInDirectionCoral() {
     return recorder.getMostInDirectionCoral(getPoseWorldRobotCurrent().toPose2d());
+  }
+
+  public static Optional<CoralRecorder.CoralInfo> getNearestCoralInSight() {
+    return recorder.getNearestCoralInSight(getPoseWorldRobotCurrent().toPose2d(), Degrees.of(70));
+  }
+
+  public static Optional<CoralRecorder.CoralInfo> getCoralById(int id) {
+    return recorder.getCoralById(id);
   }
 }

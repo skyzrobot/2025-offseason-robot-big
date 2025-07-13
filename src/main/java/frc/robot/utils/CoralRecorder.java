@@ -3,6 +3,7 @@ package frc.robot.utils;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.units.measure.Angle;
 import frc.robot.FieldConstants;
 import lib.ironpulse.math.obstacle.Obstacle2d;
 import lib.ironpulse.math.obstacle.PolygonObstacle2d;
@@ -10,10 +11,16 @@ import lib.ntext.NTParameter;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Radians;
+import static lib.ironpulse.math.MathTools.epsilonEquals;
+import static lib.ironpulse.math.MathTools.toAngle;
 
 public class CoralRecorder {
   public static Obstacle2d kRedReefHexagon = new PolygonObstacle2d(
@@ -32,6 +39,8 @@ public class CoralRecorder {
       new Translation2d(FieldConstants.fieldLength - 13.059, 2.362),
       new Translation2d(FieldConstants.fieldLength - 14.500, 3.194)
   );
+
+  public int currentId = 0;
   public List<CoralInfo> coralInfos = new ArrayList<>();
 
   public void update(double dt) {
@@ -74,7 +83,7 @@ public class CoralRecorder {
     } else {
       // does not have any near coral, create a new one
       CoralInfo info = new CoralInfo(
-          loc, 0.0, CoralRecorderParamsNT.confidenceStart.getValue(), true
+          currentId++, loc, 0.0, CoralRecorderParamsNT.confidenceStart.getValue(), true
       );
       coralInfos.add(info);
     }
@@ -94,6 +103,13 @@ public class CoralRecorder {
     }
 
     if (nearest != null) return Optional.of(nearest);
+    return Optional.empty();
+  }
+
+  public Optional<CoralInfo> getCoralById(int id) {
+    for(CoralInfo info : coralInfos) {
+      if (info.getId() == id) return Optional.of(info);
+    }
     return Optional.empty();
   }
 
@@ -132,6 +148,33 @@ public class CoralRecorder {
     return Optional.empty();
   }
 
+  public Optional<CoralInfo> getNearestCoralInSight(Pose2d robotPose, Angle insightAngle) {
+    var pRobot = robotPose.getTranslation();
+    var heading = robotPose.getRotation();
+
+    CoralInfo nearest = null;
+    double minDist = Double.MAX_VALUE;
+
+    for (CoralInfo info : coralInfos) {
+      if (info.getConfidence() <= CoralRecorderParamsNT.confidenceThreshold.getValue()) {
+        continue;
+      }
+
+      // vector from robot to this coral
+      Translation2d toCoral = info.getTranslation().minus(pRobot);
+      Rotation2d toCoralAngle = toAngle(toCoral);
+      double dist = toCoral.getNorm();
+
+      // within field of view and closer than any before
+      if (epsilonEquals(heading, toCoralAngle, insightAngle.in(Radians)) && dist < minDist) {
+        minDist = dist;
+        nearest = info;
+      }
+    }
+
+    return nearest != null ? Optional.of(nearest) : Optional.empty();
+  }
+
   public Pose2d[] getCoralLocations() {
     double threshold = CoralRecorderParamsNT.confidenceThreshold.getValue();
 
@@ -151,6 +194,8 @@ public class CoralRecorder {
   @Data
   @AllArgsConstructor
   public static class CoralInfo {
+    public int id;
+
     public Translation2d translation;
     public double addedTime;
     public double confidence;
