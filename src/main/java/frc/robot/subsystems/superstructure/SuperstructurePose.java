@@ -45,9 +45,9 @@ public record SuperstructurePose(DoubleSupplier elevatorHeight, DoubleSupplier e
         CORAL_STOW("Coral Stow",        0.53,   135,   132, 60),  // alternate: 110
         ALGAE_STOW("Algae Stow",        0.6,    0,     60,  60),   // alternate: 80
         START("Start",                  0.5,    0,     132),
-        L1_INTAKE_SIDE("L1 Intake Side", 0.16,   0,    60),
+        L1_INTAKE_SIDE("L1 Intake Side", 0.01,   0,    45),
         L1_SHOOT_SIDE("L1 Shoot Side",  0.3,   200,   132,  60),   // alternate: 40
-        L2("L2",                        0.16,  190,   132, 60  ),  // alternate: 110
+        L2("L2",                        0.16,  190,   132, 60),  // alternate: 110
         L3("L3",                        0.53,  185,   132, 60),  // alternate: 110
         L4("L4",                        1.445, 225,   132, 60),  // alternate: 110
         NET_SCORE("Net Score",          1.4,   -133,  132,  60),   // alternate: 40
@@ -56,6 +56,7 @@ public record SuperstructurePose(DoubleSupplier elevatorHeight, DoubleSupplier e
         CORAL_GROUND_INTAKE("Coral Ground Intake", 0.01, 0, 140),
         CORAL_INDEXED_INTAKE("Coral Indexed Intake", 0.57, 0, 140),
         CORAL_STATION_INTAKE("Coral Station Intake", 0.2, 180, 60),
+        CORAL_L1_INTAKE("Coral L1 Intake", 0.01, 0, 140),
         SAFE_OUTTAKE("Safe Outtake", 0.53, 0, 60),
         IDLE("Idle",                    0.01,  0,     132, 60),  // alternate: 110
         PROCESSOR("Processor", 0.16, 0, 60),

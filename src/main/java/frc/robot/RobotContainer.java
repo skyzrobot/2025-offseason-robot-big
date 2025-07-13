@@ -235,26 +235,41 @@ public class RobotContainer {
               indicatorSubsystem.setPattern(IndicatorIO.Patterns.RESET_ODOM);
             })));
 
-    //INTAKE and OUTTAKE
+    // INTAKE and OUTTAKE
     driverController
         .rightStick()
         .toggleOnTrue(
-          Commands.parallel(
-            new CoralIntakeAssistCommand(
-              swerve,
-              () -> -driverController.getLeftY(),
-              () -> -driverController.getLeftX(),
-              () -> -driverController.getRightX(),
-              RobotStateRecorder::getPoseDriverRobotCurrent,
-              MetersPerSecond.of(0.04),
-              DegreesPerSecond.of(3.0)
-          ),
-            superstructure
-                .runGoal(this::determineIntakeState)
-                ).until(this::isIntakeComplete));
+            new BlocklessEitherCommand(
+                // If right bumper is held, run L1 intake
+                superstructure.runGoal(() -> SuperstructureState.CORAL_L1_INTAKE),
+                // If right bumper is NOT held, choose between algae intake and assisted coral intake
+                new BlocklessEitherCommand(
+                    // If left bumper is held, run algae intake
+                    AutoActions.takeAlgae(),
+                    // Otherwise, run assisted coral intake (swerve + superstructure)
+                    Commands.parallel(
+                        new CoralIntakeAssistCommand(
+                            swerve,
+                            () -> -driverController.getLeftY(),
+                            () -> -driverController.getLeftX(),
+                            () -> -driverController.getRightX(),
+                            RobotStateRecorder::getPoseDriverRobotCurrent,
+                            MetersPerSecond.of(0.04),
+                            DegreesPerSecond.of(3.0)
+                        ),
+                        superstructure.runGoal(this::determineIntakeState)
+                    ).until(this::isIntakeComplete),
+                    // Condition: use algae intake if left bumper is held
+                    () -> driverController.leftBumper().getAsBoolean()
+                ),
+                // Condition: use assisted/algae intake if right bumper is held
+                () -> driverController.rightBumper().getAsBoolean()
+            )
+        );
 
     driverController.b().whileTrue(superstructure.runGoal(() -> SuperstructureState.CORAL_OUTTAKE));
-    driverController.povUp().whileTrue(superstructure.runGoal(() -> SuperstructureState.SAFE_OUTTAKE));
+    driverController.y().toggleOnTrue(superstructure.runGoal(() -> SuperstructureState.SAFE_OUTTAKE));
+    driverController.a().onTrue(superstructure.toggleIntakePose());
 
     //CLIMBER
    driverController.povDown().whileTrue(
@@ -326,6 +341,15 @@ public class RobotContainer {
         .leftStick()
         .whileTrue(
             createScoringCommand(true, SuperstructureState.L2));
+    
+    driverController.povUp().whileTrue(
+      superstructure.runGoal(() -> SuperstructureState.L1_SHOOT_SIDE)
+        .until(() -> driverController.rightTrigger().getAsBoolean())
+        .andThen(
+          superstructure.runGoal(() -> SuperstructureState.L1_SHOOT_SIDE_EJECT)
+            .withTimeout(0.5)
+        )
+    );
 
 
   //TESTING : TODO: remove

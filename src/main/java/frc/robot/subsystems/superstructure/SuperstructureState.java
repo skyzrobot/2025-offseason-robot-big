@@ -21,7 +21,7 @@ public enum SuperstructureState {
     // L1 positions
     //TODO: L1_intake_side
     L1_INTAKE_SIDE(createState(Preset.L1_INTAKE_SIDE)),
-    L1_INTAKE_SIDE_EJECT(createIntakeState(L1_INTAKE_SIDE, () -> IntakeConstants.OUTTAKE_VOLTAGE.get())),
+    L1_INTAKE_SIDE_EJECT(createIntakeState(L1_INTAKE_SIDE, () -> IntakeConstants.SHOOT_VOLTAGE.get())),
     L1_SHOOT_SIDE(createState(Preset.L1_SHOOT_SIDE)),
     L1_SHOOT_SIDE_EJECT(createEEState(L1_SHOOT_SIDE, () -> EndEffectorArmConstants.CORAL_SHOOT_VOLTAGE_L1.get())),
 
@@ -58,6 +58,11 @@ public enum SuperstructureState {
         () -> 0, 
         () -> 0,
         () -> EndEffectorArmConstants.CORAL_INTAKE_VOLTAGE.get())),
+    
+    CORAL_L1_INTAKE(createState(Preset.CORAL_L1_INTAKE,
+        () -> IntakeConstants.INTAKE_HOLD_VOLTAGE.get(), 
+        () -> -IntakeConstants.INDEX_ROLLER_VOLTAGE.get(),
+        () -> EndEffectorArmConstants.CORAL_OUTTAKE_VOLTAGE.get())),
 
     // Safe outtake positions
     SAFE_OUTTAKE(createState(

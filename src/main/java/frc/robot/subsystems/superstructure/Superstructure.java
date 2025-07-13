@@ -83,7 +83,8 @@ public class Superstructure extends SubsystemBase {
                         Pair.of(SuperstructureState.L2, SuperstructureState.L2_EJECT),
                         Pair.of(SuperstructureState.L3, SuperstructureState.L3_EJECT),
                         Pair.of(SuperstructureState.L4, SuperstructureState.L4_EJECT),
-                        Pair.of(SuperstructureState.NET_SCORE, SuperstructureState.NET_SCORE_EJECT));
+                        Pair.of(SuperstructureState.NET_SCORE, SuperstructureState.NET_SCORE_EJECT),
+                        Pair.of(SuperstructureState.PROCESSOR_SCORE, SuperstructureState.PROCESSOR_SCORE_EJECT));
         for (var pair : shootStates) {
             addEdge(pair.getFirst(), pair.getSecond(), true, false);
         }
@@ -151,10 +152,10 @@ public class Superstructure extends SubsystemBase {
             Set.of(
                     SuperstructureState.CORAL_GROUND_INTAKE,
                     SuperstructureState.L1_INTAKE_SIDE,
+                    SuperstructureState.CORAL_L1_INTAKE,
                     SuperstructureState.IDLE,
                     SuperstructureState.CORAL_OUTTAKE,
                     SuperstructureState.PROCESSOR_SCORE,
-                    SuperstructureState.PROCESSOR_SCORE_EJECT,
                     SuperstructureState.SAFE_OUTTAKE
             );
     final Set<SuperstructureState> statesAboveFlip =
@@ -580,6 +581,11 @@ public class Superstructure extends SubsystemBase {
                                 runSuperstructurePose(to.getValue().getPose()),
                                 Commands.waitUntil(this::poseAtGoal),
                                 runSuperstructureRollers(to));
+        }
+        if (to == SuperstructureState.L1_SHOOT_SIDE || to == SuperstructureState.L1_SHOOT_SIDE_EJECT){
+            return runSuperstructurePose(to.getValue().getPose())
+                    .andThen(Commands.waitUntil(intake::isAtGoal),
+                        runSuperstructureRollers(to));
         }
 
         if (to == SuperstructureState.CORAL_STATION_INTAKE){
