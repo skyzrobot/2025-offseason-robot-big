@@ -258,7 +258,7 @@ public final class RobotConstants {
         .steerMotorId(3)
         .encoderId(10)
         .driveMotorEncoderOffset(Degree.of(0))
-        .steerMotorEncoderOffset(Rotations.of(-0.20849609375))
+        .steerMotorEncoderOffset(Rotations.of(-0.23291))
         .driveInverted(false)
         .steerInverted(true)
         .encoderInverted(false)
@@ -374,7 +374,7 @@ public final class RobotConstants {
     public static final TunableNumber OMEGA_TOLERANCE_DEGREES = new TunableNumber("AIM/OMEGA_TOLERANCE_DEGREES", 1);
     public static final Measure<LinearVelocityUnit> MAX_AIMING_SPEED = MetersPerSecond.of(3.5);
     public static final Measure<LinearAccelerationUnit> MAX_AIMING_ACCELERATION = MetersPerSecondPerSecond.of(10);
-    public static final TunableNumber Edge_Case_Max_Delta = new TunableNumber("AIM/MAX DELTA", 0.35);
+    public static final TunableNumber Edge_Case_Max_Delta = new TunableNumber("AIM/MAX DELTA", 0.41);
     public static final TunableNumber ROBOT_TO_ALGAE_METERS = new TunableNumber("AIM/ROBOT_TO_ALGAE_METERS", 0.489);
     public static final TunableNumber ALGAE_TO_TAG_METERS = new TunableNumber("AIM/ALGAE_TO_TAG_METERS", 0);
     public static final TunableNumber HEXAGON_DANGER_DEGREES = new TunableNumber("AIM/HEXAGON_DANGER_DEGREES", 45);

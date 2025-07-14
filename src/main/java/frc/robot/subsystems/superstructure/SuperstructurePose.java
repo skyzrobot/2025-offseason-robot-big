@@ -50,13 +50,13 @@ public record SuperstructurePose(DoubleSupplier elevatorHeight, DoubleSupplier e
         L2("L2",                        0.16,  190,   132, 60),  // alternate: 110
         L3("L3",                        0.53,  185,   132, 60),  // alternate: 110
         L4("L4",                        1.445, 225,   132, 60),  // alternate: 110
-        NET_SCORE("Net Score",          1.4,   -133,  132,  60),   // alternate: 40
+        NET_SCORE("Net Score",          1.44,   -133,  132,  60),   // alternate: 40
         P1("P1",                        0.52,  -10,   132,60),
         P2("P2",                        0.85,  -10,   132,60),
-        CORAL_GROUND_INTAKE("Coral Ground Intake", 0.01, 0, 140),
-        CORAL_INDEXED_INTAKE("Coral Indexed Intake", 0.57, 0, 140),
+        CORAL_GROUND_INTAKE("Coral Ground Intake", 0.01, 0, 144),
+        CORAL_INDEXED_INTAKE("Coral Indexed Intake", 0.57, 0, 144),
         CORAL_STATION_INTAKE("Coral Station Intake", 0.2, 180, 60),
-        CORAL_L1_INTAKE("Coral L1 Intake", 0.01, 0, 140),
+        CORAL_L1_INTAKE("Coral L1 Intake", 0.01, 0, 144),
         SAFE_OUTTAKE("Safe Outtake", 0.53, 0, 60),
         IDLE("Idle",                    0.01,  0,     132, 60),  // alternate: 110
         PROCESSOR("Processor", 0.16, 0, 60),

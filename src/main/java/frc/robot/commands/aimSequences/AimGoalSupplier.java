@@ -355,7 +355,6 @@ public class AimGoalSupplier {
     static final double AlgaeToTagMeters = 0.2;
     static final double HexagonDangerZoneOffset = 0.3;
     static final double HexagonDangerDegrees = 45.0;
-    static final double EdgeCaseMaxDelta = 0.2;
     static final double ShiftingTerminate = 0.2;
     static final double NetClearanceDistance = 1.15;
     static final double NetNearDistance = 1.60;

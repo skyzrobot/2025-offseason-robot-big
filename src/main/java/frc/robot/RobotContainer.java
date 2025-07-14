@@ -239,14 +239,6 @@ public class RobotContainer {
     driverController
         .rightStick()
         .toggleOnTrue(
-            new BlocklessEitherCommand(
-                // If right bumper is held, run L1 intake
-                superstructure.runGoal(() -> SuperstructureState.CORAL_L1_INTAKE),
-                // If right bumper is NOT held, choose between algae intake and assisted coral intake
-                new BlocklessEitherCommand(
-                    // If left bumper is held, run algae intake
-                    AutoActions.takeAlgae(),
-                    // Otherwise, run assisted coral intake (swerve + superstructure)
                     Commands.parallel(
                         new CoralIntakeAssistCommand(
                             swerve,
@@ -258,13 +250,7 @@ public class RobotContainer {
                             DegreesPerSecond.of(3.0)
                         ),
                         superstructure.runGoal(this::determineIntakeState)
-                    ).until(this::isIntakeComplete),
-                    // Condition: use algae intake if left bumper is held
-                    () -> driverController.leftBumper().getAsBoolean()
-                ),
-                // Condition: use assisted/algae intake if right bumper is held
-                () -> driverController.rightBumper().getAsBoolean()
-            )
+                    ).until(this::isIntakeComplete)
         );
 
     driverController.b().whileTrue(superstructure.runGoal(() -> SuperstructureState.CORAL_OUTTAKE));
@@ -275,7 +261,7 @@ public class RobotContainer {
    driverController.povDown().whileTrue(
      Commands.either(
      Commands.run(() ->
-     climberSubsystem.setWantedState(ClimberSubsystem.WantedState.CLIMB)),
+     climberSubsystem.setWantedState(ClimberSubsystem.WantedState.IDLE)),
      Commands.run(() ->
      climberSubsystem.setWantedState(ClimberSubsystem.WantedState.DEPLOY)),
      climberSubsystem::hasDeployed
@@ -343,12 +329,7 @@ public class RobotContainer {
             createScoringCommand(true, SuperstructureState.L2));
     
     driverController.povUp().whileTrue(
-      superstructure.runGoal(() -> SuperstructureState.L1_INTAKE_SIDE)
-        .until(() -> driverController.rightTrigger().getAsBoolean())
-        .andThen(
-          superstructure.runGoal(() -> SuperstructureState.L1_INTAKE_SIDE_EJECT)
-            .withTimeout(0.5)
-        )
+      superstructure.runGoal(SuperstructureState.CORAL_L1_INTAKE)
     );
 
 
