@@ -348,7 +348,7 @@ public class AimGoalSupplier {
   @NTParameter(tableName = "Params/AimParams")
   private static class AimParams {
     static final double MaxDistanceReefLineup = 0.75;
-    static final double RobotToPipeXMeters = 0.52;
+    static final double RobotToPipeXMeters = 0.54;
     static final double RobotToPipeYMeters = -0.03;
 
     static final double RobotToAlgaeMeters = 0.4;
@@ -357,7 +357,7 @@ public class AimGoalSupplier {
     static final double HexagonDangerDegrees = 45.0;
     static final double EdgeCaseMaxDelta = 0.2;
     static final double ShiftingTerminate = 0.2;
-    static final double NetClearanceDistance = 1.15;
+    static final double NetClearanceDistance = 1.0;
     static final double NetNearDistance = 1.60;
   }
 

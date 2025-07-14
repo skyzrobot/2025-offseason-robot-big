@@ -17,11 +17,13 @@ public class AutoComplexTest extends AutoRoutine {
 
   @Override
   public Command getAutoCommand() {
-    var action1 = print("starting").alongWith(waitSeconds(1.0));
-    var action2 = defer(() -> print("currently counting " + tryCounter++), Collections.emptySet()).alongWith(waitSeconds(1.0));
-    var action3 = print("ending");
+    var action1 = print("action1");
+    var action2 = print("action2");
+    var action3 = print("action3");
 
-    var tree = new DecisionTree(action1).addAlwaysTrueDecision(action1, action2).addDecision(action2, action2, () -> tryCounter < 3).addDecision(action2, action3, () -> tryCounter >= 3);
+    var tree = new DecisionTree(action1)
+        .addAlwaysTrueDecision(action1, action2)
+        .addAlwaysTrueDecision(action2, action3);
 
     return tree.toCommand();
   }

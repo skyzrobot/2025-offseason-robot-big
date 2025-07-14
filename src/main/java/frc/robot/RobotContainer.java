@@ -198,6 +198,7 @@ public class RobotContainer {
 
     // init auto actions
     AutoActions.init(swerve, superstructure, indicatorSubsystem, photonVisionSubsystem);
+
     AutoSelector.getInstance().registerAuto("TestAuto", new AutoTest());
     AutoSelector.getInstance().registerAuto("TestComplexAuto", new AutoComplexTest());
     AutoSelector.getInstance().registerAuto("Right 5C1A", new AutoRight5C1A());
@@ -232,7 +233,6 @@ public class RobotContainer {
                   TransformRecorder.kFrameWorld,
                   TransformRecorder.kFrameRobot);
               lastResetTime = Timer.getFPGATimestamp();
-              indicatorSubsystem.setPattern(IndicatorIO.Patterns.RESET_ODOM);
             })));
 
     // INTAKE and OUTTAKE
@@ -361,23 +361,23 @@ public class RobotContainer {
 //     new ReefAimCommand(swerve, indicatorSubsystem)
 //     )
 //     );
-    driverController.x().whileTrue(
-        Commands.deadline(
-            AutoActions.chase(),
-            Commands.run(
-                () -> {
-                  if(AutoActions.isCoralInSight()) {
-                    indicatorSubsystem.setPattern(IndicatorIO.Patterns.ASSISTED_INTAKE);
-                  } else {
-                    indicatorSubsystem.setPattern(IndicatorIO.Patterns.INTAKE);
-                  }
-                },indicatorSubsystem)
-        ).andThen(
-            Commands.run(
-                () -> indicatorSubsystem.setPattern(IndicatorIO.Patterns.AFTER_INTAKE)
-            )
-        )
-    );
+//    driverController.x().whileTrue(
+//        Commands.deadline(
+//            AutoActions.chase(),
+//            Commands.run(
+//                () -> {
+//                  if(AutoActions.isCoralInSight()) {
+//                    indicatorSubsystem.setPattern(IndicatorIO.Patterns.ASSISTED_INTAKE);
+//                  } else {
+//                    indicatorSubsystem.setPattern(IndicatorIO.Patterns.INTAKE);
+//                  }
+//                },indicatorSubsystem)
+//        ).andThen(
+//            Commands.run(
+//                () -> indicatorSubsystem.setPattern(IndicatorIO.Patterns.AFTER_INTAKE)
+//            )
+//        )
+//    );
   }
 
   private void configureStreamDeckBindings() {

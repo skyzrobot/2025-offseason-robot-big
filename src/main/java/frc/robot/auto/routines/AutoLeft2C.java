@@ -27,7 +27,7 @@ public class AutoLeft2C extends AutoRoutine {
   );
 
   private int idxCoral = 0;
-  private Timer indexTimer = new Timer();
+  private final Timer indexTimer = new Timer();
 
   public AutoLeft2C() {
     super("Left2C");
@@ -37,13 +37,15 @@ public class AutoLeft2C extends AutoRoutine {
     idxCoral = 0;
   }
   private void advanceCoralIdx() {
-    this.idxCoral++;
+    Logging.info("Auto", "Advancing coral cound from %d to %d.", idxCoral, idxCoral + 1);
+    idxCoral++;
   }
 
   private Command setGoalBasedOnIdx() {
     Logging.info("Auto", "Currently on coral idx %d.", idxCoral);
     indexTimer.reset();
     indexTimer.start();
+
     return switch (idxCoral) {
       case 0 -> setGoal(AimGoalSupplier.ReefFace.FarLeftTilt, false, SuperstructureState.L4);
       case 1 -> setGoal(AimGoalSupplier.ReefFace.NearLeftTilt, false, SuperstructureState.L4);
@@ -52,17 +54,13 @@ public class AutoLeft2C extends AutoRoutine {
       case 4 -> setGoal(AimGoalSupplier.ReefFace.NearLeftTilt, true, SuperstructureState.L3);
       default -> setGoal(AimGoalSupplier.ReefFace.NearLeftTilt, false, SuperstructureState.L2);
     };
-
   }
 
   @Override
   public Command getAutoCommand() {
-    var tree = new DecisionTree();
-
     var start = Commands.runOnce(this::reset);
 
     var scorePreload = sequence(
-        print("Score Preload"),
         defer(this::setGoalBasedOnIdx, Set.of()),
         parallel(
             driveToSelectedTarget(),
@@ -74,7 +72,6 @@ public class AutoLeft2C extends AutoRoutine {
 
     var getCoral = defer(
         () -> {
-          System.out.println("Get Coral");
           boolean backoff = idxCoral == 1; // only back off for the first coral
           return deadline(
               sequence(
@@ -93,22 +90,23 @@ public class AutoLeft2C extends AutoRoutine {
     );
 
     var scoreWithConsider = sequence(
-        print("Score With Consider"),
         defer(this::setGoalBasedOnIdx, Set.of()),
         sequence(
             parallel(
                 driveToSelectedTarget(),
                 prepare()
             ),
-            shoot().onlyIf(AutoActions::isControlCoral),
-            Commands.runOnce(this::advanceCoralIdx)
+            sequence(
+                shoot(),
+                Commands.runOnce(this::advanceCoralIdx)
+            ).onlyIf(AutoActions::isControlCoral)
         ).unless(() -> indexTimer.hasElapsed(1.0) && !AutoActions.isControlCoral())
     );
 
     var end = AutoActions.takeAlgae();
 
-
-    tree.setRoot(start);
+    var tree = new DecisionTree();
+    tree.addRoot(start);
     tree.addAlwaysTrueDecision(start, scorePreload);
     tree.addAlwaysTrueDecision(scorePreload, getCoral);
     tree.addAlwaysTrueDecision(getCoral, scoreWithConsider);

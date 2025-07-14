@@ -93,10 +93,6 @@ public class AutoActions {
     AutoActions.photon = photon;
   }
 
-  public static Command indicate(IndicatorIO.Patterns pattern) {
-    return Commands.run(() -> indicator.setPattern(pattern), indicator);
-  }
-
   public static Command intake() {
     return superstructure.runGoal(() -> SuperstructureState.CORAL_GROUND_INTAKE);
   }
@@ -105,6 +101,10 @@ public class AutoActions {
     return superstructure
         .runGoal(AutoActions::determineIntakeState)
         .until(AutoActions::isIntakeComplete);
+  }
+
+  public static Command indicate(IndicatorIO.Patterns pattern) {
+    return Commands.run(() -> indicator.setPattern(pattern));
   }
 
   public static Command chase() {
@@ -145,9 +145,9 @@ public class AutoActions {
     return new ReefAimCommand(swerve, indicator, true);
   }
 
-  public static PathPlannerPath generatePath(List<Pose2d> waypoints, List<RotationTarget> rotationTargets, double endVelMps) {
+  public static PathPlannerPath generatePath(List<Pose2d> waypoints, List<RotationTarget> rotationTargets, double maxVel, double maxAcc, double endVelMps) {
     PathConstraints constraints = new PathConstraints(
-        4.6, 6.0,
+        maxVel, maxAcc,
         15.0, 40.0, 12.0
     );
     List<Waypoint> pts = PathPlannerPath.waypointsFromPoses(waypoints);
@@ -166,6 +166,10 @@ public class AutoActions {
     );
   }
 
+  public static PathPlannerPath generatePath(List<Pose2d> waypoints, List<RotationTarget> rotationTargets, double endVelMps) {
+    return generatePath(waypoints, rotationTargets, 4.5, 15.0, endVelMps);
+  }
+
   public static Command driveToIntakePoint(boolean isLeft, boolean shouldBackoff) {
     return swerve.defer(() -> {
       Pose2d current = RobotStateRecorder.getPoseWorldRobotCurrent().toPose2d();
@@ -181,8 +185,11 @@ public class AutoActions {
           ? List.of(backoffAngle, decisionAngle)
           : List.of(decisionAngle);
 
-      PathPlannerPath path = generatePath(waypoints, rotationTargets, 0.0);
-      return Commands.deadline(followPath(path), applySwerveLimit().repeatedly());
+      PathPlannerPath path = generatePath(waypoints, rotationTargets, 3.5, 5.0, 0.0);
+      return Commands.deadline(
+          followPath(path),
+          applySwerveLimit().repeatedly()
+      );
     });
   }
 

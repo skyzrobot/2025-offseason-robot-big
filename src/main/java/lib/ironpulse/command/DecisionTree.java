@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import lombok.Getter;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultDirectedGraph;
+
 import java.util.function.BooleanSupplier;
 
 public class DecisionTree {
@@ -13,23 +14,29 @@ public class DecisionTree {
   private Command rootCommand;
   @Getter
   private Command currentCommand;
-
-  public DecisionTree(Graph<Command, BooleanSupplier> graph) {
-    this.graph = graph;
-  }
+  private boolean shouldAdvanceCurrent = false;
 
   public DecisionTree(Command rootCommand) {
     this.graph = new DefaultDirectedGraph<>(BooleanSupplier.class);
     this.rootCommand = rootCommand;
+
+    registerCallback();
   }
 
   public DecisionTree() {
     this.graph = new DefaultDirectedGraph<>(BooleanSupplier.class);
+    registerCallback();
   }
 
-  public DecisionTree setRoot(Command root) {
-    this.rootCommand = root;
+  public void registerCallback() {
+    CommandScheduler.getInstance().onCommandFinish(command -> {
+      if(command == currentCommand) shouldAdvanceCurrent = true;
+    });
+  }
+
+  public DecisionTree addRoot(Command root) {
     graph.addVertex(root);
+    rootCommand = root;
     return this;
   }
 
@@ -43,9 +50,16 @@ public class DecisionTree {
   }
 
   public DecisionTree addAlwaysTrueDecision(Command from, Command to) {
+    BooleanSupplier alwaysTrue = new BooleanSupplier() {
+      @Override
+      public boolean getAsBoolean() {
+        return true;
+      }
+    };
+
     graph.addVertex(from);
     graph.addVertex(to);
-    graph.addEdge(from, to, () -> true);
+    graph.addEdge(from, to, alwaysTrue); // NOTE: need to make a new BooleanSupplier each time
     return this;
   }
 
@@ -57,7 +71,7 @@ public class DecisionTree {
    * Call this every scheduler cycle. It will:
    * 1) schedule root on first tick
    * 2) when currentCommand finishes, test outgoing edges in iteration order
-   *    and schedule the first target whose supplier returns true.
+   * and schedule the first target whose supplier returns true.
    */
   public void tick() {
     // 1. start the root if nothing is running yet
@@ -70,7 +84,8 @@ public class DecisionTree {
     }
 
     // 2. if currentCommand is done, try transitions
-    if (currentCommand.isFinished()) {
+    if (currentCommand.isFinished() || shouldAdvanceCurrent) {
+      shouldAdvanceCurrent = false;
       for (BooleanSupplier edge : graph.outgoingEdgesOf(currentCommand)) {
         if (edge.getAsBoolean()) {
           Command next = graph.getEdgeTarget(edge);
@@ -88,7 +103,7 @@ public class DecisionTree {
       return true;
     }
 
-    boolean done = currentCommand.isFinished();
+    boolean done = currentCommand.isFinished() || shouldAdvanceCurrent;
     boolean terminal = graph.outgoingEdgesOf(currentCommand).isEmpty();
     return done && terminal;
   }

@@ -28,7 +28,6 @@ import org.littletonrobotics.junction.Logger;
 import static edu.wpi.first.math.util.Units.degreesToRadians;
 import static edu.wpi.first.units.Units.*;
 import static lib.ironpulse.math.MathTools.epsilonEquals;
-import static lib.ironpulse.math.MathTools.unwrapAngle;
 
 public class ReefAimCommand extends Command {
   private final static String kTag = "Commands/ReefAimCommand";
@@ -56,7 +55,7 @@ public class ReefAimCommand extends Command {
         ReefAimCommandParamsNT.rotationKi.getValue(),
         ReefAimCommandParamsNT.rotationKd.getValue()
     );
-    addRequirements(swerve);
+    addRequirements(swerve, indicatorSubsystem);
 
     this.useSelectedTarget = useSelectedTarget;
   }
@@ -121,11 +120,6 @@ public class ReefAimCommand extends Command {
 
   @Override
   public void execute() {
-    if(useFast()) {
-      Logging.warn(kTag, "Use Fast!");
-    } else {
-      Logging.warn(kTag, "Use Slow!");
-    }
     poseWorldRobot = RobotStateRecorder.getPoseWorldRobotCurrent().toPose2d();
     poseWorldTarget = AimGoalSupplier.getDriveTarget(poseWorldRobot, finalDestinationPose);
     Pose2d poseRobotTarget = poseWorldTarget.relativeTo(poseWorldRobot);
@@ -179,6 +173,8 @@ public class ReefAimCommand extends Command {
     Logger.recordOutput(kTag + "/tagPose", tagPose);
     Logger.recordOutput(kTag + "/destinationPose", poseWorldTarget);
     Logger.recordOutput(kTag + "/finalDestinationPose", finalDestinationPose);
+
+    indicatorSubsystem.setPattern(IndicatorIO.Patterns.AIMING);
   }
 
   @Override
@@ -259,8 +255,7 @@ public class ReefAimCommand extends Command {
   public void end(boolean interrupted) {
     swerve.setSwerveLimitDefault();
     swerve.runStop();
-    if (!interrupted) indicatorSubsystem.setPattern(IndicatorIO.Patterns.AIMED);
-    else indicatorSubsystem.setPattern(IndicatorIO.Patterns.NORMAL);
+    indicatorSubsystem.setPattern(IndicatorIO.Patterns.AIMED);
   }
 
   @Override
