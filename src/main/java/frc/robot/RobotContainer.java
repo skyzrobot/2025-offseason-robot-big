@@ -343,10 +343,10 @@ public class RobotContainer {
             createScoringCommand(true, SuperstructureState.L2));
     
     driverController.povUp().whileTrue(
-      superstructure.runGoal(() -> SuperstructureState.L1_SHOOT_SIDE)
+      superstructure.runGoal(() -> SuperstructureState.L1_INTAKE_SIDE)
         .until(() -> driverController.rightTrigger().getAsBoolean())
         .andThen(
-          superstructure.runGoal(() -> SuperstructureState.L1_SHOOT_SIDE_EJECT)
+          superstructure.runGoal(() -> SuperstructureState.L1_INTAKE_SIDE_EJECT)
             .withTimeout(0.5)
         )
     );

@@ -180,7 +180,7 @@ public final class RobotConstants {
     private static final int FRONT_LEFT_DRIVE_MOTOR_ID = 4;
     private static final int FRONT_LEFT_STEER_MOTOR_ID = 3;
     private static final int FRONT_LEFT_ENCODER_ID = 10;
-    private static final double FRONT_LEFT_ENCODER_OFFSET = -0.1491701719;
+    private static final double FRONT_LEFT_ENCODER_OFFSET = -0.20849609375;
     private static final Measure<DistanceUnit> frontLeftXPos = Meters.of(0.29);
     private static final Measure<DistanceUnit> frontLeftYPos = Meters.of(0.29);
     public static final LegacySwerveModuleConstants FrontLeft = ConstantCreator.createModuleConstants(
@@ -190,7 +190,7 @@ public final class RobotConstants {
     private static final int FRONT_RIGHT_DRIVE_MOTOR_ID = 6;
     private static final int FRONT_RIGHT_STEER_MOTOR_ID = 5;
     private static final int FRONT_RIGHT_ENCODER_ID = 11;
-    private static final double FRONT_RIGHT_ENCODER_OFFSET = -0.3134766406;
+    private static final double FRONT_RIGHT_ENCODER_OFFSET = -0.30615234375;
     private static final Measure<DistanceUnit> frontRightXPos = Meters.of(0.29);
     private static final Measure<DistanceUnit> frontRightYPos = Meters.of(-0.29);
     public static final LegacySwerveModuleConstants FrontRight = ConstantCreator.createModuleConstants(
@@ -201,7 +201,7 @@ public final class RobotConstants {
     private static final int BACK_LEFT_DRIVE_MOTOR_ID = 2;
     private static final int BACK_LEFT_STEER_MOTOR_ID = 1;
     private static final int BACK_LEFT_ENCODER_ID = 0;
-    private static final double BACK_LEFT_ENCODER_OFFSET = 0.0383297031;
+    private static final double BACK_LEFT_ENCODER_OFFSET = 0.032958984375;
     private static final Measure<DistanceUnit> backLeftXPos = Meters.of(-0.29);
     private static final Measure<DistanceUnit> backLeftYPos = Meters.of(0.29);
     public static final LegacySwerveModuleConstants BackLeft = ConstantCreator.createModuleConstants(
@@ -211,7 +211,7 @@ public final class RobotConstants {
     private static final int BACK_RIGHT_DRIVE_MOTOR_ID = 8;
     private static final int BACK_RIGHT_STEER_MOTOR_ID = 7;
     private static final int BACK_RIGHT_ENCODER_ID = 20;
-    private static final double BACK_RIGHT_ENCODER_OFFSET = 0.6206053438;
+    private static final double BACK_RIGHT_ENCODER_OFFSET = -0.377685546875;
     private static final Measure<DistanceUnit> backRightXPos = Meters.of(-0.29);
     private static final Measure<DistanceUnit> backRightYPos = Meters.of(-0.29);
     public static final LegacySwerveModuleConstants BackRight = ConstantCreator.createModuleConstants(
@@ -258,7 +258,7 @@ public final class RobotConstants {
         .steerMotorId(3)
         .encoderId(10)
         .driveMotorEncoderOffset(Degree.of(0))
-        .steerMotorEncoderOffset(Rotations.of(-0.14502))
+        .steerMotorEncoderOffset(Rotations.of(-0.20849609375))
         .driveInverted(false)
         .steerInverted(true)
         .encoderInverted(false)
@@ -270,7 +270,7 @@ public final class RobotConstants {
         .steerMotorId(5)
         .encoderId(11)
         .driveMotorEncoderOffset(Degree.of(0))
-        .steerMotorEncoderOffset(Rotations.of(-0.30639))
+        .steerMotorEncoderOffset(Rotations.of(-0.30615234375))
         .driveInverted(true)
         .steerInverted(true)
         .encoderInverted(false)
@@ -282,7 +282,7 @@ public final class RobotConstants {
         .steerMotorId(1)
         .encoderId(0)
         .driveMotorEncoderOffset(Degree.of(0))
-        .steerMotorEncoderOffset(Rotations.of(0.03710))
+        .steerMotorEncoderOffset(Rotations.of(0.032958984375))
         .driveInverted(false)
         .steerInverted(true)
         .encoderInverted(false)
@@ -294,7 +294,7 @@ public final class RobotConstants {
         .steerMotorId(7)
         .encoderId(20)
         .driveMotorEncoderOffset(Degree.of(0))
-        .steerMotorEncoderOffset(Rotations.of(-0.37597))
+        .steerMotorEncoderOffset(Rotations.of(-0.377685546875))
         .driveInverted(true)
         .steerInverted(true)
         .encoderInverted(false)
@@ -424,8 +424,8 @@ public final class RobotConstants {
     public static final double INTAKE_PIVOT_ROTOR_ENCODER_RATIO = 45 / 11 * 56 / 20 * 56 / 8;
 
     //Constants for intake roller
-    public static final int STATOR_CURRENT_LIMIT_AMPS = 25;
-    public static final int SUPPLY_CURRENT_LIMIT_AMPS = 25;
+    public static final int STATOR_CURRENT_LIMIT_AMPS = 60;
+    public static final int SUPPLY_CURRENT_LIMIT_AMPS = 60;
     public static final boolean IS_BRAKE = false;
     public static final boolean IS_INTAKER_INVERT = true;
     public static final boolean IS_INDEXER_INVERT = false;
@@ -438,7 +438,7 @@ public final class RobotConstants {
     public static final TunableNumber INTAKE_PIVOT_JERK = new TunableNumber("INTAKE_PIVOT/jerk", 0);
     public static final TunableNumber INTAKE_PIVOT_TOLERANCE = new TunableNumber("INTAKE_PIVIOT/tolerance", 3.5);
 
-    public static final double INTAKE_PIVOT_ENCODER_OFFSET = -0.31640625 - 0.25;
+    public static final double INTAKE_PIVOT_ENCODER_OFFSET = -0.308837890625 - 0.25;
     //Motion constants for intake roller
     public static final TunableNumber INTAKE_VOLTAGE = new TunableNumber("INTAKE_ROLLER/intakeVoltage", 15.0);
     public static final TunableNumber INDEX_ROLLER_VOLTAGE = new TunableNumber("INTAKE_ROLLER/indexRollerVoltage", 15.0);

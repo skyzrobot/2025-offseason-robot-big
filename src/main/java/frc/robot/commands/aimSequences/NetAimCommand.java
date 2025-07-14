@@ -1,9 +1,11 @@
 package frc.robot.commands.aimSequences;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotConstants;
 import frc.robot.RobotStateRecorder;
@@ -25,7 +27,7 @@ public class NetAimCommand extends Command {
   private final static String kTag = "Commands/NetAimCommand";
   private final Swerve swerve;
   private final DoubleSupplier yVelocitySupplier;
-  private PIDController xController;
+  private ProfiledPIDController xController;
   private PIDController rotationController;
   private Pose2d poseWorldRobot, poseWorldTarget;
 
@@ -33,16 +35,17 @@ public class NetAimCommand extends Command {
     this.swerve = swerve;
     this.yVelocitySupplier = yVelocitySupplier;
 
-    xController = new PIDController(
+    xController = new ProfiledPIDController(
         NetAimCommandParamsNT.xKp.getValue(),
         NetAimCommandParamsNT.xKi.getValue(),
-        NetAimCommandParamsNT.xKd.getValue()
-    );
+        NetAimCommandParamsNT.xKd.getValue(),
+        new TrapezoidProfile.Constraints(
+            NetAimCommandParamsNT.translationVelocityMaxFar.getValue(),
+            NetAimCommandParamsNT.translationAccelerationMax.getValue()));
     rotationController = new PIDController(
         NetAimCommandParamsNT.rotationKp.getValue(),
         NetAimCommandParamsNT.rotationKi.getValue(),
-        NetAimCommandParamsNT.rotationKd.getValue()
-    );
+        NetAimCommandParamsNT.rotationKd.getValue());
     addRequirements(swerve);
   }
 
@@ -63,11 +66,12 @@ public class NetAimCommand extends Command {
 
     // calculate destination
     poseWorldTarget = AimGoalSupplier.getFinalNetTarget();
+    var velocityWorldRobot = RobotStateRecorder.getVelocityWorldRobotCurrent();
 
     // PID init with field-relative velocities
     rotationController.enableContinuousInput(0, Math.PI * 2);
-    xController.setTolerance(0.05);
-    xController.reset();
+    xController.setTolerance(0.05, 0.15);
+    xController.reset(poseWorldRobot.getTranslation().getX(), velocityWorldRobot.getX());
     rotationController.reset();
   }
 
@@ -84,7 +88,6 @@ public class NetAimCommand extends Command {
     double thetaRT = poseRobotTarget.getRotation().getRadians();
     double omegaRT = -rotationController.calculate(thetaRT, 0.0);
 
-
     // compute limit
     double dCurr = Math.abs(xCurr - xFinal); // use final destination
     double vFar = NetAimCommandParamsNT.translationVelocityMaxFar.getValue();
@@ -96,11 +99,12 @@ public class NetAimCommand extends Command {
     swerve.setSwerveLimit(
         SwerveLimit.builder()
             .maxLinearVelocity(MetersPerSecond.of(maxTranslationVelocityMps))
-            .maxSkidAcceleration(MetersPerSecondPerSecond.of(NetAimCommandParamsNT.translationAccelerationMax.getValue()))
+            .maxSkidAcceleration(
+                MetersPerSecondPerSecond.of(NetAimCommandParamsNT.translationAccelerationMax.getValue()))
             .maxAngularVelocity(DegreesPerSecond.of(NetAimCommandParamsNT.rotationVelocityMax.getValue()))
-            .maxAngularAcceleration(DegreesPerSecondPerSecond.of(NetAimCommandParamsNT.rotationAccelerationMax.getValue()))
-            .build()
-    );
+            .maxAngularAcceleration(
+                DegreesPerSecondPerSecond.of(NetAimCommandParamsNT.rotationAccelerationMax.getValue()))
+            .build());
     ChassisSpeeds VRT = ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omegaRT, poseWorldRobot.getRotation());
     swerve.runTwist(VRT);
 
@@ -114,7 +118,6 @@ public class NetAimCommand extends Command {
   public boolean isFinished() {
     return xController.atSetpoint();
   }
-
 
   @Override
   public void end(boolean interrupted) {
@@ -130,15 +133,15 @@ public class NetAimCommand extends Command {
     static final double xKiZone = 0.5;
     static final double xKd = 0.1;
     static final double translationVelocityMaxFar = 3.0;
-    static final double translationVelocityMaxNear = 1.2;
+    static final double translationVelocityMaxNear = 2.0;
     static final double translationParamsChangeDistance = 2.0;
-    static final double translationAccelerationMax = 12.0;
+    static final double translationAccelerationMax = 8.0;
 
     static final double rotationKp = 4.0;
     static final double rotationKi = 0.01;
     static final double rotationKiZone = 0.5;
     static final double rotationKd = 0.3;
     static final double rotationVelocityMax = 360.0;
-    static final double rotationAccelerationMax = 1000.0;
+    static final double rotationAccelerationMax = 1200.0;
   }
 }
