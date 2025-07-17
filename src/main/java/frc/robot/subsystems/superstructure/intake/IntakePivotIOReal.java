@@ -33,8 +33,6 @@ public class IntakePivotIOReal implements IntakePivotIO {
     private final StatusSignal<Angle> currentPositionRot = motor.getPosition();
 
     private final CANcoder canCoder = new CANcoder(INTAKE_PIVOT_ENCODER_ID, RobotConstants.CANIVORE_CAN_BUS_NAME);
-
-
     private final VoltageOut voltageOut = new VoltageOut(0.0).withEnableFOC(false);
     private final PositionDutyCycle motionMagic = new PositionDutyCycle(0.0).withEnableFOC(true);
 
@@ -49,6 +47,7 @@ public class IntakePivotIOReal implements IntakePivotIO {
         config.CurrentLimits.SupplyCurrentLimitEnable = true;
         config.CurrentLimits.StatorCurrentLimit = 80;
         config.CurrentLimits.StatorCurrentLimitEnable = true;
+
 
         // Initialize CANcoder
         CANcoderConfiguration CANconfig = new CANcoderConfiguration();

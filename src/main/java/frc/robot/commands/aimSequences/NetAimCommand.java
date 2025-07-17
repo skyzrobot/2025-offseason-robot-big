@@ -155,7 +155,7 @@ public class NetAimCommand extends Command {
     System.out.println("Finished!");
     swerve.setSwerveLimitDefault();
     swerve.runStop();
-    indicator.setPattern(IndicatorIO.Patterns.AIMED);
+    indicator.indicateWithTimeout(IndicatorIO.Patterns.AIMED, 0.6).schedule();
   }
 
   @NTParameter(tableName = "Params/" + kTag)

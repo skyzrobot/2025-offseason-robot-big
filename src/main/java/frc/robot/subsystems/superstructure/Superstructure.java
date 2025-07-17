@@ -1,8 +1,7 @@
 package frc.robot.subsystems.superstructure;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import edu.wpi.first.math.Pair;
-import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -127,6 +126,9 @@ public class Superstructure extends SubsystemBase {
         addEdge(L1_INTAKE_SIDE, IDLE, false, false);
         addEdge(L1_INTAKE_SIDE_EJECT, IDLE, false, false);
 
+        addEdge(AUTO_START, CORAL_STOW, false, false);
+        addEdge(AUTO_START, L4, false, false);
+
         setDefaultCommand(
                 runGoal(() -> {
                     if (endEffectorArm.isHasCoral()) {
@@ -180,6 +182,12 @@ public class Superstructure extends SubsystemBase {
 
     @Override
     public void periodic() {
+        // Set to current on disable
+        if(DriverStation.isDisabled()) {
+            endEffectorArm.setPivotAngle(endEffectorArm::getCurrentAngle);
+            elevator.setElevatorPosition(elevator::getElevatorPosition);
+        }
+
         // Run periodic
         intake.periodic();
         endEffectorArm.periodic();
@@ -187,10 +195,10 @@ public class Superstructure extends SubsystemBase {
 
         //simulated gamepiece tracking
         if (Robot.isSimulation()) {
-//            if (simIntakeTimer.update(atGoal() && state == SuperstructureState.CORAL_GROUND_INTAKE)) {
-//                intake.setIndexRollerHasCoral(false);
-//                endEffectorArm.setHasCoral(true);
-//            }
+            if (simIntakeTimer.update(atGoal() && state == SuperstructureState.CORAL_GROUND_INTAKE)) {
+                intake.setIndexRollerHasCoral(false);
+                endEffectorArm.setHasCoral(true);
+            }
             if (state != SuperstructureState.CORAL_GROUND_INTAKE) {
                 simIntakeTimer.reset();
             }
@@ -299,6 +307,15 @@ public class Superstructure extends SubsystemBase {
                 .until(this::poseAtGoal)
                 .andThen(elevator.zeroElevator());
     }
+
+    public void startNormal() {
+        state = START;
+    }
+
+    public void startAuto() {
+        state = AUTO_START;
+    }
+
 
     /**
      * Command to toggle the intake pose between default and alternate positions
@@ -551,7 +568,6 @@ public class Superstructure extends SubsystemBase {
                 return runSuperstructurePose(to.getValue().getPose()).alongWith(runSuperstructureRollers(to))
                         .andThen(Commands.waitUntil(endEffectorArm::isAtGoal));
             } else if (statesBelowNoFlip.contains(from)) {
-                System.out.println(goal.getValue().getPose().elevatorHeight() + "" + goal.getValue().getPose().endEffectorAngle());
                 // WIP: flyby
                 return Commands.either(
                         // fly-by case: set elevator directly to goal

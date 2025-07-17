@@ -3,6 +3,7 @@ package frc.robot.subsystems.climber;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.Timer;
 import lib.ntext.NTParameter;
+import lombok.Getter;
 import lombok.Setter;
 import org.littletonrobotics.junction.Logger;
 
@@ -16,6 +17,7 @@ public class ClimberSubsystem extends SubsystemBase {
 
   @Setter
   private WantedState wantedState = WantedState.IDLE;
+  @Getter
   private SystemState systemState = SystemState.IDLING;
 
   // Auto climb detection variables

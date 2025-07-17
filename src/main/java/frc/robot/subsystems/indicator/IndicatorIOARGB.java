@@ -15,8 +15,8 @@ public class IndicatorIOARGB implements IndicatorIO {
                 LED_PORT,
                 LED_BUFFER_LENGTH
         );
-        led.setIntensity(1);
-        led.start(0.05);
+        led.setIntensity(1.0);
+        led.start(0.02);
     }
 
     @Override

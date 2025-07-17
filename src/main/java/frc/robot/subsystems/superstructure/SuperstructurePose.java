@@ -42,8 +42,9 @@ public record SuperstructurePose(DoubleSupplier elevatorHeight, DoubleSupplier e
     @RequiredArgsConstructor
     enum Preset {
         CORAL_STOW("Coral Stow",        0.53,   135,   132, 60),  // alternate: 110
-        ALGAE_STOW("Algae Stow",        0.6,    0,     60,  60),   // alternate: 80
+        ALGAE_STOW("Algae Stow",        0.6,    0,     132,  60),   // alternate: 80
         START("Start",                  0.5,    0,     132),
+        AUTO_START("Auto Start",                  0.5,    0,     132),
         L1_SHOOT_SIDE("L1 Shoot Side",  0.3,   200,   132,  60),   // alternate: 40
         L1_INTAKE_SIDE("L1 Intake Side", 0.01,   0,    50),
         L1_INTAKE_SIDE_DOWN("L1 Intake Side Down", 0.01,   0,    50),
@@ -51,7 +52,7 @@ public record SuperstructurePose(DoubleSupplier elevatorHeight, DoubleSupplier e
         L3("L3",                        0.53,  185,   132, 60),  // alternate: 110
         L4("L4",                        1.445, 225,   132, 60),  // alternate: 110
         NET_SCORE("Net Score",          1.44,   -133,  132,  60),   // alternate: 40
-        P1("P1",                        0.52,  -10,   132,60),
+        P1("P1",                        0.50,  -10,   132,60),
         P2("P2",                        0.85,  -10,   132,60),
         CORAL_GROUND_INTAKE("Coral Ground Intake", 0.01, 0, 146),
         CORAL_INDEXED_INTAKE("Coral Indexed Intake", 0.57, 0, 144),

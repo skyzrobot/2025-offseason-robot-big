@@ -374,7 +374,7 @@ public final class RobotConstants {
     public static final TunableNumber OMEGA_TOLERANCE_DEGREES = new TunableNumber("AIM/OMEGA_TOLERANCE_DEGREES", 1);
     public static final Measure<LinearVelocityUnit> MAX_AIMING_SPEED = MetersPerSecond.of(3.5);
     public static final Measure<LinearAccelerationUnit> MAX_AIMING_ACCELERATION = MetersPerSecondPerSecond.of(10);
-    public static final TunableNumber Edge_Case_Max_Delta = new TunableNumber("AIM/MAX DELTA", 0.38);
+    public static final TunableNumber Edge_Case_Max_Delta = new TunableNumber("AIM/MAX DELTA", 0.2);
     public static final TunableNumber ROBOT_TO_ALGAE_METERS = new TunableNumber("AIM/ROBOT_TO_ALGAE_METERS", 0.489);
     public static final TunableNumber ALGAE_TO_TAG_METERS = new TunableNumber("AIM/ALGAE_TO_TAG_METERS", 0);
     public static final TunableNumber HEXAGON_DANGER_DEGREES = new TunableNumber("AIM/HEXAGON_DANGER_DEGREES", 45);
@@ -504,7 +504,7 @@ public final class RobotConstants {
     public static final TunableNumber MAX_EXTENSION_METERS = new TunableNumber("Elevator/maxExtension",
         1.475);
     public static final TunableNumber ELEVATOR_ZEROING_CURRENT = new TunableNumber("Elevator/zeroingCurrent",
-        40);
+        50);
     public static final TunableNumber SAFE_HEIGHT_FLIP = new TunableNumber("Elevator/safeHeightFlip", 0.5);
 
     public static final TunableNumber FLYBY_HEIGHT = new TunableNumber("Elevator/FlybyHeight", 1.43);

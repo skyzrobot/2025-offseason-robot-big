@@ -1,6 +1,7 @@
 package frc.robot;
 
 import com.pathplanner.lib.commands.FollowPathCommand;
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.net.WebServer;
 import edu.wpi.first.wpilibj.*;
@@ -13,8 +14,10 @@ import frc.robot.auto.AutoBuilder;
 import frc.robot.auto.AutoSelector;
 import frc.robot.commands.aimSequences.AimGoalSupplier;
 import frc.robot.utils.LoggedTracer;
+import lib.ironpulse.math.filter.ButterworthFilter;
 import lib.ironpulse.utils.PhoenixUtils;
 import lib.ntext.NTParameterRegistry;
+import lombok.extern.java.Log;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -23,6 +26,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter.AdvantageScopeOpenBehavior;
 
+import javax.sound.sampled.Line;
 import java.lang.reflect.Field;
 
 import static frc.robot.RobotConstants.DriverCamera;
@@ -31,9 +35,14 @@ import static frc.robot.RobotConstants.LOOPER_DT;
 public class Robot extends LoggedRobot {
   private Command autonomousCommand;
   private RobotContainer robotContainer;
+  public static PowerDistribution powerDistribution;
+  public static LinearFilter voltageFilter = LinearFilter.singlePoleIIR(1.0 / (2.0 * Math.PI * 100), LOOPER_DT);
+  public static LinearFilter currentFilter = LinearFilter.singlePoleIIR(1.0 / (2.0 * Math.PI * 100), LOOPER_DT);
+  public static LinearFilter powerFilter = LinearFilter.singlePoleIIR(1.0 / (2.0 * Math.PI * 100), LOOPER_DT);
 
   public Robot() {
     super(LOOPER_DT);
+    powerDistribution = new PowerDistribution();
   }
 
   @Override
@@ -67,11 +76,7 @@ public class Robot extends LoggedRobot {
     }
     CommandScheduler.getInstance().setPeriod(0.2);
 
-
-    PowerDistribution PDP = new PowerDistribution();
-    PDP.clearStickyFaults();
-    SmartDashboard.putData("PDP", PDP);
-
+    powerDistribution.clearStickyFaults();
     robotContainer = new RobotContainer();
 
     // warm-up path-following
@@ -82,13 +87,22 @@ public class Robot extends LoggedRobot {
   public void robotPeriodic() {
     PhoenixUtils.refreshAll();
     CommandScheduler.getInstance().run();
-
-    LoggedTracer.record("Commands");
-    LoggedTracer.record("RobotPeriodic");
-
     NTParameterRegistry.refresh();
+
     robotContainer.robotPeriodic();
     AutoSelector.getInstance().updateAlerts();
+
+    double voltage = powerDistribution.getVoltage();
+    double current = powerDistribution.getTotalCurrent();
+    double power = powerDistribution.getTotalPower();
+
+    Logger.recordOutput("Power/Current", current);
+    Logger.recordOutput("Power/Voltage", voltage);
+    Logger.recordOutput("Power/Power", power);
+
+    Logger.recordOutput("Power/CurrentFiltered", currentFilter.calculate(current));
+    Logger.recordOutput("Power/VoltageFiltered", voltageFilter.calculate(voltage));
+    Logger.recordOutput("Power/PowerFiltered", powerFilter.calculate(power));
   }
 
   @Override

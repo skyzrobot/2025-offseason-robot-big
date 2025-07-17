@@ -6,7 +6,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Robot;
 import frc.robot.RobotStateRecorder;
 import frc.robot.commands.aimSequences.AimGoalSupplier;
-import frc.robot.subsystems.indicator.IndicatorIO;
 import frc.robot.subsystems.superstructure.SuperstructureState;
 import lib.ironpulse.command.DecisionTree;
 import lib.ironpulse.utils.Logging;
@@ -20,6 +19,7 @@ import static frc.robot.auto.AutoActions.*;
 public class AutoBuilder {
   private static AutoBuilder instance;
   private int idx = 0;
+  private boolean firstTimeToIntake = true;
   private boolean hasSeenCoral = false;
   // ------- Configs -------
   @Setter
@@ -123,6 +123,7 @@ public class AutoBuilder {
       var pose = config.getAutoType() == AutoConfig.AutoType.LeftRoutine ? kLeftStartPose : kRightStartPose;
       AutoActions.resetOnPose(pose).schedule();
     }
+    superstructure.startAuto();
   }
 
   private void advanceCoralIdx() {
@@ -146,23 +147,23 @@ public class AutoBuilder {
 
     var getCoral = print("Getting Coral").andThen(
         defer(() -> {
-          boolean backoff = idx == 1; // only back off for the first coral
           boolean isLeft = config.getAutoType() == AutoConfig.AutoType.LeftRoutine;
           return deadline(
               sequence(
-                  deadline(
-                      driveToIntakePoint(isLeft, backoff),
-                      indicate(IndicatorIO.Patterns.INTAKE)
-                  ).until(AutoActions::isCoralInSight),
-                  deadline(
-                      chase(),
-                      indicate(IndicatorIO.Patterns.ASSISTED_INTAKE)
-                  ).onlyIf(AutoActions::isCoralInSight)
+                  driveToIntakePoint(isLeft, firstTimeToIntake).until(AutoActions::isCoralInSight),
+                  chase().onlyIf(AutoActions::isCoralInSight)
               ).until(() -> AutoActions.isInIntakeDangerZone() || hasSeenCoral || AutoActions.hasCoralAtEE()),
-              intake()
+              sequence(
+//                  forceZero().onlyIf(() -> idx == 1),
+                  intake()
+              )
           );
         }, Set.of(swerve, superstructure))
-            .andThen(runOnce(swerve::runStop))
+    ).finallyDo(
+        () -> {
+          swerve.runStop();
+          firstTimeToIntake = false;
+        }
     );
 
     var driveToBackoffPoint = sequence(

@@ -5,6 +5,7 @@ import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 import org.littletonrobotics.junction.Logger;
 
+import java.util.Comparator;
 import java.util.List;
 
 import static frc.robot.RobotConstants.PhotonvisionConstants.*;
@@ -25,16 +26,25 @@ public class PhotonVisionIOReal implements PhotonVisionIO {
 
     @Override
     public void updateInputs(PhotonVisionIOInputs inputs) {
-        // Get the latest result for consistent hasTargets status
-        PhotonPipelineResult latestResult = camera.getLatestResult();
-        
-        // Check if we have fresh data by getting unread results
-        List<PhotonPipelineResult> freshResults = camera.getAllUnreadResults();
-        boolean hasFreshData = !freshResults.isEmpty();
-        
-        // Use latest result for consistent status, but track freshness separately
-        PhotonPipelineResult result = latestResult;
-        
+//        // Get the latest result for consistent hasTargets status
+//        PhotonPipelineResult latestResult = camera.getLatestResult();
+//
+//        // Check if we have fresh data by getting unread results
+//        List<PhotonPipelineResult> freshResults = camera.getAllUnreadResults();
+//        boolean hasFreshData = !freshResults.isEmpty();
+//
+//        // Use latest result for consistent status, but track freshness separately
+//        PhotonPipelineResult result = latestResult;
+
+        List<PhotonPipelineResult> unread = camera.getAllUnreadResults();
+        boolean hasFreshData = !unread.isEmpty();
+        PhotonPipelineResult result = null;
+        if (hasFreshData) {
+            result = unread.stream()
+                .max(Comparator.comparing(PhotonPipelineResult::getTimestampSeconds))
+                .orElse(null);
+        }
+
         // Basic connection info
         inputs.connected = camera.isConnected();
         inputs.name = camera.getName();
@@ -163,10 +173,6 @@ public class PhotonVisionIOReal implements PhotonVisionIO {
             Logger.recordOutput("PhotonVision/Camera" + id + "/TotalTargets", 0);
             Logger.recordOutput("PhotonVision/Camera" + id + "/NoResults", true);
         }
-        
-        // Log freshness status
-        Logger.recordOutput("PhotonVision/Camera" + id + "/HasFreshData", hasFreshData);
-        Logger.recordOutput("PhotonVision/Camera" + id + "/FreshResultCount", freshResults.size());
     }
 
     @Override

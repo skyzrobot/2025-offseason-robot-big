@@ -33,8 +33,6 @@ public class SuperCycleCommand extends SequentialCommandGroup {
         this.superstructure = superstructure;
         this.takingAlgae = takingAlgae;
 
-        addRequirements(superstructure);
-
         addCommands(
                 // preshoot and shoot coral, then take the algae
                 Commands.sequence(

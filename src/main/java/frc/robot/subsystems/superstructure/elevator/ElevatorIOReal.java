@@ -11,6 +11,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.*;
+import edu.wpi.first.wpilibj.RobotController;
 import frc.robot.RobotConstants;
 import frc.robot.RobotConstants.ElevatorGainsClass;
 
@@ -38,7 +39,7 @@ public class ElevatorIOReal implements ElevatorIO {
     private final StatusSignal<Current> statorLeft;
     private final StatusSignal<Current> supplyLeft;
     private final StatusSignal<Temperature> tempLeft;
-    private double setpointMeters = 0;
+    private double setpointMeters = 0.53;
     private boolean isGoingUp = false;
 
     public ElevatorIOReal() {
@@ -108,6 +109,7 @@ public class ElevatorIOReal implements ElevatorIO {
 
         follower.setControl(new Follower(leader.getDeviceID(), true));
 
+        resetElevatorPosition();
     }
 
     @Override
@@ -134,6 +136,7 @@ public class ElevatorIOReal implements ElevatorIO {
         inputs.currentAcceleration = isGoingUp ? motionAccelerationUp.get() : motionAccelerationDown.get();
         inputs.currentCruiseVelocity = isGoingUp ? motionCruiseVelocityUp.get() : motionCruiseVelocityDown.get();
         inputs.currentJerk = isGoingUp ? motionJerkUp.get() : motionJerkDown.get();
+
         if (false) {
             slot0Configs.kA = ElevatorGainsClass.ELEVATOR_KA.get();
             slot0Configs.kS = ElevatorGainsClass.ELEVATOR_KS.get();

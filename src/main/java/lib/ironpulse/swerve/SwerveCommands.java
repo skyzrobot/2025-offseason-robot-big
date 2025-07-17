@@ -7,6 +7,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.units.measure.*;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -102,8 +103,8 @@ public class SwerveCommands {
       Supplier<Pose3d> poseWorldRobotSupplier,
       Supplier<Pose3d> poseWorldTargetSupplier,
       Supplier<Pose2d> velocityWorldRobotSupplier,
-      ProfiledPIDController translationController,
-      ProfiledPIDController rotationController,
+      PIDController translationController,
+      PIDController rotationController,
       Distance translationTolerance,
       Angle rotationTolerance
   ) {
@@ -134,7 +135,7 @@ public class SwerveCommands {
       Pose3d poseWorldRobotCurr = swerve.getEstimatedPose();
       Pose3d newPoseWorldRobotCurr = new Pose3d(poseWorldRobotCurr.getTranslation(), new Rotation3d(rotation));
       swerve.resetEstimatedPose(newPoseWorldRobotCurr);
-    });
+    }).ignoringDisable(true);
   }
 
   public static Command followPathPlannerTrajectory(
@@ -158,7 +159,7 @@ public class SwerveCommands {
 
   public static SysIdRoutine sysid(
       Swerve swerve,
-      Velocity rampVelocity,
+      Velocity<VoltageUnit> rampVelocity,
       Voltage stepVoltage,
       Time timeout
   ) {

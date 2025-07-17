@@ -5,6 +5,7 @@ import edu.wpi.first.units.Unit;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.units.measure.Time;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -37,8 +38,8 @@ public class ElevatorSubsystem {
     public boolean zeroing = false;
     @Getter
     @AutoLogOutput(key = "Elevator/setPoint")
-    private double wantedPosition = 0.16;
-    private double previousWantedPosition = 0.16;
+    private double wantedPosition = 0.53;
+    private double previousWantedPosition = 0.53;
     @Getter
     @AutoLogOutput(key = "Elevator/atGoal")
     private boolean atGoal = false;
@@ -138,10 +139,12 @@ public class ElevatorSubsystem {
         Logger.processInputs("Elevator", inputs);
         
         // Check if position exceeds maximum extension
-        if (wantedPosition > ElevatorConstants.MAX_EXTENSION_METERS.get()) {
+        if (wantedPosition > ElevatorConstants.MAX_EXTENSION_METERS.get() && DriverStation.isEnabled()) {
             stopDueToLimit = true;
-            throw new IllegalArgumentException("Elevator setpoint " + wantedPosition + " exceeds maximum extension of " + 
-                ElevatorConstants.MAX_EXTENSION_METERS.get() + " meters");
+            throw new IllegalArgumentException(
+                "Elevator setpoint " + wantedPosition + " exceeds maximum extension of " +
+                ElevatorConstants.MAX_EXTENSION_METERS.get() + " meters"
+            );
         } else if (stopDueToLimit) {
             // Reset stopDueToLimit if position is now valid
             stopDueToLimit = false;
@@ -199,7 +202,7 @@ public class ElevatorSubsystem {
                 if (RobotBase.isReal()) {
                     currentFilterValue = currentFilter.calculate(inputs.statorCurrentAmps);
                     if (currentFilterValue <= ElevatorConstants.ELEVATOR_ZEROING_CURRENT.get()) {
-                        io.setElevatorVoltage(-1);
+                        io.setElevatorVoltage(-3.5);
                     }
                     if (currentFilterValue > ElevatorConstants.ELEVATOR_ZEROING_CURRENT.get()) {
                         io.setElevatorVoltage(0);

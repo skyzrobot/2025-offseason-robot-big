@@ -26,7 +26,7 @@ public interface ElevatorIO {
     class ElevatorIOInputs {
         public double positionMeters = 0.0;
         public double velocityMetersPerSec = 0.0;
-        public double setpointMeters = 0.0;
+        public double setpointMeters = 0.53;
         public double appliedVolts = 0.0;
         public double statorCurrentAmps = 0.0;
         public double supplyCurrentAmps = 0.0;

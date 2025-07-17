@@ -40,7 +40,7 @@ public class EndEffectorArmSubsystem {
 
     @Getter
     @AutoLogOutput(key = "EndEffectorArm/setPoint")
-    private double wantedAngle = 0.0;
+    private double wantedAngle = 135.0;
     @Getter@AutoLogOutput(key = "EndEffectorArm/atGoal")
     private boolean atGoal = false;
     @AutoLogOutput(key = "EndEffectorArm/stopDueToLimit")

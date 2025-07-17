@@ -30,7 +30,7 @@ public class EndEffectorArmPivotIOReal implements EndEffectorArmPivotIO {
     private final StatusSignal<Angle> currentPositionRot = motor.getPosition();
     private final MotionMagicVoltage motionMagicRequest = new MotionMagicVoltage(0.0).withEnableFOC(true);
 
-    double targetAngleDeg = 0.0;
+    double targetAngleDeg = 135.0;
 
     public EndEffectorArmPivotIOReal() {
         var config = new TalonFXConfiguration();

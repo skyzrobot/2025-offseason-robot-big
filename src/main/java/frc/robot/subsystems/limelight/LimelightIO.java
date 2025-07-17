@@ -18,7 +18,7 @@ public interface LimelightIO {
     void updateInputs(LimelightIOInputs inputs);
 
     default void setMegaTag2(boolean useMegaTag2) {
-        System.out.println("setMegaTag2 = " + useMegaTag2);
+//        System.out.println("setMegaTag2 = " + useMegaTag2);
     }
 
     @AutoLog

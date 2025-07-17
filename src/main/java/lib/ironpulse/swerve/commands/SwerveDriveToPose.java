@@ -1,5 +1,6 @@
 package lib.ironpulse.swerve.commands;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -29,15 +30,15 @@ public class SwerveDriveToPose extends Command {
   protected Supplier<Pose2d> velocityWorldRobotSupplier;
   protected Distance translationTolerance;
   protected Angle rotationTolerance;
-  protected ProfiledPIDController translationController;
-  protected ProfiledPIDController rotationController;
+  protected PIDController translationController;
+  protected PIDController rotationController;
 
   public SwerveDriveToPose(Swerve swerve,
                            Supplier<Pose3d> poseWorldRobotSupplier,
                            Supplier<Pose3d> poseWorldTargetSupplier,
                            Supplier<Pose2d> velocityWorldRobotSupplier,
-                           ProfiledPIDController translationController,
-                           ProfiledPIDController rotationController,
+                           PIDController translationController,
+                           PIDController rotationController,
                            Distance translationTolerance,
                            Angle rotationTolerance) {
     this.swerve = swerve;
@@ -58,22 +59,13 @@ public class SwerveDriveToPose extends Command {
     translationController.setP(SwerveDriveToPoseParamsNT.translationKp.getValue());
     translationController.setI(SwerveDriveToPoseParamsNT.translationKi.getValue());
     translationController.setD(SwerveDriveToPoseParamsNT.translationKd.getValue());
-    translationController.setConstraints(new TrapezoidProfile.Constraints(
-        SwerveDriveToPoseParamsNT.translationVelocityMax.getValue(),
-        SwerveDriveToPoseParamsNT.rotationAccelerationMax.getValue()
-    ));
 
     rotationController.setP(SwerveDriveToPoseParamsNT.rotationKp.getValue());
     rotationController.setI(SwerveDriveToPoseParamsNT.rotationKi.getValue());
     rotationController.setD(SwerveDriveToPoseParamsNT.rotationKd.getValue());
-    rotationController.setConstraints(new TrapezoidProfile.Constraints(
-        SwerveDriveToPoseParamsNT.rotationVelocityMax.getValue(),
-        SwerveDriveToPoseParamsNT.rotationAccelerationMax.getValue()
-    ));
 
-    Pose2d velocity = velocityWorldRobotSupplier.get();
-    translationController.reset(velocity.getTranslation().getNorm());
-    rotationController.reset(velocity.getRotation().getRadians());
+    translationController.reset();
+    rotationController.reset();
   }
 
   @Override
@@ -127,8 +119,6 @@ public class SwerveDriveToPose extends Command {
     static final double translationKp = 4.5;
     static final double translationKi = 0.0;
     static final double translationKd = 0.0;
-    static final double translationVelocityMax = 4.5;
-    static final double translationAccelerationMax = 14.0;
 
     static final double rotationKp = 5.0;
     static final double rotationKi = 0.0;

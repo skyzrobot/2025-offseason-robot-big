@@ -290,7 +290,7 @@ public class AimGoalSupplier {
    *
    * @param robotPose Current pose of the robot
    */
-  public static void isEdgeCase(Pose2d robotPose) {
+  public static boolean isEdgeCase(Pose2d robotPose) {
     XboxController driverController = new XboxController(0);
     double ControllerX = driverController.getLeftX();
     double ControllerY = driverController.getLeftY();
@@ -314,18 +314,24 @@ public class AimGoalSupplier {
         minDistance = distance;
       }
     }
+
+    boolean edge;
     Logger.recordOutput("EdgeCase/DeltaDistance", secondMinDistance - minDistance);
     Logger.recordOutput("EdgeCase/ControllerX", ControllerX);
     Logger.recordOutput("EdgeCase/ControllerY", ControllerY);
     if ((secondMinDistance - minDistance) < RobotConstants.ReefAimConstants.Edge_Case_Max_Delta.get()) {
+      edge = true;
       Logger.recordOutput("EdgeCase/IsEdgeCase", true);
       if (Math.abs(ControllerX) >= 0.05 || Math.abs(ControllerY) >= 0.05) {
         minDistanceID = solveEdgeCase(ControllerX, ControllerY, minDistanceID, secondMinDistanceID);
       }
     } else {
+      edge = false;
       Logger.recordOutput("EdgeCase/IsEdgeCase", false);
     }
     Logger.recordOutput("EdgeCase/TargetChanged", minDistanceID == secondMinDistanceID);
+
+    return edge;
   }
 
   // note: all assume blue driver station, origin at right side

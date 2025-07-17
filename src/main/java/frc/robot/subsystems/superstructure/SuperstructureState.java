@@ -12,6 +12,7 @@ import java.util.function.DoubleSupplier;
 public enum SuperstructureState {
     // Stow positions
     START(createState(Preset.START)),
+    AUTO_START(createState(Preset.AUTO_START)),
     CORAL_STOW(createEEState(Preset.CORAL_STOW, () -> EndEffectorArmConstants.CORAL_HOLD_VOLTAGE.get())),
     ALGAE_STOW(createEEState(Preset.ALGAE_STOW, () -> EndEffectorArmConstants.ALGAE_HOLD_VOLTAGE.get())),
     IDLE(createState(Preset.IDLE)),
