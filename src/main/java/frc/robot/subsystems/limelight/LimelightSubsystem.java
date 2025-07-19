@@ -4,6 +4,7 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotConstants;
@@ -24,6 +25,13 @@ public class LimelightSubsystem extends SubsystemBase {
     public Optional<PoseEstimate[]> estimatedPose = Optional.empty();
 
     private boolean useMegaTag2 = false;
+
+    private Alert limelightLeftConnected = new Alert(
+        "Limelight Left Disconnected.", Alert.AlertType.kWarning
+    );
+    private Alert limelightRightConnected = new Alert(
+        "Limelight Right DisConnected.", Alert.AlertType.kWarning
+    );
 
     public LimelightSubsystem(Map<String, LimelightIO> limelightIOs) {
         this.limelightIOs = limelightIOs;

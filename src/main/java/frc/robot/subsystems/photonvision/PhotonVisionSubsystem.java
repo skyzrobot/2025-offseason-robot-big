@@ -1,5 +1,6 @@
 package frc.robot.subsystems.photonvision;
 
+import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
@@ -21,10 +22,13 @@ import static frc.robot.RobotConstants.PhotonvisionConstants.SNAPSHOT_ENABLED;
 import static frc.robot.RobotConstants.PhotonvisionConstants.SNAPSHOT_PERIOD;
 
 public class PhotonVisionSubsystem extends SubsystemBase {
-
     private final PhotonVisionIO[] ios;
     private final PhotonVisionIOInputsAutoLogged[] inputs;
     private Timer snapshotTimer = new Timer();
+
+    private Alert photonVisionDisconnected = new Alert(
+        "PhotonVision Disconnected.", Alert.AlertType.kWarning
+    );
 
     @NTParameter(tableName = "Params/PhotonVision")
     public final static class PhotonVisionParams {
@@ -66,6 +70,8 @@ public class PhotonVisionSubsystem extends SubsystemBase {
         
         // Perform 3D projection for all detected targets
         performPeriodicProjections();
+
+        photonVisionDisconnected.set(!inputs[0].connected);
     }
     
     /**
