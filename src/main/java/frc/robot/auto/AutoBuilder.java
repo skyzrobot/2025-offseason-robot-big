@@ -155,11 +155,11 @@ public class AutoBuilder {
               ).until(() -> AutoActions.isInIntakeDangerZone() || hasSeenCoral || AutoActions.hasCoralAtEE()),
               parallel(
 //                  forceZero().onlyIf(() -> idx == 1),
-                  intake(),
-                  sequence(
-                      waitUntil(() -> superstructure.getState() == SuperstructureState.CORAL_GROUND_INTAKE && superstructure.poseAtGoal()),
-                      superstructure.runZero()
-                  )
+                  intake()
+//                  sequence(
+//                      waitUntil(() -> superstructure.getState() == SuperstructureState.CORAL_GROUND_INTAKE && superstructure.poseAtGoal()),
+//                      superstructure.runZero()
+//                  )
               )
           );
         }, Set.of(swerve, superstructure))
