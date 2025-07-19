@@ -101,7 +101,12 @@ public class ImuIOPigeon implements ImuIO {
         roll.setUpdateFrequency(50.0);
         rollVelocity.setUpdateFrequency(50.0);
     }
-    
+
+    @Override
+    public void resetYawAngle(Rotation2d angle) {
+        pigeon.setYaw(angle.getMeasure());
+    }
+
     // Note: No need for startSyncThread() method since we use the shared sync thread from SwerveModuleIOSJTU6
 
     @Override
