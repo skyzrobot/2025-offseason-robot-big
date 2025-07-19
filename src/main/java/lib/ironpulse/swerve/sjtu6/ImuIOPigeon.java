@@ -103,7 +103,7 @@ public class ImuIOPigeon implements ImuIO {
     }
 
     @Override
-    public void resetYawAngle(Rotation2d angle) {
+    public void reset() {
         pigeon.reset();
     }
 
