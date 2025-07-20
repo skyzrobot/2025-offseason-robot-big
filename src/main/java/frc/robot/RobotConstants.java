@@ -438,7 +438,7 @@ public final class RobotConstants {
     public static final TunableNumber INTAKE_PIVOT_JERK = new TunableNumber("INTAKE_PIVOT/jerk", 0);
     public static final TunableNumber INTAKE_PIVOT_TOLERANCE = new TunableNumber("INTAKE_PIVIOT/tolerance", 3.5);
 
-    public static final double INTAKE_PIVOT_ENCODER_OFFSET = -0.131 - 0.25;
+    public static final double INTAKE_PIVOT_ENCODER_OFFSET = -0.132568 - 0.25;
     //Motion constants for intake roller
     public static final TunableNumber INTAKE_VOLTAGE = new TunableNumber("INTAKE_ROLLER/intakeVoltage", 15.0);
     public static final TunableNumber INDEX_ROLLER_VOLTAGE = new TunableNumber("INTAKE_ROLLER/indexRollerVoltage", 15.0);
