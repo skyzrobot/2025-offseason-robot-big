@@ -309,7 +309,7 @@ public class Superstructure extends SubsystemBase {
     }
 
     public Command runZero() {
-        return elevator.zeroElevator();
+        return elevator.zeroElevator().andThen(Commands.print("Zero Success!"));
     }
 
     public void startNormal() {
