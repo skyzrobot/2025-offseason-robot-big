@@ -408,14 +408,14 @@ public class RobotContainer {
                         .until(() -> netEjectTimer.update(!superstructure.hasAlgae()))))
     );
 
-    // operatorController.x().whileTrue(
-    //     superstructure.runGoal(() -> SuperstructureState.P1)
-    //         .until(() -> superstructure.hasAlgae()
-    //         ));
-    operatorController.x().onTrue(
-      AutoActions.resetOnPoseTester(kLeftBackoff).alongWith(print("testing reset"))
-      .ignoringDisable(true)
-    );
+    operatorController.x().whileTrue(
+        superstructure.runGoal(() -> SuperstructureState.P1)
+            .until(() -> superstructure.hasAlgae()
+            ));
+    // operatorController.x().onTrue(
+    //   AutoActions.resetOnPoseTester(kLeftBackoff).alongWith(print("testing reset"))
+    //   .ignoringDisable(true)
+    // );
     operatorController.y().whileTrue(
         superstructure.runGoal(() -> SuperstructureState.P1)
             .until(() -> superstructure.hasAlgae()

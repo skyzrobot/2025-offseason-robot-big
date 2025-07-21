@@ -46,7 +46,7 @@ public class Robot extends LoggedRobot {
   public void robotInit() {
     if (!RobotConstants.useReplay) {
       // logger initialization
-      Logger.addDataReceiver(new NT4Publisher()); // REMOVE before comp
+      // Logger.addDataReceiver(new NT4Publisher()); // REMOVE before comp
       Logger.addDataReceiver(new WPILOGWriter());
     } else {
       // Replaying a log, set up replay source
