@@ -412,7 +412,7 @@ public class RobotContainer {
     //         .until(() -> superstructure.hasAlgae()
     //         ));
     operatorController.x().onTrue(
-      AutoActions.resetOnPose(kLeftBackoff)
+      AutoActions.resetOnPose(kLeftBackoff).ignoringDisable(true)
     );
     operatorController.y().whileTrue(
         superstructure.runGoal(() -> SuperstructureState.P1)
