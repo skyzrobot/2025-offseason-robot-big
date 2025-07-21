@@ -534,13 +534,13 @@ public class AutoActions {
 
     static final double CoralInSightDegs = 80.0;
 
-    static final double IntakeOffsetDistanceMeters = 0.85;
+    static final double IntakeOffsetDistanceMeters = 0.80;
     static final double RightTriangleX = 2.1;
     static final double RightTriangleY = 1.4;
     static final double LeftTriangleX = 2.1;
     static final double LeftTriangleY = 6.6;
     static final double BoundaryOffset = 0.0;
-    static final double StopLookforward = 15.0;
+    static final double StopLookforward = 7.0;
   }
 
 }
