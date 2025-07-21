@@ -218,7 +218,7 @@ public class AutoActions {
               ? List.of(clearanceTarget)
               : List.of();
 
-          PathPlannerPath path = generatePath(waypoints, rotationTargets, 4.5, 10.0, 0.0);
+          PathPlannerPath path = generatePath(waypoints, rotationTargets, 4.2, 10.0, 0.0);
           return deadline(
               followPath(path),
               applySwerveLimit()
