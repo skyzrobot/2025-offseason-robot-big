@@ -20,6 +20,7 @@ import java.util.Optional;
 
 import static edu.wpi.first.units.Units.Radians;
 import static lib.ironpulse.math.MathTools.epsilonEquals;
+import static lib.ironpulse.math.MathTools.epsilonEqualsNorm;
 import static lib.ironpulse.math.MathTools.toAngle;
 
 public class CoralRecorder {
@@ -29,16 +30,14 @@ public class CoralRecorder {
       new Translation2d(11.618, 4.858),
       new Translation2d(11.618, 3.194),
       new Translation2d(13.059, 2.362),
-      new Translation2d(14.500, 3.194)
-  );
+      new Translation2d(14.500, 3.194));
   public static Obstacle2d kBlueReefHexagon = new PolygonObstacle2d(
       new Translation2d(FieldConstants.fieldLength - 14.50, 4.858),
       new Translation2d(FieldConstants.fieldLength - 13.059, 5.689),
       new Translation2d(FieldConstants.fieldLength - 11.618, 4.858),
       new Translation2d(FieldConstants.fieldLength - 11.618, 3.194),
       new Translation2d(FieldConstants.fieldLength - 13.059, 2.362),
-      new Translation2d(FieldConstants.fieldLength - 14.500, 3.194)
-  );
+      new Translation2d(FieldConstants.fieldLength - 14.500, 3.194));
 
   public static Obstacle2d kBlueLeftAutoCoralRegion = new PolygonObstacle2d(
       new Translation2d(0.000, 6.140),
@@ -46,16 +45,14 @@ public class CoralRecorder {
       new Translation2d(3.467, 5.270),
       new Translation2d(7.538, 5.270),
       new Translation2d(7.538, 8.024),
-      new Translation2d(1.807, 8.005)
-  );
+      new Translation2d(1.807, 8.005));
   public static Obstacle2d kBlueRightAutoCoralRegion = new PolygonObstacle2d(
       new Translation2d(0.000, FieldConstants.fieldWidth - 6.140),
       new Translation2d(1.906, FieldConstants.fieldWidth - 5.270),
       new Translation2d(3.467, FieldConstants.fieldWidth - 5.270),
       new Translation2d(7.538, FieldConstants.fieldWidth - 5.270),
       new Translation2d(7.538, FieldConstants.fieldWidth - 8.024),
-      new Translation2d(1.807, FieldConstants.fieldWidth - 8.005)
-  );
+      new Translation2d(1.807, FieldConstants.fieldWidth - 8.005));
 
   public static Obstacle2d kRedLeftAutoCoralRegion = new PolygonObstacle2d(
       new Translation2d(FieldConstants.fieldLength - 0.000, 6.140),
@@ -63,26 +60,21 @@ public class CoralRecorder {
       new Translation2d(FieldConstants.fieldLength - 3.467, 5.270),
       new Translation2d(FieldConstants.fieldLength - 7.538, 5.270),
       new Translation2d(FieldConstants.fieldLength - 7.538, 8.024),
-      new Translation2d(FieldConstants.fieldLength - 1.807, 8.005)
-  );
+      new Translation2d(FieldConstants.fieldLength - 1.807, 8.005));
   public static Obstacle2d kRedRightAutoCoralRegion = new PolygonObstacle2d(
       new Translation2d(FieldConstants.fieldLength - 0.000, FieldConstants.fieldWidth - 6.140),
       new Translation2d(FieldConstants.fieldLength - 1.906, FieldConstants.fieldWidth - 5.270),
       new Translation2d(FieldConstants.fieldLength - 3.467, FieldConstants.fieldWidth - 5.270),
       new Translation2d(FieldConstants.fieldLength - 7.538, FieldConstants.fieldWidth - 5.270),
       new Translation2d(FieldConstants.fieldLength - 7.538, FieldConstants.fieldWidth - 8.024),
-      new Translation2d(FieldConstants.fieldLength - 1.807, FieldConstants.fieldWidth - 8.005)
-  );
+      new Translation2d(FieldConstants.fieldLength - 1.807, FieldConstants.fieldWidth - 8.005));
 
   public static final Translation2d kLeftLollipop = FieldConstants.StagingPositions.leftIceCream.getTranslation();
   public static final Translation2d kRightLollipop = FieldConstants.StagingPositions.rightIceCream.getTranslation();
   public static final Translation2d kLeftLollipopFlipped = new Translation2d(
-    FieldConstants.fieldLength - kLeftLollipop.getX(), kLeftLollipop.getY()
-  );
+      FieldConstants.fieldLength - kLeftLollipop.getX(), kLeftLollipop.getY());
   public static final Translation2d kRightLollipopFlipped = new Translation2d(
-    FieldConstants.fieldLength - kRightLollipop.getX(), kRightLollipop.getY()
-  );
-
+      FieldConstants.fieldLength - kRightLollipop.getX(), kRightLollipop.getY());
 
   public int currentId = 0;
   public List<CoralInfo> coralInfos = new ArrayList<>();
@@ -99,15 +91,20 @@ public class CoralRecorder {
       info.setAddedTime(info.getAddedTime() + dt);
       // decay confidence
       info.setConfidence(info.getConfidence() - dt * CoralRecorderParamsNT.confidenceTimeDecay.getValue());
-      if (info.getConfidence() <= 0.0) iterator.remove();
+      if (info.getConfidence() <= 0.0)
+        iterator.remove();
     }
   }
 
   public void addCoralMeasurement(Translation2d loc, double dt) {
-    if (loc.getX() < 0.0 || loc.getX() > FieldConstants.fieldLength) return;
-    if (loc.getY() < 0.0 || loc.getY() > FieldConstants.fieldWidth) return;
-    if (kRedReefHexagon.isInside(loc)) return;
-    if (kBlueReefHexagon.isInside(loc)) return;
+    if (loc.getX() < 0.0 || loc.getX() > FieldConstants.fieldLength)
+      return;
+    if (loc.getY() < 0.0 || loc.getY() > FieldConstants.fieldWidth)
+      return;
+    if (kRedReefHexagon.isInside(loc))
+      return;
+    if (kBlueReefHexagon.isInside(loc))
+      return;
 
     // find nearest coral
     CoralInfo nearest = null;
@@ -123,26 +120,30 @@ public class CoralRecorder {
     // if have near coral and within radius, update to current
     if (nearest != null && minDistance <= CoralRecorderParamsNT.sameCoralRadiusMeters.getValue()) {
       nearest.setConfidence(
-          Math.min(1.0, nearest.getConfidence() + dt * CoralRecorderParamsNT.confidenceTimeObservationGain.getValue())
-      );
+          Math.min(1.0, nearest.getConfidence() + dt * CoralRecorderParamsNT.confidenceTimeObservationGain.getValue()));
       nearest.setTranslation(
-          nearest.getTranslation().interpolate(loc, CoralRecorderParamsNT.confidenceNewObservationProportion.getValue())
-      );
+          nearest.getTranslation().interpolate(loc,
+              CoralRecorderParamsNT.confidenceNewObservationProportion.getValue()));
     } else {
       // does not have any near coral, create a new one
-      boolean isNearLollipop = epsilonEquals(loc, kLeftLollipop)
-        || epsilonEquals(loc, kRightLollipop)
-        || epsilonEquals(loc, kLeftLollipopFlipped)
-        || epsilonEquals(loc, kRightLollipopFlipped);
+      double lollipopCapture = CoralRecorderParamsNT.lollipopRejectionRadiusMeters.getValue();
+      boolean isNearLollipop = epsilonEqualsNorm(loc, kLeftLollipop, lollipopCapture)
+          || epsilonEqualsNorm(loc, kRightLollipop, lollipopCapture)
+          || epsilonEqualsNorm(loc, kLeftLollipopFlipped, lollipopCapture)
+          || epsilonEqualsNorm(loc, kRightLollipopFlipped, lollipopCapture);
       if (!isNearLollipop && (filterRegion == null || filterRegion.isInside(loc))) {
         CoralInfo info = new CoralInfo(
             currentId++, loc, 0.0,
             CoralRecorderParamsNT.confidenceStart.getValue(),
-            true
-        );
+            true);
         coralInfos.add(info);
       }
     }
+  }
+
+  private boolean epsilonEqualsNorm(Translation2d loc, Translation2d kleftlollipop2, double lollipopCapture) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'epsilonEqualsNorm'");
   }
 
   public Optional<CoralInfo> getNearestCoral(Pose2d robotPose) {
@@ -150,7 +151,8 @@ public class CoralRecorder {
     CoralInfo nearest = null;
     double minDistance = Double.MAX_VALUE;
     for (CoralInfo info : coralInfos) {
-      if (info.getConfidence() < CoralRecorderParamsNT.confidenceThreshold.getValue()) continue;
+      if (info.getConfidence() < CoralRecorderParamsNT.confidenceThreshold.getValue())
+        continue;
       double distance = info.getTranslation().getDistance(pRobot);
       if (distance < minDistance) {
         minDistance = distance;
@@ -158,7 +160,8 @@ public class CoralRecorder {
       }
     }
 
-    if (nearest != null) return Optional.of(nearest);
+    if (nearest != null)
+      return Optional.of(nearest);
     return Optional.empty();
   }
 
@@ -178,13 +181,15 @@ public class CoralRecorder {
     double maxDotProduct = Double.NEGATIVE_INFINITY;
 
     for (CoralInfo info : coralInfos) {
-      if (info.getConfidence() <= CoralRecorderParamsNT.confidenceThreshold.getValue()) continue;
+      if (info.getConfidence() <= CoralRecorderParamsNT.confidenceThreshold.getValue())
+        continue;
 
       // Calculate vector from robot to coral
       Translation2d robotToCoral = info.getTranslation().minus(pRobot);
 
       // Skip if coral is at robot position
-      if (robotToCoral.getNorm() == 0.0) continue;
+      if (robotToCoral.getNorm() == 0.0)
+        continue;
 
       // Normalize the vector to get direction
       Translation2d directionToCoral = robotToCoral.div(robotToCoral.getNorm());
@@ -201,7 +206,8 @@ public class CoralRecorder {
       }
     }
 
-    if (mostAligned != null) return Optional.of(mostAligned);
+    if (mostAligned != null)
+      return Optional.of(mostAligned);
     return Optional.empty();
   }
 
