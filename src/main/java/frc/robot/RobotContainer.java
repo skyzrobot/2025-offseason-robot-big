@@ -67,6 +67,7 @@ import org.littletonrobotics.AllianceFlipUtil;
 import java.util.HashMap;
 
 import static edu.wpi.first.units.Units.*;
+import static edu.wpi.first.wpilibj2.command.Commands.print;
 import static frc.robot.RobotConstants.LimelightConstants.LIMELIGHT_LEFT;
 import static frc.robot.RobotConstants.LimelightConstants.LIMELIGHT_RIGHT;
 import static frc.robot.auto.AutoActions.kLeftBackoff;
@@ -412,7 +413,8 @@ public class RobotContainer {
     //         .until(() -> superstructure.hasAlgae()
     //         ));
     operatorController.x().onTrue(
-      AutoActions.resetOnPose(kLeftBackoff).ignoringDisable(true)
+      AutoActions.resetOnPose(kLeftBackoff).alongWith(print("testing reset"))
+      .ignoringDisable(true)
     );
     operatorController.y().whileTrue(
         superstructure.runGoal(() -> SuperstructureState.P1)
