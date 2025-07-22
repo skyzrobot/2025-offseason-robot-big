@@ -48,8 +48,8 @@ public record SuperstructurePose(DoubleSupplier elevatorHeight, DoubleSupplier e
         L1_SHOOT_SIDE("L1 Shoot Side",  0.3,   200,   132,  60),   // alternate: 40
         L1_INTAKE_SIDE("L1 Intake Side", 0.01,   0,    50),
         L1_INTAKE_SIDE_DOWN("L1 Intake Side Down", 0.01,   0,    50),
-        L2("L2",                        0.164,  190,   132, 60),  // alternate: 110
-        L3("L3",                        0.530,  185,   132, 60),  // alternate: 110
+        L2("L2",                        0.167,  190,   132, 60),  // alternate: 110
+        L3("L3",                        0.536,  185,   132, 60),  // alternate: 110
         L4("L4",                        1.445, 225,   132, 60),  // alternate: 110
         NET_SCORE("Net Score",          1.44,   -133,  132,  60),   // alternate: 40
         P1("P1",                        0.50,  -10,   132,60),
